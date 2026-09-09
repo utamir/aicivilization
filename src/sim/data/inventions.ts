@@ -1,0 +1,106 @@
+import type { TechId } from '../types';
+
+export interface InventionCandidate {
+  id: string;
+  techId: TechId;
+  name: string;
+  objective: string;
+  minCapFraction: number;
+  baseDifficulty: number;
+  capabilityGain: number;
+  paradigmLift: number;
+  reliabilityPenalty: number;
+  costPenalty: number;
+  evidenceIds: string[];
+}
+
+// A small, explicit library of plausible pathways. These are intentionally
+// engineering/science pathways rather than fantasy devices. Success is never
+// scheduled: research programs must discover, validate and deploy them.
+export const INVENTION_CANDIDATES: InventionCandidate[] = [
+  { id: 'ai-sparse-architecture', techId: 'ai_models', name: 'Adaptive sparse model architecture', objective: 'Reduce compute per useful capability while preserving frontier performance.', minCapFraction: 0.55, baseDifficulty: 1.1, capabilityGain: 0.12, paradigmLift: 1.55, reliabilityPenalty: 0.08, costPenalty: 1.25, evidenceIds: ['algorithmic-efficiency', 'ai-training-compute-doubling'] },
+  { id: 'agent-verification-stack', techId: 'ai_agents', name: 'Self-verifying agent execution stack', objective: 'Extend reliable autonomous performance through verification, memory and recovery without assuming benchmark hours extrapolate indefinitely.', minCapFraction: 0.52, baseDifficulty: 1.2, capabilityGain: 0.10, paradigmLift: 1.5, reliabilityPenalty: 0.05, costPenalty: 1.18, evidenceIds: ['ai-task-horizon-doubling'] },
+  { id: 'chiplet-3d-integration', techId: 'compute_accel', name: 'Dense chiplet and 3D integration platform', objective: 'Increase accelerator throughput without relying only on transistor scaling.', minCapFraction: 0.58, baseDifficulty: 1.25, capabilityGain: 0.11, paradigmLift: 1.45, reliabilityPenalty: 0.08, costPenalty: 1.3, evidenceIds: ['moore-slowing', 'semiconductor-fab-cost'] },
+  { id: 'high-na-process', techId: 'semiconductor_fab', name: 'Next-generation lithography process integration', objective: 'Industrialize a denser leading-edge manufacturing process with acceptable yield.', minCapFraction: 0.60, baseDifficulty: 1.35, capabilityGain: 0.08, paradigmLift: 1.42, reliabilityPenalty: 0.12, costPenalty: 1.45, evidenceIds: ['semiconductor-fab-cost', 'moore-slowing'] },
+  { id: 'tandem-pv', techId: 'solar_pv', name: 'Commercial tandem photovoltaic module', objective: 'Raise conversion efficiency while retaining manufacturability and lifetime.', minCapFraction: 0.45, baseDifficulty: 0.95, capabilityGain: 0.08, paradigmLift: 1.3, reliabilityPenalty: 0.07, costPenalty: 1.18, evidenceIds: ['solar-learning-rate'] },
+  { id: 'advanced-wind-control', techId: 'wind_power', name: 'Adaptive high-yield wind platform', objective: 'Combine larger rotors, controls and predictive maintenance for higher lifetime output.', minCapFraction: 0.48, baseDifficulty: 0.9, capabilityGain: 0.07, paradigmLift: 1.25, reliabilityPenalty: 0.04, costPenalty: 1.12, evidenceIds: ['global-electricity'] },
+  { id: 'modular-reactor-platform', techId: 'nuclear_power', name: 'Standardized modular reactor platform', objective: 'Reduce construction variance through repeatable design and factory-built components.', minCapFraction: 0.48, baseDifficulty: 1.25, capabilityGain: 0.06, paradigmLift: 1.35, reliabilityPenalty: 0.05, costPenalty: 1.2, evidenceIds: ['nuclear-construction'] },
+  { id: 'nextgen-storage', techId: 'storage_batt', name: 'Low-cost long-cycle storage chemistry', objective: 'Reduce stationary storage cost while extending useful cycle life.', minCapFraction: 0.45, baseDifficulty: 1.05, capabilityGain: 0.09, paradigmLift: 1.35, reliabilityPenalty: 0.08, costPenalty: 1.25, evidenceIds: ['battery-cost'] },
+  { id: 'grid-enhancing-stack', techId: 'grid_transmission', name: 'Grid-enhancing control and transmission stack', objective: 'Increase usable transfer capacity through monitoring, controls and upgraded conductors.', minCapFraction: 0.42, baseDifficulty: 0.85, capabilityGain: 0.08, paradigmLift: 1.28, reliabilityPenalty: 0.03, costPenalty: 1.08, evidenceIds: ['global-electricity', 'datacenter-electricity'] },
+  { id: 'robot-tactile-stack', techId: 'robotics_ind', name: 'Adaptive tactile manipulation stack', objective: 'Improve reliable manipulation of variable industrial objects and workflows.', minCapFraction: 0.58, baseDifficulty: 1.0, capabilityGain: 0.09, paradigmLift: 1.38, reliabilityPenalty: 0.08, costPenalty: 1.22, evidenceIds: ['robot-density'] },
+  { id: 'general-robot-platform', techId: 'robotics_gp', name: 'General-purpose mobile manipulation platform', objective: 'Combine locomotion, manipulation and task learning into a serviceable platform.', minCapFraction: 0.55, baseDifficulty: 1.25, capabilityGain: 0.10, paradigmLift: 1.5, reliabilityPenalty: 0.12, costPenalty: 1.35, evidenceIds: ['robot-density', 'ai-task-horizon-doubling'] },
+  { id: 'automated-biofoundry', techId: 'biotech_med', name: 'Closed-loop automated biofoundry', objective: 'Increase experimental throughput through automated design-build-test cycles.', minCapFraction: 0.55, baseDifficulty: 1.15, capabilityGain: 0.09, paradigmLift: 1.4, reliabilityPenalty: 0.08, costPenalty: 1.25, evidenceIds: ['research-productivity-decline'] },
+  { id: 'ev-cell-platform', techId: 'transport_ev', name: 'High-cycle low-cost vehicle cell platform', objective: 'Reduce pack cost and increase lifetime without requiring scarce inputs.', minCapFraction: 0.62, baseDifficulty: 0.9, capabilityGain: 0.06, paradigmLift: 1.25, reliabilityPenalty: 0.04, costPenalty: 1.12, evidenceIds: ['battery-cost', 'ev-adoption'] },
+  { id: 'verified-av-stack', techId: 'transport_av', name: 'Verified autonomous-driving stack', objective: 'Increase safety and geographic reliability enough for broad unattended operation.', minCapFraction: 0.55, baseDifficulty: 1.15, capabilityGain: 0.08, paradigmLift: 1.35, reliabilityPenalty: 0.07, costPenalty: 1.16, evidenceIds: ['ai-task-horizon-doubling'] },
+
+  // Follow-on pathways keep technological history alive after the first major
+  // transition. They are deliberately generic engineering pathways rather than
+  // claims that a named science-fiction device will exist on a particular date.
+  { id: 'ai-efficient-reasoning', techId: 'ai_models', name: 'Compute-efficient reasoning architecture', objective: 'Increase useful reasoning per unit of training and inference compute through architecture and algorithmic efficiency.', minCapFraction: 0.42, baseDifficulty: 1.28, capabilityGain: 0.10, paradigmLift: 1.42, reliabilityPenalty: 0.06, costPenalty: 1.12, evidenceIds: ['algorithmic-efficiency', 'ai-inference-cost-decline'] },
+  { id: 'agent-long-horizon-control', techId: 'ai_agents', name: 'Long-horizon agent control architecture', objective: 'Improve planning, memory, monitoring and recovery on tasks spanning days rather than hours.', minCapFraction: 0.44, baseDifficulty: 1.35, capabilityGain: 0.10, paradigmLift: 1.45, reliabilityPenalty: 0.08, costPenalty: 1.18, evidenceIds: ['ai-task-horizon-doubling'] },
+  { id: 'accelerator-memory-integration', techId: 'compute_accel', name: 'Memory-integrated accelerator platform', objective: 'Reduce data-movement bottlenecks through tighter accelerator, memory and interconnect integration.', minCapFraction: 0.46, baseDifficulty: 1.35, capabilityGain: 0.10, paradigmLift: 1.4, reliabilityPenalty: 0.06, costPenalty: 1.22, evidenceIds: ['moore-slowing', 'hyperscaler-capex'] },
+  { id: 'fab-yield-automation', techId: 'semiconductor_fab', name: 'Autonomous yield-control fabrication stack', objective: 'Use dense process monitoring and automated control to raise leading-edge yield and usable fab throughput.', minCapFraction: 0.46, baseDifficulty: 1.3, capabilityGain: 0.08, paradigmLift: 1.32, reliabilityPenalty: 0.05, costPenalty: 1.14, evidenceIds: ['semiconductor-fab-cost', 'moore-slowing'] },
+  { id: 'pv-manufacturing-platform', techId: 'solar_pv', name: 'High-throughput photovoltaic manufacturing platform', objective: 'Convert higher-efficiency cell designs into durable modules with lower material and manufacturing cost.', minCapFraction: 0.40, baseDifficulty: 1.0, capabilityGain: 0.07, paradigmLift: 1.25, reliabilityPenalty: 0.04, costPenalty: 1.08, evidenceIds: ['solar-learning-rate'] },
+  { id: 'wind-predictive-fleet', techId: 'wind_power', name: 'Predictive wind-fleet engineering platform', objective: 'Increase availability and lifetime energy through condition monitoring, controls and maintainability.', minCapFraction: 0.40, baseDifficulty: 0.95, capabilityGain: 0.06, paradigmLift: 1.22, reliabilityPenalty: 0.03, costPenalty: 1.06, evidenceIds: ['global-electricity', 'world-bank-asset-lifecycle'] },
+  { id: 'nuclear-construction-learning', techId: 'nuclear_power', name: 'Repeat-build nuclear construction system', objective: 'Reduce schedule variance through standardized designs, supply chains and repeat construction.', minCapFraction: 0.42, baseDifficulty: 1.28, capabilityGain: 0.06, paradigmLift: 1.3, reliabilityPenalty: 0.03, costPenalty: 1.10, evidenceIds: ['nuclear-construction'] },
+  { id: 'storage-grid-duration', techId: 'storage_batt', name: 'Grid-duration storage platform', objective: 'Extend economically useful storage duration while preserving cycle life and manufacturability.', minCapFraction: 0.42, baseDifficulty: 1.15, capabilityGain: 0.08, paradigmLift: 1.3, reliabilityPenalty: 0.05, costPenalty: 1.12, evidenceIds: ['battery-cost', 'global-electricity'] },
+  { id: 'dynamic-grid-routing', techId: 'grid_transmission', name: 'Dynamic transmission routing platform', objective: 'Coordinate sensing, power electronics and controls to extract more reliable transfer from existing corridors.', minCapFraction: 0.38, baseDifficulty: 1.0, capabilityGain: 0.07, paradigmLift: 1.24, reliabilityPenalty: 0.03, costPenalty: 1.06, evidenceIds: ['iea-grid-lead-times-2026', 'global-electricity'] },
+  { id: 'robot-maintenance-learning', techId: 'robotics_ind', name: 'Self-diagnosing industrial robotics platform', objective: 'Increase uptime and adaptability through predictive maintenance and continuous task learning.', minCapFraction: 0.44, baseDifficulty: 1.05, capabilityGain: 0.07, paradigmLift: 1.28, reliabilityPenalty: 0.04, costPenalty: 1.10, evidenceIds: ['robot-density', 'ai-task-horizon-doubling'] },
+  { id: 'modular-floating-platforms', techId: 'robotics_ind', name: 'Mass-produced modular floating platforms', objective: 'Factory-built, self-monitoring buoyant platforms and moorings rated for city-scale districts and storm loads.', minCapFraction: 0.5, baseDifficulty: 1.35, capabilityGain: 0.06, paradigmLift: 1.2, reliabilityPenalty: 0.1, costPenalty: 1.2, evidenceIds: ['floating-cities', 'land-reclamation'] },
+  { id: 'robot-generalization-stack', techId: 'robotics_gp', name: 'Cross-task robot generalization stack', objective: 'Reduce retraining and integration cost when robots move between homes, services and light industry.', minCapFraction: 0.44, baseDifficulty: 1.32, capabilityGain: 0.09, paradigmLift: 1.4, reliabilityPenalty: 0.08, costPenalty: 1.18, evidenceIds: ['robot-density', 'ai-task-horizon-doubling'] },
+  { id: 'bio-validation-automation', techId: 'biotech_med', name: 'Automated biological validation platform', objective: 'Connect computational design to higher-throughput experimental validation while preserving traceability.', minCapFraction: 0.44, baseDifficulty: 1.25, capabilityGain: 0.08, paradigmLift: 1.32, reliabilityPenalty: 0.06, costPenalty: 1.14, evidenceIds: ['research-productivity-decline'] },
+  { id: 'vehicle-pack-manufacturing', techId: 'transport_ev', name: 'Integrated vehicle-pack manufacturing platform', objective: 'Reduce battery-pack cost, assembly complexity and lifetime degradation through manufacturing integration.', minCapFraction: 0.46, baseDifficulty: 0.98, capabilityGain: 0.06, paradigmLift: 1.22, reliabilityPenalty: 0.03, costPenalty: 1.07, evidenceIds: ['battery-cost', 'ev-adoption'] },
+  { id: 'autonomy-fleet-learning', techId: 'transport_av', name: 'Fleet-scale autonomy learning system', objective: 'Improve geographic coverage and rare-event handling using verified fleet learning and simulation.', minCapFraction: 0.44, baseDifficulty: 1.22, capabilityGain: 0.07, paradigmLift: 1.3, reliabilityPenalty: 0.05, costPenalty: 1.10, evidenceIds: ['ai-task-horizon-doubling'] },
+
+  // ── Frontier pathways ───────────────────────────────────────────────────
+  { id: 'fusion-pilot-plant', techId: 'fusion_power', name: 'Net-electricity fusion pilot plant', objective: 'Sustain burning plasma with a full power-conversion loop that produces more electricity than the site consumes.', minCapFraction: 0.30, baseDifficulty: 1.7, capabilityGain: 0.35, paradigmLift: 1.6, reliabilityPenalty: 0.10, costPenalty: 1.05, evidenceIds: ['fusion-net-gain'] },
+  { id: 'fusion-repeat-build', techId: 'fusion_power', name: 'Repeatable commercial fusion plant', objective: 'Turn a first-of-a-kind reactor into a factory-built, licensable product with predictable cost.', minCapFraction: 0.45, baseDifficulty: 1.5, capabilityGain: 0.25, paradigmLift: 1.45, reliabilityPenalty: 0.05, costPenalty: 0.9, evidenceIds: ['fusion-net-gain', 'nuclear-construction'] },
+  { id: 'fusion-compact-core', techId: 'fusion_power', name: 'Compact high-field fusion core', objective: 'Shrink the reactor with advanced magnets and materials so it fits existing grid nodes and industrial sites.', minCapFraction: 0.5, baseDifficulty: 1.6, capabilityGain: 0.2, paradigmLift: 1.4, reliabilityPenalty: 0.06, costPenalty: 0.95, evidenceIds: ['fusion-net-gain'] },
+  { id: 'senescence-clearance', techId: 'longevity_bio', name: 'Validated senescence-clearance therapy', objective: 'Demonstrate in large trials that removing senescent cells extends healthy lifespan in humans.', minCapFraction: 0.22, baseDifficulty: 1.3, capabilityGain: 0.30, paradigmLift: 1.5, reliabilityPenalty: 0.12, costPenalty: 1.2, evidenceIds: ['longevity-trials'] },
+  { id: 'partial-reprogramming', techId: 'longevity_bio', name: 'Partial cellular reprogramming platform', objective: 'Reset epigenetic age in tissues without triggering uncontrolled growth.', minCapFraction: 0.38, baseDifficulty: 1.55, capabilityGain: 0.35, paradigmLift: 1.6, reliabilityPenalty: 0.15, costPenalty: 1.3, evidenceIds: ['longevity-trials'] },
+  { id: 'in-vitro-gametogenesis', techId: 'biotech_med', name: 'Human in vitro gametogenesis', objective: 'Eggs and sperm from reprogrammed skin cells, validated across a full generation of healthy births.', minCapFraction: 0.35, baseDifficulty: 1.5, capabilityGain: 0.10, paradigmLift: 1.2, reliabilityPenalty: 0.15, costPenalty: 1.3, evidenceIds: ['longevity-trials'] },
+  { id: 'full-ectogenesis', techId: 'biotech_med', name: 'Full ectogenesis', objective: 'Gestation from embryo to birth outside a body, at scale, with outcomes matching natural birth.', minCapFraction: 0.5, baseDifficulty: 1.8, capabilityGain: 0.10, paradigmLift: 1.2, reliabilityPenalty: 0.2, costPenalty: 1.5, evidenceIds: ['longevity-trials'] },
+  { id: 'germline-enhancement', techId: 'biotech_med', name: 'Validated germline enhancement', objective: 'Heritable edits for disease resistance and cognition with no off-target effects across two generations.', minCapFraction: 0.55, baseDifficulty: 1.7, capabilityGain: 0.08, paradigmLift: 1.15, reliabilityPenalty: 0.2, costPenalty: 1.4, evidenceIds: ['longevity-trials'] },
+  { id: 'organ-regeneration', techId: 'longevity_bio', name: 'On-demand organ regeneration', objective: 'Grow replacement tissues and organs from a patient\'s own cells at clinical scale.', minCapFraction: 0.5, baseDifficulty: 1.7, capabilityGain: 0.25, paradigmLift: 1.4, reliabilityPenalty: 0.08, costPenalty: 1.1, evidenceIds: ['longevity-trials'] },
+  { id: 'full-reuse-heavy-launch', techId: 'space_systems', name: 'Fully reusable heavy launch at airline cadence', objective: 'Bring cost to orbit down by an order of magnitude through rapid reuse and propellant transfer.', minCapFraction: 0.28, baseDifficulty: 1.2, capabilityGain: 0.30, paradigmLift: 1.5, reliabilityPenalty: 0.08, costPenalty: 0.9, evidenceIds: ['launch-cost-decline'] },
+  { id: 'in-space-resource-processing', techId: 'space_systems', name: 'In-space resource processing', objective: 'Extract water, metals and propellant from asteroids and lunar regolith with autonomous robots.', minCapFraction: 0.42, baseDifficulty: 1.5, capabilityGain: 0.25, paradigmLift: 1.45, reliabilityPenalty: 0.12, costPenalty: 1.1, evidenceIds: ['asteroid-mining-economics'] },
+  { id: 'closed-loop-habitat', techId: 'space_systems', name: 'Closed-loop life support for permanent settlements', objective: 'Recycle air, water and food indefinitely for thousands of people off Earth.', minCapFraction: 0.5, baseDifficulty: 1.6, capabilityGain: 0.2, paradigmLift: 1.4, reliabilityPenalty: 0.1, costPenalty: 1.05, evidenceIds: ['asteroid-mining-economics'] },
+  { id: 'orbital-tether-materials', techId: 'space_systems', name: 'Tether-grade structural materials at scale', objective: 'Manufacture kilometer-scale high-strength cable and truss for elevators and large habitats.', minCapFraction: 0.6, baseDifficulty: 1.9, capabilityGain: 0.2, paradigmLift: 1.35, reliabilityPenalty: 0.1, costPenalty: 1.15, evidenceIds: ['launch-cost-decline'] },
+];
+
+export function candidatesFor(techId: TechId) {
+  return INVENTION_CANDIDATES.filter((x) => x.techId === techId);
+}
+
+// After the curated pathways are exhausted, research continues through
+// numbered follow-on generations with diminishing lifts. Nobody knows the
+// name of the 2140 accelerator architecture; the simulation does not pretend
+// to. What it does insist on is that each generation is harder than the last.
+const FOLLOW_ON_LABEL: Record<TechId, string> = {
+  ai_models: 'model architecture', ai_agents: 'agent architecture', compute_accel: 'accelerator platform', semiconductor_fab: 'process node',
+  solar_pv: 'photovoltaic platform', wind_power: 'wind platform', nuclear_power: 'reactor generation', geothermal_power: 'geothermal platform', bioenergy_systems: 'bioenergy platform', ocean_energy: 'marine-energy platform', hydrogen_systems: 'hydrogen system', storage_batt: 'storage chemistry', grid_transmission: 'grid control stack',
+  robotics_ind: 'industrial robotics platform', robotics_gp: 'general robot platform', biotech_med: 'therapeutic platform', longevity_bio: 'regenerative platform',
+  transport_ev: 'vehicle platform', transport_av: 'autonomy stack', fusion_power: 'fusion reactor generation', space_systems: 'space-systems generation',
+};
+
+export function followOnCandidate(techId: TechId, generation: number): InventionCandidate {
+  const g = Math.max(3, generation);
+  const diff = 1.15 + (g - 3) * 0.12;
+  return {
+    id: `${techId}-gen${g}`, techId,
+    name: `${FOLLOW_ON_LABEL[techId]} — generation ${g}`,
+    objective: `Next-generation ${FOLLOW_ON_LABEL[techId]}: consolidate the previous paradigm and open the next. Each generation is harder than the last.`,
+    minCapFraction: 0.45, baseDifficulty: Math.min(2.4, diff),
+    capabilityGain: Math.max(0.04, 0.09 - (g - 3) * 0.006), paradigmLift: Math.max(1.12, 1.32 - (g - 3) * 0.02),
+    reliabilityPenalty: 0.05, costPenalty: 1.08, evidenceIds: ['research-productivity-decline'],
+  };
+}
+
+/** Named pathway if one remains, otherwise the next numbered generation. */
+export function nextCandidate(techId: TechId, inventedNames: string[]): InventionCandidate | null {
+  const named = candidatesFor(techId).find((x) => !inventedNames.includes(x.name));
+  if (named) return named;
+  const gen = inventedNames.filter((n) => n.includes('— generation ')).length + 3;
+  if (gen > 14) return null;
+  return followOnCandidate(techId, gen);
+}

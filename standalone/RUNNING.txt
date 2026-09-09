@@ -1,0 +1,12 @@
+WHAT IF? Civilization Lab v11.4 — single-file no-Node runtime
+
+Run:
+  python3 CivilizationLab_NoNode.pyz
+
+or on a Unix-like system after extracting the release:
+  ./CivilizationLab_NoNode.pyz
+
+This one file contains the complete prebuilt project-owned browser runtime.
+Node.js/npm are not required. Python 3 and a modern browser are required.
+The browser loads version-pinned React/Three third-party packages from esm.sh,
+so internet access is required at runtime for those packages.

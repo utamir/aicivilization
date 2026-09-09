@@ -1,0 +1,24 @@
+// Public API of the simulation core
+export * from './types';
+export { createWorld, cloneWorld, START_YEAR, CAPACITY_FACTOR } from './core/world';
+export { stepWorld, dateLabel, yearOf, addEvent, taskHorizonHrs, fmtHorizon, techTickCache, PROJECT_LABEL, energyHardship } from './core/step';
+export { MILESTONES, ERA_LABELS, milestoneDef } from './data/frontier';
+export type { MilestoneDef } from './data/frontier';
+export { physicalPopulation } from './core/frontier';
+export { resolveDecision, DECISIONS } from './core/decisions';
+export { ageGroups } from './core/demography';
+export type { PendingDecision } from './types';
+export { explainStability, explainReadiness, demographicAnalogue, civHeadline } from './explainState';
+export type { Factor } from './explainState';
+export { DEFAULT_PARAMS, SCENARIO_PRESETS, BUILDER_AXES, parseWhatIf, mergeDeltas, applyDelta } from './data/params';
+export type { ScenarioPreset, ParamDelta, ParsedWhatIf } from './data/params';
+export { TECH_DEFS, TECH_IDS, DOMAIN_META } from './data/techDefs';
+export { CIV_DEFS, civDef } from './data/civDefs';
+export { EVIDENCE, evidenceById } from './data/evidence';
+export { CALIBRATION } from './data/calibration';
+export { INVENTION_CANDIDATES, candidatesFor } from './data/inventions';
+export { INTERVENTIONS, INFLUENCE_START } from './data/interventions';
+export { applyIntervention, createBranch, compareWorlds } from './branch';
+export type { BranchResult, CompareRow } from './branch';
+export { researchVelocity, whyDidThisHappen } from './explain';
+export type { VelocityReport, WhyReport } from './explain';

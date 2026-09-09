@@ -1,0 +1,2571 @@
+{
+  "generatedAt": "2026-09-09",
+  "release": "v11.4",
+  "simulationYears": 300,
+  "referenceSeed": 7,
+  "scenarioCount": 23,
+  "checks": {
+    "all23Seed7FiniteAndAccounted": true,
+    "oceanCenturyRobustAcrossSeeds": true,
+    "verticalWorldRobustAcrossSeeds": true,
+    "inhabitEverythingUsesAllHabitatClasses": true,
+    "terminalExtinctionReachableNotScripted": true,
+    "extinctionAbsorbingAndFinite": true,
+    "rendererZeroActorsNoGhostActivity": true,
+    "humanCenteredBeatsAutomationDivideInstitutionally": true,
+    "resilientEarthMostlyEarthBound": true,
+    "longStagnationNoAsiByTimeAlone": true,
+    "collapseAndReturnHasRealReturnPath": true
+  },
+  "pass": true,
+  "build": {
+    "simulationTypeScript": "PASS",
+    "browserModuleCount": 51,
+    "browserSyntaxBad": 0,
+    "wholeModuleGraph": "PASS",
+    "reactRootRenderReached": true
+  },
+  "scenarios": [
+    {
+      "id": "baseline_2026",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 546.519378230267,
+      "earthLocatedM": 339.25531678243453,
+      "earthEmbodiedM": 134.36155287491727,
+      "offworldM": 207.2640614478324,
+      "offworldShare": 0.379243755489499,
+      "orbitalM": 203.89755695199813,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 3.3565044958342956,
+      "marsCapacityM": 0.01,
+      "digitalM": 329.6727587975031,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.08071326335920037,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.278519029320103,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8582722993455809,
+        "humanDevelopment": 0.9803092761446057,
+        "institutionalHealth": 0.7713290807920175,
+        "ecologicalSafety": 0.8853852294025285,
+        "distribution": 0.9942520591630976,
+        "resilience": 0.8357238240064708,
+        "broadFlourishing": 0.8840698463461706
+      },
+      "society": {
+        "basicProvision": 0.7841667353470348,
+        "trust": 0.7182585165935821,
+        "stability": 0.7396572994053369,
+        "gini": 0.21674681272814902,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 177.62126922622696,
+        "outputPerCapitaMean": 34.8429027384742,
+        "outputPerCapitaMax": 38.411155343517436
+      },
+      "energyGW": {
+        "solar": 7663.665787096215,
+        "wind": 15.174937188185593,
+        "nuclear": 3.7597325679435504e-11,
+        "geothermal": 770.291828380903,
+        "bioenergy": 352.444062438179,
+        "ocean": 218.6114774445236,
+        "fusion": 637.9462181999361,
+        "hydrogenElectrolyzer": 1466.7265046225587
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "ai_flywheel",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 495.0866525740046,
+      "earthLocatedM": 318.5400850656507,
+      "earthEmbodiedM": 124.87355044043602,
+      "offworldM": 176.54656750835386,
+      "offworldShare": 0.3565973079469438,
+      "orbitalM": 173.44372460604,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 3.0928429023138544,
+      "marsCapacityM": 0.01,
+      "digitalM": 300.42394862212666,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.06539281874358813,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.195838825268415,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8549845991033499,
+        "humanDevelopment": 0.9803092643783102,
+        "institutionalHealth": 0.775576114584203,
+        "ecologicalSafety": 0.896957516162164,
+        "distribution": 0.9942679725744333,
+        "resilience": 0.8603636430676969,
+        "broadFlourishing": 0.8905340569575458
+      },
+      "society": {
+        "basicProvision": 0.7841666675021329,
+        "trust": 0.7230908115532652,
+        "stability": 0.7441075748521201,
+        "gini": 0.216620635502316,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 179.44287791550676,
+        "outputPerCapitaMean": 38.165320264992765,
+        "outputPerCapitaMax": 41.473079324361606
+      },
+      "energyGW": {
+        "solar": 7407.937046000041,
+        "wind": 27.395886620275974,
+        "nuclear": 8.187989219538783e-13,
+        "geothermal": 800.1277229779951,
+        "bioenergy": 364.90043655000403,
+        "ocean": 245.60424545335653,
+        "fusion": 623.3333796835805,
+        "hydrogenElectrolyzer": 1339.5262865330997
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "energy_constraint",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 821.8874563578934,
+      "earthLocatedM": 737.0975523354898,
+      "earthEmbodiedM": 290.12664278592104,
+      "offworldM": 84.78990402240359,
+      "offworldShare": 0.10316485957595825,
+      "orbitalM": 84.77990402240358,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 498.2971933433836,
+      "habitats": {
+        "floating": 0.45872869777950154,
+        "subsea": 0,
+        "vertical": 0.6305256437141514,
+        "underground": 0.13999999999999999,
+        "floatingCondition": 0.6782773278279501,
+        "subseaCondition": 1,
+        "verticalCondition": 0.574204909873561,
+        "undergroundCondition": 0.6966599112421199
+      },
+      "rewilding": 0.055075404294364194,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 10 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2611363340668813,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8051676432315442,
+        "humanDevelopment": 0.9803136990192238,
+        "institutionalHealth": 0.7622832081496966,
+        "ecologicalSafety": 0.7041092549292328,
+        "distribution": 0.9942158377575303,
+        "resilience": 0.6182141600020679,
+        "broadFlourishing": 0.7991063273502688
+      },
+      "society": {
+        "basicProvision": 0.7841922379237151,
+        "trust": 0.7051652873854032,
+        "stability": 0.7315450401469374,
+        "gini": 0.21111274148264914,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 163.60828588962664,
+        "outputPerCapitaMean": 25.47746156596425,
+        "outputPerCapitaMax": 35.60245684454213
+      },
+      "energyGW": {
+        "solar": 8261.894023843517,
+        "wind": 1716.6474597599863,
+        "nuclear": 5.758964020215955e-09,
+        "geothermal": 826.2780884945448,
+        "bioenergy": 377.3256424406282,
+        "ocean": 450.118771349713,
+        "fusion": 293.6022297821143,
+        "hydrogenElectrolyzer": 1058.435701066182
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "abundant_clean",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 476.5882202395258,
+      "earthLocatedM": 284.1552726874976,
+      "earthEmbodiedM": 111.11186652860354,
+      "offworldM": 192.43294755202822,
+      "offworldShare": 0.4037719343027707,
+      "orbitalM": 190.49191259726655,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 1.9310349547617016,
+      "marsCapacityM": 0.01,
+      "digitalM": 288.88439701237706,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.05529243629461009,
+      "trajectory": "flourishing",
+      "trajectoryNote": "Broad outcomes are strong (91/100): material security, human development, institutions, ecology, distribution and resilience all remain viable. Development form: mixed.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2665733461822988,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8723018563914178,
+        "humanDevelopment": 0.9803121282817148,
+        "institutionalHealth": 0.7826727253896468,
+        "ecologicalSafety": 0.9238753996923005,
+        "distribution": 0.9942708103247299,
+        "resilience": 0.9029555763999662,
+        "broadFlourishing": 0.9065657517233543
+      },
+      "society": {
+        "basicProvision": 0.7841831809248685,
+        "trust": 0.7303853558615144,
+        "stability": 0.7525742664860534,
+        "gini": 0.21614374727221386,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 157.3164387681667,
+        "outputPerCapitaMean": 34.62590546514901,
+        "outputPerCapitaMax": 37.2442429620443
+      },
+      "energyGW": {
+        "solar": 7778.954550533971,
+        "wind": 6.7685347728154784e-06,
+        "nuclear": 1.8069778126883754e-10,
+        "geothermal": 786.0017321730826,
+        "bioenergy": 358.3501864109765,
+        "ocean": 116.72343905281342,
+        "fusion": 927.9171116121504,
+        "hydrogenElectrolyzer": 1374.7938795852415
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "fragmented_world",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 443.2810797136748,
+      "earthLocatedM": 272.10845741283805,
+      "earthEmbodiedM": 109.91687348435877,
+      "offworldM": 171.17262230083674,
+      "offworldShare": 0.3861491729162025,
+      "orbitalM": 169.47700167181733,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 1.6856206290194338,
+      "marsCapacityM": 0.01,
+      "digitalM": 263.4233314449167,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.11618424234895365,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.3%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2271312961592518,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8622739401388199,
+        "humanDevelopment": 0.9803336392062785,
+        "institutionalHealth": 0.775687979416734,
+        "ecologicalSafety": 0.9239153365716608,
+        "distribution": 0.9942675342171976,
+        "resilience": 0.8865428231440701,
+        "broadFlourishing": 0.9007208794257366
+      },
+      "society": {
+        "basicProvision": 0.7843072171694425,
+        "trust": 0.7245788930907802,
+        "stability": 0.7441728462670593,
+        "gini": 0.21641811752708348,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 119.2725512527087,
+        "outputPerCapitaMean": 30.476142225186397,
+        "outputPerCapitaMax": 33.93331162674594
+      },
+      "energyGW": {
+        "solar": 7522.361715212226,
+        "wind": 0.07664795480863042,
+        "nuclear": 2.4443833581978296e-12,
+        "geothermal": 750.6811209032194,
+        "bioenergy": 310.76065021436466,
+        "ocean": 0.0009489772676273874,
+        "fusion": 631.2230472796749,
+        "hydrogenElectrolyzer": 1178.8571411020614
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "ascent",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 877.1009894639662,
+      "earthLocatedM": 631.4357753380405,
+      "earthEmbodiedM": 248.45344398220675,
+      "offworldM": 245.66521412592576,
+      "offworldShare": 0.2800877174657644,
+      "orbitalM": 245.65521412592577,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 531.6124343281634,
+      "habitats": {
+        "floating": 0.8894904335484305,
+        "subsea": 0,
+        "vertical": 0.4073011680704137,
+        "underground": 0.18000000000000002,
+        "floatingCondition": 0.7967492359190375,
+        "subseaCondition": 1,
+        "verticalCondition": 0.7794968208817917,
+        "undergroundCondition": 0.797017134910412
+      },
+      "rewilding": 0.05203162424420261,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 10 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2830872156419708,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8798826615037237,
+        "humanDevelopment": 0.9803092642334158,
+        "institutionalHealth": 0.7783961542712453,
+        "ecologicalSafety": 0.7800240194591035,
+        "distribution": 0.9942615675854733,
+        "resilience": 0.799958260265038,
+        "broadFlourishing": 0.8641930129507007
+      },
+      "society": {
+        "basicProvision": 0.7841666666666663,
+        "trust": 0.7257146923941161,
+        "stability": 0.747414446071294,
+        "gini": 0.21602060290390437,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 353.4291326711101,
+        "outputPerCapitaMean": 46.08339687394143,
+        "outputPerCapitaMax": 49.84924805009376
+      },
+      "energyGW": {
+        "solar": 7868.419029502036,
+        "wind": 807.0861985488976,
+        "nuclear": 7.617968896272208e-13,
+        "geothermal": 830.0547726663273,
+        "bioenergy": 378.57168296757084,
+        "ocean": 263.0542694103423,
+        "fusion": 961.5751002356317,
+        "hydrogenElectrolyzer": 2369.8677598346985
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "ocean_century",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 376.8731527527485,
+      "earthLocatedM": 265.15333089086795,
+      "earthEmbodiedM": 102.72856323487414,
+      "offworldM": 111.7198218618806,
+      "offworldShare": 0.29643879126400796,
+      "orbitalM": 110.40396843928045,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 1.3058534226001672,
+      "marsCapacityM": 0.01,
+      "digitalM": 230.16661679059004,
+      "habitats": {
+        "floating": 0.3229227615863323,
+        "subsea": 0.09706407919427203,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 0.6423742467221959,
+        "subseaCondition": 0.7100274294295325,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.06446284849231465,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.3%/yr; 12 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.5052392038003206,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8568353828019583,
+        "humanDevelopment": 0.9803112488052022,
+        "institutionalHealth": 0.771439481740392,
+        "ecologicalSafety": 0.8267056035498569,
+        "distribution": 0.9942425400083578,
+        "resilience": 0.9188971828428223,
+        "broadFlourishing": 0.8877259127597905
+      },
+      "society": {
+        "basicProvision": 0.7841781098052162,
+        "trust": 0.7158903912627488,
+        "stability": 0.7417068742117098,
+        "gini": 0.2169306754307225,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 150.545007447688,
+        "outputPerCapitaMean": 38.987627597049055,
+        "outputPerCapitaMax": 43.013628358657584
+      },
+      "energyGW": {
+        "solar": 7827.3495159170525,
+        "wind": 482.4995532873276,
+        "nuclear": 1.0493769745666593e-12,
+        "geothermal": 789.1666952520366,
+        "bioenergy": 359.1701140717047,
+        "ocean": 0.0006920305476837336,
+        "fusion": 636.3142603313223,
+        "hydrogenElectrolyzer": 1114.161605576099
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "hothouse_collapse",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 0,
+      "earthLocatedM": 0,
+      "earthEmbodiedM": 0,
+      "offworldM": 0,
+      "offworldShare": 0,
+      "orbitalM": 0,
+      "marsPopulationM": 0,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0.05666666666666667,
+        "underground": 0,
+        "floatingCondition": 0.01,
+        "subseaCondition": 0.01,
+        "verticalCondition": 0.04411297680657331,
+        "undergroundCondition": 0.03
+      },
+      "rewilding": 0.9915015686000755,
+      "trajectory": "extinction",
+      "trajectoryNote": "No embodied, off-world or digital population remains. Only physical and ecological processes continue.",
+      "developmentForm": "earthbound",
+      "kardashev": 0.6706088026172315,
+      "agi": true,
+      "asi": false,
+      "outcome": {
+        "materialSecurity": 0,
+        "humanDevelopment": 0,
+        "institutionalHealth": 0,
+        "ecologicalSafety": 0.24979761540130838,
+        "distribution": 0,
+        "resilience": 0,
+        "broadFlourishing": 0
+      },
+      "society": {
+        "basicProvision": 0.784166637085223,
+        "trust": 0,
+        "stability": 0,
+        "gini": 0.23270054946358618,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 0,
+        "outputPerCapitaMean": 0,
+        "outputPerCapitaMax": 0
+      },
+      "energyGW": {
+        "solar": 164.20409337326464,
+        "wind": 13.622279614015579,
+        "nuclear": 2.814748516950891,
+        "geothermal": 1.238462745660782,
+        "bioenergy": 0.21857927921436238,
+        "ocean": 0.017205440283245867,
+        "fusion": 3.426434559003159,
+        "hydrogenElectrolyzer": 324.9961096134339
+      },
+      "polityStatuses": {
+        "veloria": "abandoned",
+        "ardan": "abandoned",
+        "nemea": "abandoned"
+      }
+    },
+    {
+      "id": "everywhere",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 1454.7375123489705,
+      "earthLocatedM": 1013.7630245304259,
+      "earthEmbodiedM": 405.447372695229,
+      "offworldM": 440.97448781854473,
+      "offworldShare": 0.3031299351774475,
+      "orbitalM": 440.96448781854474,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 871.9271170652192,
+      "habitats": {
+        "floating": 2.2371915958494037,
+        "subsea": 0.0711540109399827,
+        "vertical": 0.5739851314422743,
+        "underground": 0.18117537235709813,
+        "floatingCondition": 0.7010216573548383,
+        "subseaCondition": 0.8203928018254353,
+        "verticalCondition": 0.7089079735879539,
+        "undergroundCondition": 0.7807978468862221
+      },
+      "rewilding": 0.03238657563607984,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.0%/yr; 10 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.1878264699068264,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8058897292967964,
+        "humanDevelopment": 0.9804873829609723,
+        "institutionalHealth": 0.76538553118692,
+        "ecologicalSafety": 0.7212743918757755,
+        "distribution": 0.9942621919618321,
+        "resilience": 0.7427526075505675,
+        "broadFlourishing": 0.8279559859300754
+      },
+      "society": {
+        "basicProvision": 0.7851938925537002,
+        "trust": 0.7155722643714922,
+        "stability": 0.7288135386448641,
+        "gini": 0.2167322799117978,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 518.7365622085845,
+        "outputPerCapitaMean": 41.347642067693066,
+        "outputPerCapitaMax": 51.111036286539886
+      },
+      "energyGW": {
+        "solar": 8058.678399100649,
+        "wind": 1867.1856179522572,
+        "nuclear": 6.03552007028002e-13,
+        "geothermal": 827.9567535551427,
+        "bioenergy": 378.5506650519716,
+        "ocean": 304.39526521123014,
+        "fusion": 1196.35552740188,
+        "hydrogenElectrolyzer": 2914.0107436183002
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "resource_crunch",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 61.726648509548696,
+      "earthLocatedM": 60.9216485095487,
+      "earthEmbodiedM": 60.9216485095487,
+      "offworldM": 0.805,
+      "offworldShare": 0.013041368994389384,
+      "orbitalM": 0.8,
+      "marsPopulationM": 0.005,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.005,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.25365359502564233,
+      "trajectory": "collapse",
+      "trajectoryNote": "62M people remain of 256M in 2026.",
+      "developmentForm": "earthbound",
+      "kardashev": 0.7624487713651285,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.4660036594337782,
+        "humanDevelopment": 0.8988371088984444,
+        "institutionalHealth": 0.30202685913921706,
+        "ecologicalSafety": 0.4973091368359479,
+        "distribution": 0.7148010037781538,
+        "resilience": 0.2093979282243314,
+        "broadFlourishing": 0.45953293540538614
+      },
+      "society": {
+        "basicProvision": 0.35235564860610324,
+        "trust": 0.3193406404379792,
+        "stability": 0.2613704999124443,
+        "gini": 0.3799416943850753,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 8.901161917746448,
+        "outputPerCapitaMean": 6.423940118072719,
+        "outputPerCapitaMax": 13.86820949802723
+      },
+      "energyGW": {
+        "solar": 1911.313631310516,
+        "wind": 4.638538450051753,
+        "nuclear": 5.40456041691214e-08,
+        "geothermal": 4.5311867618514645,
+        "bioenergy": 0.7125626798139116,
+        "ocean": 0.016028991099620526,
+        "fusion": 1.8104888974500823,
+        "hydrogenElectrolyzer": 338.82324341923913
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "failed"
+      }
+    },
+    {
+      "id": "long_stagnation",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 98.72175371351447,
+      "earthLocatedM": 91.56473469491252,
+      "earthEmbodiedM": 91.56473469491252,
+      "offworldM": 7.157019018601955,
+      "offworldShare": 0.0724968788477083,
+      "orbitalM": 7.147019018601955,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0.005500981607464059,
+        "subsea": 0,
+        "vertical": 0.04583249337394193,
+        "underground": 0.02,
+        "floatingCondition": 0.9513167225438041,
+        "subseaCondition": 1,
+        "verticalCondition": 0.982316246299438,
+        "undergroundCondition": 0.980978124433709
+      },
+      "rewilding": 0.25891612145690385,
+      "trajectory": "collapse",
+      "trajectoryNote": "99M people remain of 256M in 2026.",
+      "developmentForm": "spacefaring",
+      "kardashev": 0.7599710053411558,
+      "agi": true,
+      "asi": false,
+      "outcome": {
+        "materialSecurity": 0.6370986050145329,
+        "humanDevelopment": 0.8942198661803241,
+        "institutionalHealth": 0.3915695534956731,
+        "ecologicalSafety": 0.7545894598602728,
+        "distribution": 0.6853078322255075,
+        "resilience": 0.3905753225260754,
+        "broadFlourishing": 0.5965225316512663
+      },
+      "society": {
+        "basicProvision": 0.3300885771221023,
+        "trust": 0.39531844711875125,
+        "stability": 0.3633817489447619,
+        "gini": 0.40025497611550764,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 9.326687572589691,
+        "outputPerCapitaMean": 7.251129720770983,
+        "outputPerCapitaMax": 18.401800253731025
+      },
+      "energyGW": {
+        "solar": 1684.3410658998198,
+        "wind": 229.44150253432596,
+        "nuclear": 6.775541340847757e-08,
+        "geothermal": 40.21079804918788,
+        "bioenergy": 19.623771725981022,
+        "ocean": 6.470317952134784e-05,
+        "fusion": 35.82907978122886,
+        "hydrogenElectrolyzer": 521.3548371060256
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "failed",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "open_knowledge",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 449.2040712671049,
+      "earthLocatedM": 313.95256068592903,
+      "earthEmbodiedM": 121.99029673603354,
+      "offworldM": 135.2515105811758,
+      "offworldShare": 0.3010914620601308,
+      "orbitalM": 133.56551691562282,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 1.6759936655529977,
+      "marsCapacityM": 0.01,
+      "digitalM": 273.84297364531767,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.05702812036918838,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.3%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.4061152444557024,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8320248619902709,
+        "humanDevelopment": 0.9803092691116695,
+        "institutionalHealth": 0.7755740976253429,
+        "ecologicalSafety": 0.9000091472153904,
+        "distribution": 0.9942637906540688,
+        "resilience": 0.8527860546688873,
+        "broadFlourishing": 0.8856971032716545
+      },
+      "society": {
+        "basicProvision": 0.7841666947948602,
+        "trust": 0.7244060838296069,
+        "stability": 0.7428273305462394,
+        "gini": 0.21718208172092335,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 140.2404684659891,
+        "outputPerCapitaMean": 33.531324969873275,
+        "outputPerCapitaMax": 36.15721640055145
+      },
+      "energyGW": {
+        "solar": 7385.243223201895,
+        "wind": 134.1648149755871,
+        "nuclear": 7.516859262370325e-13,
+        "geothermal": 736.1100367467182,
+        "bioenergy": 328.1885481169278,
+        "ocean": 96.43672403266285,
+        "fusion": 632.3972614259328,
+        "hydrogenElectrolyzer": 1117.0082332606435
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "human_centered_abundance",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 517.274927956923,
+      "earthLocatedM": 373.3418114784683,
+      "earthEmbodiedM": 146.95261020118784,
+      "offworldM": 143.93311647845468,
+      "offworldShare": 0.2782526441924148,
+      "orbitalM": 142.87328744021295,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 1.049829038241759,
+      "marsCapacityM": 0.01,
+      "digitalM": 314.4360124257329,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.06425935537293344,
+      "trajectory": "flourishing",
+      "trajectoryNote": "Broad outcomes are strong (90/100): material security, human development, institutions, ecology, distribution and resilience all remain viable. Development form: mixed.",
+      "developmentForm": "mixed",
+      "kardashev": 1.540659325559774,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.844432455882896,
+        "humanDevelopment": 1,
+        "institutionalHealth": 0.8230730193422114,
+        "ecologicalSafety": 0.8386686018606525,
+        "distribution": 1,
+        "resilience": 0.9390517958266157,
+        "broadFlourishing": 0.904441612770034
+      },
+      "society": {
+        "basicProvision": 0.9199999999999998,
+        "trust": 0.7512595447997829,
+        "stability": 0.7573541652358912,
+        "gini": 0.2000000000000007,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 171.09041067847105,
+        "outputPerCapitaMean": 36.22038804940212,
+        "outputPerCapitaMax": 41.7835452161269
+      },
+      "energyGW": {
+        "solar": 7358.361214891514,
+        "wind": 10.758218020425323,
+        "nuclear": 1.7433410416928186e-10,
+        "geothermal": 722.4191538623683,
+        "bioenergy": 329.99863061680304,
+        "ocean": 20.389088842463188,
+        "fusion": 649.3185939902992,
+        "hydrogenElectrolyzer": 1340.8368438469793
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "automation_divide",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 165.92471543389513,
+      "earthLocatedM": 101.81119326667829,
+      "earthEmbodiedM": 40.56086287016483,
+      "offworldM": 64.11352216721683,
+      "offworldShare": 0.3864012784325662,
+      "orbitalM": 63.93371957962716,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0.16980258758967576,
+      "marsCapacityM": 0.01,
+      "digitalM": 99.7841049502573,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0.05925825309986774,
+        "underground": 0.02,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 0.8775605714926004,
+        "undergroundCondition": 0.8803618833468404
+      },
+      "rewilding": 0.23940244809258868,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.5%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.4524427256605943,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8779715697326442,
+        "humanDevelopment": 0.896995476936007,
+        "institutionalHealth": 0.4880497029046167,
+        "ecologicalSafety": 0.9098381109549853,
+        "distribution": 0.6515033529774947,
+        "resilience": 0.7010436802205371,
+        "broadFlourishing": 0.7365916128687815
+      },
+      "society": {
+        "basicProvision": 0.3434467103221273,
+        "trust": 0.4700579081870435,
+        "stability": 0.49470138821272297,
+        "gini": 0.44108157921738744,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 61.95056300162676,
+        "outputPerCapitaMean": 20.92086490795121,
+        "outputPerCapitaMax": 28.58063098365545
+      },
+      "energyGW": {
+        "solar": 5303.799760650371,
+        "wind": 0.0010606151864855564,
+        "nuclear": 3.2385142031837908e-09,
+        "geothermal": 531.7972357340457,
+        "bioenergy": 203.05720122349604,
+        "ocean": 4.6231623018112604e-07,
+        "fusion": 357.9145759640904,
+        "hydrogenElectrolyzer": 818.5089018164092
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "failed"
+      }
+    },
+    {
+      "id": "resilient_earth",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 223.33481825912475,
+      "earthLocatedM": 201.9979537848335,
+      "earthEmbodiedM": 77.76745669139183,
+      "offworldM": 21.33686447429125,
+      "offworldShare": 0.09553756391685914,
+      "orbitalM": 21.32686447429125,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 137.86935541890574,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.052352846557644585,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.3%/yr; 9 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2868786469300666,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8757241438101291,
+        "humanDevelopment": 0.9998778492549175,
+        "institutionalHealth": 0.8004354105959077,
+        "ecologicalSafety": 0.6270819467433821,
+        "distribution": 1,
+        "resilience": 0.85062669475024,
+        "broadFlourishing": 0.8487581905914866
+      },
+      "society": {
+        "basicProvision": 0.9126005183840206,
+        "trust": 0.7194211289040018,
+        "stability": 0.7279007932700982,
+        "gini": 0.2000000000000007,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 86.66217899444025,
+        "outputPerCapitaMean": 31.320954606682722,
+        "outputPerCapitaMax": 37.792586414864914
+      },
+      "energyGW": {
+        "solar": 7930.940021435876,
+        "wind": 390.5100077622593,
+        "nuclear": 5.413237169388416e-10,
+        "geothermal": 621.3738165439373,
+        "bioenergy": 248.83939175200533,
+        "ocean": 0.15249818185105807,
+        "fusion": 517.71560617143,
+        "hydrogenElectrolyzer": 876.7247238941212
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "polycrisis",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 2.9712739033040934,
+      "earthLocatedM": 2.9712739033040934,
+      "earthEmbodiedM": 2.9712739033040934,
+      "offworldM": 0,
+      "offworldShare": 0,
+      "orbitalM": 0,
+      "marsPopulationM": 0,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.7520986027652196,
+      "trajectory": "collapse",
+      "trajectoryNote": "3M people remain of 256M in 2026.",
+      "developmentForm": "earthbound",
+      "kardashev": 0.6136542526050347,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.6479594751258141,
+        "humanDevelopment": 0.9034354157407404,
+        "institutionalHealth": 0.1308035999294296,
+        "ecologicalSafety": 0.9114701794246647,
+        "distribution": 0.6438520127928145,
+        "resilience": 0.26005267678401567,
+        "broadFlourishing": 0.4763678214098222
+      },
+      "society": {
+        "basicProvision": 0.37475993282919323,
+        "trust": 0.17483818605572674,
+        "stability": 0.07653413758155726,
+        "gini": 0.4452264049005983,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 0.24367429014268582,
+        "outputPerCapitaMean": 18.130466436364802,
+        "outputPerCapitaMax": 34.90909090909091
+      },
+      "energyGW": {
+        "solar": 0.7522194865177224,
+        "wind": 0.0006890450676754583,
+        "nuclear": 2.563094935155405e-08,
+        "geothermal": 1.1831091189654028,
+        "bioenergy": 0.21112688636424046,
+        "ocean": 7.706575447606205e-10,
+        "fusion": 0.5441344006533944,
+        "hydrogenElectrolyzer": 88.84959228733736
+      },
+      "polityStatuses": {
+        "veloria": "failed",
+        "ardan": "failed",
+        "nemea": "failed"
+      }
+    },
+    {
+      "id": "ai_safety_first",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 537.3036264197358,
+      "earthLocatedM": 337.14970217326254,
+      "earthEmbodiedM": 130.61824187551144,
+      "offworldM": 200.15392424647325,
+      "offworldShare": 0.372515491064479,
+      "orbitalM": 198.12630407419522,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 2.01762017227807,
+      "marsCapacityM": 0.01,
+      "digitalM": 327.7037597842938,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.046510259892235485,
+      "trajectory": "flourishing",
+      "trajectoryNote": "Broad outcomes are strong (91/100): material security, human development, institutions, ecology, distribution and resilience all remain viable. Development form: mixed.",
+      "developmentForm": "mixed",
+      "kardashev": 1.2625031346237403,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8590378896608264,
+        "humanDevelopment": 0.9955265932991727,
+        "institutionalHealth": 0.8285745807487244,
+        "ecologicalSafety": 0.9385276324054119,
+        "distribution": 1,
+        "resilience": 0.8594675430371361,
+        "broadFlourishing": 0.9109870903413113
+      },
+      "society": {
+        "basicProvision": 0.8827794731698608,
+        "trust": 0.7591207416324383,
+        "stability": 0.7646415326067609,
+        "gini": 0.2000000000000007,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 176.7332889049693,
+        "outputPerCapitaMean": 34.3682271488849,
+        "outputPerCapitaMax": 36.14382143933167
+      },
+      "energyGW": {
+        "solar": 7621.534406939309,
+        "wind": 37.97363684934171,
+        "nuclear": 1.009058047005425e-12,
+        "geothermal": 827.3391676009308,
+        "bioenergy": 377.1395255583774,
+        "ocean": 139.91344661956936,
+        "fusion": 645.237377983068,
+        "hydrogenElectrolyzer": 1420.2541355231076
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "population_spring",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 1211.3714144833516,
+      "earthLocatedM": 766.2617359236541,
+      "earthEmbodiedM": 298.26129880494943,
+      "offworldM": 445.1096785596976,
+      "offworldShare": 0.3674427786869449,
+      "orbitalM": 441.6537468101078,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 3.4459317495898407,
+      "marsCapacityM": 0.01,
+      "digitalM": 737.2198831058416,
+      "habitats": {
+        "floating": 0.7975002314132492,
+        "subsea": 0,
+        "vertical": 0.6493381795572041,
+        "underground": 0.16573284952071768,
+        "floatingCondition": 0.8826829994518269,
+        "subseaCondition": 1,
+        "verticalCondition": 0.7827852852287146,
+        "undergroundCondition": 0.9093653779746913
+      },
+      "rewilding": 0.016953270270751407,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 12 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.5516061481348942,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.6705951201295889,
+        "humanDevelopment": 0.9959838924724199,
+        "institutionalHealth": 0.7601904879082138,
+        "ecologicalSafety": 0.8731572687183924,
+        "distribution": 1,
+        "resilience": 0.9021286626383024,
+        "broadFlourishing": 0.8583531692294399
+      },
+      "society": {
+        "basicProvision": 0.8893333330873198,
+        "trust": 0.7384222951232561,
+        "stability": 0.70039549308358,
+        "gini": 0.2000000000000007,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 419.3060974479505,
+        "outputPerCapitaMean": 32.32112241646595,
+        "outputPerCapitaMax": 35.364625337979916
+      },
+      "energyGW": {
+        "solar": 7963.3144247525315,
+        "wind": 99.24385537896887,
+        "nuclear": 9.356027495064912e-11,
+        "geothermal": 836.215735822176,
+        "bioenergy": 385.34344020761966,
+        "ocean": 141.4054156656802,
+        "fusion": 628.4131112746849,
+        "hydrogenElectrolyzer": 2486.0521185797634
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "vertical_world",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 606.1219789927258,
+      "earthLocatedM": 400.54787249144795,
+      "earthEmbodiedM": 157.52596951028136,
+      "offworldM": 205.57410650127784,
+      "offworldShare": 0.33916293027833755,
+      "orbitalM": 202.35949299748728,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 3.204613503790582,
+      "marsCapacityM": 0.01,
+      "digitalM": 368.55552939530975,
+      "habitats": {
+        "floating": 0.017333333333333336,
+        "subsea": 0,
+        "vertical": 0.7377073861262519,
+        "underground": 0.19114674166059228,
+        "floatingCondition": 0.9870761023831086,
+        "subseaCondition": 1,
+        "verticalCondition": 0.5875019454129289,
+        "undergroundCondition": 0.6955147515802768
+      },
+      "rewilding": 0.026628567912087692,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.2%/yr; 11 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.212941848216523,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8174271197534846,
+        "humanDevelopment": 0.979914706496062,
+        "institutionalHealth": 0.8072635413393262,
+        "ecologicalSafety": 0.8302626222312584,
+        "distribution": 0.9938519275268298,
+        "resilience": 0.7236140951826332,
+        "broadFlourishing": 0.8533282842592781
+      },
+      "society": {
+        "basicProvision": 0.78189254748856,
+        "trust": 0.7227284507344957,
+        "stability": 0.7427538546449828,
+        "gini": 0.21130441660402086,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 228.33732136699567,
+        "outputPerCapitaMean": 35.21875823564733,
+        "outputPerCapitaMax": 39.80924575891291
+      },
+      "energyGW": {
+        "solar": 7914.816244876602,
+        "wind": 609.704293967103,
+        "nuclear": 9.294860901758058e-13,
+        "geothermal": 782.9754787609962,
+        "bioenergy": 355.1678306319536,
+        "ocean": 436.54504157780775,
+        "fusion": 765.1957901741093,
+        "hydrogenElectrolyzer": 1559.7996704627512
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "hydrogen_archipelago",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 468.01728218883466,
+      "earthLocatedM": 283.31662679238855,
+      "earthEmbodiedM": 113.5365567139907,
+      "offworldM": 184.7006553964461,
+      "offworldShare": 0.3946449467263977,
+      "orbitalM": 181.69617723779191,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 2.994478158654168,
+      "marsCapacityM": 0.01,
+      "digitalM": 280.23697397932153,
+      "habitats": {
+        "floating": 0.3138962811550138,
+        "subsea": 0.09059336171816378,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 0.6362762635723539,
+        "subseaCondition": 0.7014951731510916,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.08485794567939299,
+      "trajectory": "flourishing",
+      "trajectoryNote": "Broad outcomes are strong (91/100): material security, human development, institutions, ecology, distribution and resilience all remain viable. Development form: mixed.",
+      "developmentForm": "mixed",
+      "kardashev": 1.4287209990026724,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8880899669548529,
+        "humanDevelopment": 0.9803104832895458,
+        "institutionalHealth": 0.7815442170976621,
+        "ecologicalSafety": 0.9198493421290679,
+        "distribution": 0.9942624025288022,
+        "resilience": 0.9252940099796014,
+        "broadFlourishing": 0.9121059156068261
+      },
+      "society": {
+        "basicProvision": 0.784173695798794,
+        "trust": 0.7281970099270522,
+        "stability": 0.7523374919911353,
+        "gini": 0.21584474213924099,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 142.4116637904702,
+        "outputPerCapitaMean": 33.54591083676415,
+        "outputPerCapitaMax": 35.801736856802734
+      },
+      "energyGW": {
+        "solar": 7869.921355414586,
+        "wind": 397.7510568894796,
+        "nuclear": 4.986390707618421e-13,
+        "geothermal": 775.2189952634487,
+        "bioenergy": 349.42547231155237,
+        "ocean": 178.36694377359433,
+        "fusion": 723.8644341887076,
+        "hydrogenElectrolyzer": 1267.979634872123
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "collapse_and_return",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 150.73996504680667,
+      "earthLocatedM": 129.47411448911043,
+      "earthEmbodiedM": 129.47411448911043,
+      "offworldM": 21.265850557696233,
+      "offworldShare": 0.14107639305271774,
+      "orbitalM": 21.255850557696235,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.4460782990286701,
+      "trajectory": "crisis",
+      "trajectoryNote": "At least one civilization is in an acute energy, food or political crisis.",
+      "developmentForm": "spacefaring",
+      "kardashev": 0.7884347234839171,
+      "agi": true,
+      "asi": false,
+      "outcome": {
+        "materialSecurity": 0.6457326851385629,
+        "humanDevelopment": 0.8860764646540996,
+        "institutionalHealth": 0.2973240163089007,
+        "ecologicalSafety": 0.781199884227932,
+        "distribution": 0.5766941267978288,
+        "resilience": 0.4352203180575495,
+        "broadFlourishing": 0.567364036530876
+      },
+      "society": {
+        "basicProvision": 0.29137308976837084,
+        "trust": 0.289571123809441,
+        "stability": 0.3207840793050852,
+        "gini": 0.48609258236367686,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 11.969737456868321,
+        "outputPerCapitaMean": 8.389689794584749,
+        "outputPerCapitaMax": 14.621307907787665
+      },
+      "energyGW": {
+        "solar": 2737.639071630927,
+        "wind": 1.6171584252454127e-07,
+        "nuclear": 2.0797956404094923e-12,
+        "geothermal": 194.32000397727185,
+        "bioenergy": 73.79509914989467,
+        "ocean": 2.6474366918358848e-11,
+        "fusion": 83.56567886469107,
+        "hydrogenElectrolyzer": 282.1961743737372
+      },
+      "polityStatuses": {
+        "veloria": "failed",
+        "ardan": "failed",
+        "nemea": "active"
+      }
+    },
+    {
+      "id": "terminal_cascade",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 0.005106572849984161,
+      "earthLocatedM": 0.005106572849984161,
+      "earthEmbodiedM": 0.005106572849984161,
+      "offworldM": 0,
+      "offworldShare": 0,
+      "orbitalM": 0,
+      "marsPopulationM": 0,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0,
+      "digitalM": 0,
+      "habitats": {
+        "floating": 0,
+        "subsea": 0,
+        "vertical": 0,
+        "underground": 0,
+        "floatingCondition": 1,
+        "subseaCondition": 1,
+        "verticalCondition": 1,
+        "undergroundCondition": 1
+      },
+      "rewilding": 0.9865205226671617,
+      "trajectory": "collapse",
+      "trajectoryNote": "0.005M people remain: a remnant civilization, not literal extinction. Recovery depends on surviving institutions, off-world/digital continuity and resettlement.",
+      "developmentForm": "earthbound",
+      "kardashev": 0.5330070598630966,
+      "agi": true,
+      "asi": false,
+      "outcome": {
+        "materialSecurity": 0.51397421939409,
+        "humanDevelopment": 0.8330451777605236,
+        "institutionalHealth": 0.143174399982474,
+        "ecologicalSafety": 0.7243272147066637,
+        "distribution": 0.4518047676107918,
+        "resilience": 0.2475911939101908,
+        "broadFlourishing": 0.41306273037288754
+      },
+      "society": {
+        "basicProvision": 0.23144083833717674,
+        "trust": 0.15965248565679346,
+        "stability": 0.16380484744654092,
+        "gini": 0.5658845394892947,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 0.08496405868426403,
+        "outputPerCapitaMean": 83.83991069341725,
+        "outputPerCapitaMax": 226.78387001128624
+      },
+      "energyGW": {
+        "solar": 0.12517459925072863,
+        "wind": 0.36116721880708924,
+        "nuclear": 0.03449611535257454,
+        "geothermal": 2.8294696950027425,
+        "bioenergy": 0.7530863267961725,
+        "ocean": 3.287705343317919e-13,
+        "fusion": 0,
+        "hydrogenElectrolyzer": 21.9323449300895
+      },
+      "polityStatuses": {
+        "veloria": "abandoned",
+        "ardan": "abandoned",
+        "nemea": "failed"
+      }
+    },
+    {
+      "id": "deep_diaspora",
+      "seed": 7,
+      "year": 2326,
+      "populationM": 1250.4094276951694,
+      "earthLocatedM": 832.1260892000887,
+      "earthEmbodiedM": 329.5615828370146,
+      "offworldM": 418.28333849508067,
+      "offworldShare": 0.3345171023430989,
+      "orbitalM": 418.2733384950807,
+      "marsPopulationM": 0.01,
+      "deepSpaceM": 0,
+      "marsCapacityM": 0.01,
+      "digitalM": 754.6491887158243,
+      "habitats": {
+        "floating": 1.4602874978917946,
+        "subsea": 0,
+        "vertical": 0.8052640000000001,
+        "underground": 0.39999999999999997,
+        "floatingCondition": 0.6968324221169887,
+        "subseaCondition": 1,
+        "verticalCondition": 0.6588503125688715,
+        "undergroundCondition": 0.6983272987003918
+      },
+      "rewilding": 0.045337639511702305,
+      "trajectory": "growth",
+      "trajectoryNote": "Output per person growing 0.1%/yr; 10 frontier milestones reached.",
+      "developmentForm": "mixed",
+      "kardashev": 1.332235393783051,
+      "agi": true,
+      "asi": true,
+      "outcome": {
+        "materialSecurity": 0.8312131317202691,
+        "humanDevelopment": 0.9806394533930489,
+        "institutionalHealth": 0.7665623495193623,
+        "ecologicalSafety": 0.7638045797488044,
+        "distribution": 0.9943241827374617,
+        "resilience": 0.623999638524824,
+        "broadFlourishing": 0.8164143695775574
+      },
+      "society": {
+        "basicProvision": 0.7860711910908251,
+        "trust": 0.7176936529313073,
+        "stability": 0.7296238581176474,
+        "gini": 0.21592606936301792,
+        "foodShortage": 0
+      },
+      "economy": {
+        "output": 466.10742878803234,
+        "outputPerCapitaMean": 44.62962627647399,
+        "outputPerCapitaMax": 53.387612742565686
+      },
+      "energyGW": {
+        "solar": 7980.997737059979,
+        "wind": 2070.076473672978,
+        "nuclear": 1.645233333062256e-12,
+        "geothermal": 839.2501724999187,
+        "bioenergy": 382.15171994704576,
+        "ocean": 430.0474812450576,
+        "fusion": 951.1599523362509,
+        "hydrogenElectrolyzer": 2643.357752630359
+      },
+      "polityStatuses": {
+        "veloria": "active",
+        "ardan": "active",
+        "nemea": "active"
+      }
+    }
+  ],
+  "multiSeed": {
+    "ocean_century": {
+      "3": {
+        "id": "ocean_century",
+        "seed": 3,
+        "year": 2326,
+        "populationM": 209.59512020637692,
+        "earthLocatedM": 99.24103462937416,
+        "earthEmbodiedM": 99.24103462937416,
+        "offworldM": 110.35408557700273,
+        "offworldShare": 0.5265107578284411,
+        "orbitalM": 109.37546957651632,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 0.9686160004864186,
+        "marsCapacityM": 0.01,
+        "digitalM": 0,
+        "habitats": {
+          "floating": 0.3139185255994387,
+          "subsea": 0.08334187734228775,
+          "vertical": 0.1882799284176956,
+          "underground": 0.08,
+          "floatingCondition": 0.5775366201305958,
+          "subseaCondition": 0.503395422620767,
+          "verticalCondition": 0.9138245106294206,
+          "undergroundCondition": 0.9248384122160455
+        },
+        "rewilding": 0.05352905138360701,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.5%/yr; 9 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 0.8525270420219035,
+        "agi": true,
+        "asi": false,
+        "outcome": {
+          "materialSecurity": 0.8346812332566822,
+          "humanDevelopment": 0.9473061505933604,
+          "institutionalHealth": 0.6224217322325059,
+          "ecologicalSafety": 0.8024867489239873,
+          "distribution": 0.8704336622535778,
+          "resilience": 0.7519948830225913,
+          "broadFlourishing": 0.7981429794637629
+        },
+        "society": {
+          "basicProvision": 0.6002041302658273,
+          "trust": 0.6053896137101403,
+          "stability": 0.565935754340526,
+          "gini": 0.2887501553214321,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 69.11404894990476,
+          "outputPerCapitaMean": 24.086520294735337,
+          "outputPerCapitaMax": 34.508791270203375
+        },
+        "energyGW": {
+          "solar": 5127.217110723214,
+          "wind": 246.32317687630987,
+          "nuclear": 2.2809101836977874e-08,
+          "geothermal": 507.05698791743544,
+          "bioenergy": 230.50926196727295,
+          "ocean": 8.776273652084582e-09,
+          "fusion": 432.0805938621553,
+          "hydrogenElectrolyzer": 706.6978374850805
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "7": {
+        "id": "ocean_century",
+        "seed": 7,
+        "year": 2326,
+        "populationM": 376.8731527527485,
+        "earthLocatedM": 265.15333089086795,
+        "earthEmbodiedM": 102.72856323487414,
+        "offworldM": 111.7198218618806,
+        "offworldShare": 0.29643879126400796,
+        "orbitalM": 110.40396843928045,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 1.3058534226001672,
+        "marsCapacityM": 0.01,
+        "digitalM": 230.16661679059004,
+        "habitats": {
+          "floating": 0.3229227615863323,
+          "subsea": 0.09706407919427203,
+          "vertical": 0,
+          "underground": 0,
+          "floatingCondition": 0.6423742467221959,
+          "subseaCondition": 0.7100274294295325,
+          "verticalCondition": 1,
+          "undergroundCondition": 1
+        },
+        "rewilding": 0.06446284849231465,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.3%/yr; 12 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.5052392038003206,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8568353828019583,
+          "humanDevelopment": 0.9803112488052022,
+          "institutionalHealth": 0.771439481740392,
+          "ecologicalSafety": 0.8267056035498569,
+          "distribution": 0.9942425400083578,
+          "resilience": 0.9188971828428223,
+          "broadFlourishing": 0.8877259127597905
+        },
+        "society": {
+          "basicProvision": 0.7841781098052162,
+          "trust": 0.7158903912627488,
+          "stability": 0.7417068742117098,
+          "gini": 0.2169306754307225,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 150.545007447688,
+          "outputPerCapitaMean": 38.987627597049055,
+          "outputPerCapitaMax": 43.013628358657584
+        },
+        "energyGW": {
+          "solar": 7827.3495159170525,
+          "wind": 482.4995532873276,
+          "nuclear": 1.0493769745666593e-12,
+          "geothermal": 789.1666952520366,
+          "bioenergy": 359.1701140717047,
+          "ocean": 0.0006920305476837336,
+          "fusion": 636.3142603313223,
+          "hydrogenElectrolyzer": 1114.161605576099
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "19": {
+        "id": "ocean_century",
+        "seed": 19,
+        "year": 2326,
+        "populationM": 393.7130785178755,
+        "earthLocatedM": 262.6847760853789,
+        "earthEmbodiedM": 101.71348846446031,
+        "offworldM": 131.02830243249656,
+        "offworldShare": 0.3328014983036627,
+        "orbitalM": 131.01830243249657,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 0,
+        "marsCapacityM": 0.01,
+        "digitalM": 240.94732659107368,
+        "habitats": {
+          "floating": 0.3614570161355801,
+          "subsea": 0.09849196944556253,
+          "vertical": 0.085,
+          "underground": 0.02,
+          "floatingCondition": 0.5636834805187405,
+          "subseaCondition": 0.6343619934329282,
+          "verticalCondition": 0.7478212941607619,
+          "undergroundCondition": 0.9103305628902539
+        },
+        "rewilding": 0.15273901624518668,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.3%/yr; 10 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.3015001166920506,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8547031538642084,
+          "humanDevelopment": 0.9803123769813016,
+          "institutionalHealth": 0.7704580532627403,
+          "ecologicalSafety": 0.7273740671451772,
+          "distribution": 0.9942360955188548,
+          "resilience": 0.7948829788372795,
+          "broadFlourishing": 0.8477085328092184
+        },
+        "society": {
+          "basicProvision": 0.7841846149447602,
+          "trust": 0.7146403048470535,
+          "stability": 0.7408899642206563,
+          "gini": 0.21700772223275935,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 154.6241048366186,
+          "outputPerCapitaMean": 39.67557260785448,
+          "outputPerCapitaMax": 44.806573394644005
+        },
+        "energyGW": {
+          "solar": 7533.577570471988,
+          "wind": 451.35392586906266,
+          "nuclear": 6.419829618121004e-13,
+          "geothermal": 749.4974513910175,
+          "bioenergy": 336.27181741340246,
+          "ocean": 122.25478158805456,
+          "fusion": 634.7333731414083,
+          "hydrogenElectrolyzer": 1078.5274675994096
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      }
+    },
+    "vertical_world": {
+      "3": {
+        "id": "vertical_world",
+        "seed": 3,
+        "year": 2326,
+        "populationM": 615.8485987297943,
+        "earthLocatedM": 336.4562569954944,
+        "earthEmbodiedM": 136.45750224214095,
+        "offworldM": 279.3923417342998,
+        "offworldShare": 0.45367050003938414,
+        "orbitalM": 275.16304276489916,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 4.2192989694006435,
+        "marsCapacityM": 0.01,
+        "digitalM": 367.6301933795778,
+        "habitats": {
+          "floating": 0,
+          "subsea": 0,
+          "vertical": 0.7292545977242108,
+          "underground": 0.19422262683001681,
+          "floatingCondition": 1,
+          "subseaCondition": 1,
+          "verticalCondition": 0.5789364773354254,
+          "undergroundCondition": 0.6859111774321435
+        },
+        "rewilding": 0.055154404070117534,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.3%/yr; 11 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.3437772485028308,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.828169830381968,
+          "humanDevelopment": 0.985688885736434,
+          "institutionalHealth": 0.7991427285246171,
+          "ecologicalSafety": 0.841987945513853,
+          "distribution": 0.9939950468821201,
+          "resilience": 0.7185972089802208,
+          "broadFlourishing": 0.8556113550432831
+        },
+        "society": {
+          "basicProvision": 0.8153563003062568,
+          "trust": 0.7285692248571897,
+          "stability": 0.715908453921298,
+          "gini": 0.2076772110676854,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 222.03470491916434,
+          "outputPerCapitaMean": 35.534194117252625,
+          "outputPerCapitaMax": 39.6310567684268
+        },
+        "energyGW": {
+          "solar": 7649.731767110062,
+          "wind": 279.0408934652412,
+          "nuclear": 8.001330006942931e-13,
+          "geothermal": 743.6479281192721,
+          "bioenergy": 343.993934179592,
+          "ocean": 366.4568649402621,
+          "fusion": 732.4961682850063,
+          "hydrogenElectrolyzer": 1550.8591849902039
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "7": {
+        "id": "vertical_world",
+        "seed": 7,
+        "year": 2326,
+        "populationM": 606.1219789927258,
+        "earthLocatedM": 400.54787249144795,
+        "earthEmbodiedM": 157.52596951028136,
+        "offworldM": 205.57410650127784,
+        "offworldShare": 0.33916293027833755,
+        "orbitalM": 202.35949299748728,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 3.204613503790582,
+        "marsCapacityM": 0.01,
+        "digitalM": 368.55552939530975,
+        "habitats": {
+          "floating": 0.017333333333333336,
+          "subsea": 0,
+          "vertical": 0.7377073861262519,
+          "underground": 0.19114674166059228,
+          "floatingCondition": 0.9870761023831086,
+          "subseaCondition": 1,
+          "verticalCondition": 0.5875019454129289,
+          "undergroundCondition": 0.6955147515802768
+        },
+        "rewilding": 0.026628567912087692,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.2%/yr; 11 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.212941848216523,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8174271197534846,
+          "humanDevelopment": 0.979914706496062,
+          "institutionalHealth": 0.8072635413393262,
+          "ecologicalSafety": 0.8302626222312584,
+          "distribution": 0.9938519275268298,
+          "resilience": 0.7236140951826332,
+          "broadFlourishing": 0.8533282842592781
+        },
+        "society": {
+          "basicProvision": 0.78189254748856,
+          "trust": 0.7227284507344957,
+          "stability": 0.7427538546449828,
+          "gini": 0.21130441660402086,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 228.33732136699567,
+          "outputPerCapitaMean": 35.21875823564733,
+          "outputPerCapitaMax": 39.80924575891291
+        },
+        "energyGW": {
+          "solar": 7914.816244876602,
+          "wind": 609.704293967103,
+          "nuclear": 9.294860901758058e-13,
+          "geothermal": 782.9754787609962,
+          "bioenergy": 355.1678306319536,
+          "ocean": 436.54504157780775,
+          "fusion": 765.1957901741093,
+          "hydrogenElectrolyzer": 1559.7996704627512
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "19": {
+        "id": "vertical_world",
+        "seed": 19,
+        "year": 2326,
+        "populationM": 564.063939453911,
+        "earthLocatedM": 333.95203906207723,
+        "earthEmbodiedM": 129.92905377054274,
+        "offworldM": 230.1119003918337,
+        "offworldShare": 0.40795357457988307,
+        "orbitalM": 228.3923228190801,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 1.7095775727535854,
+        "marsCapacityM": 0.01,
+        "digitalM": 343.4974327396359,
+        "habitats": {
+          "floating": 0,
+          "subsea": 0,
+          "vertical": 0.6510215920569706,
+          "underground": 0.1594537580698764,
+          "floatingCondition": 1,
+          "subseaCondition": 1,
+          "verticalCondition": 0.5684586581610483,
+          "undergroundCondition": 0.6739162207896064
+        },
+        "rewilding": 0.04694448840188773,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.2%/yr; 11 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.1754177470047913,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8227276510573724,
+          "humanDevelopment": 0.9795571862334931,
+          "institutionalHealth": 0.8081040517407743,
+          "ecologicalSafety": 0.839407264957531,
+          "distribution": 0.9938073373310468,
+          "resilience": 0.7262644892245472,
+          "broadFlourishing": 0.856420690319003
+        },
+        "society": {
+          "basicProvision": 0.7798334827523302,
+          "trust": 0.7237066655442558,
+          "stability": 0.7440696368823998,
+          "gini": 0.21146222990915386,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 197.22301665253474,
+          "outputPerCapitaMean": 34.18424488961198,
+          "outputPerCapitaMax": 38.03564033210362
+        },
+        "energyGW": {
+          "solar": 7825.007336326219,
+          "wind": 736.39278215087,
+          "nuclear": 5.165200567706278e-11,
+          "geothermal": 734.1417394874475,
+          "bioenergy": 333.67260026516806,
+          "ocean": 411.99873658424485,
+          "fusion": 728.6244810523841,
+          "hydrogenElectrolyzer": 1360.5408601981107
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      }
+    },
+    "everywhere": {
+      "3": {
+        "id": "everywhere",
+        "seed": 3,
+        "year": 2326,
+        "populationM": 1576.6560397218864,
+        "earthLocatedM": 1141.7598661666004,
+        "earthEmbodiedM": 448.2521128752099,
+        "offworldM": 434.89617355528594,
+        "offworldShare": 0.27583452737859,
+        "orbitalM": 422.5513479522021,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 12.334825603083893,
+        "marsCapacityM": 0.01,
+        "digitalM": 957.2997500642737,
+        "habitats": {
+          "floating": 2.8386325657918956,
+          "subsea": 0.06807268634397666,
+          "vertical": 0.5754393801579659,
+          "underground": 0.17387315349257673,
+          "floatingCondition": 0.736749664902102,
+          "subseaCondition": 0.8697771557752235,
+          "verticalCondition": 0.7417343174348844,
+          "undergroundCondition": 0.821444730538071
+        },
+        "rewilding": 0.028511057285374276,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.1%/yr; 12 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.23209271995687,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8531159977532128,
+          "humanDevelopment": 0.9805325202677087,
+          "institutionalHealth": 0.7648751395786417,
+          "ecologicalSafety": 0.8639072453677658,
+          "distribution": 0.99425921773938,
+          "resilience": 0.7199019913752178,
+          "broadFlourishing": 0.8568078926925339
+        },
+        "society": {
+          "basicProvision": 0.7854542625303393,
+          "trust": 0.714718368196983,
+          "stability": 0.7290029034011437,
+          "gini": 0.21675709117247066,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 584.1624098388124,
+          "outputPerCapitaMean": 40.1354551572561,
+          "outputPerCapitaMax": 49.35904809445014
+        },
+        "energyGW": {
+          "solar": 7955.665856822104,
+          "wind": 1807.7330940197908,
+          "nuclear": 8.113331809440243e-13,
+          "geothermal": 822.1859806860116,
+          "bioenergy": 376.3014997307163,
+          "ocean": 304.61098663354306,
+          "fusion": 1286.555502499977,
+          "hydrogenElectrolyzer": 3208.8983681646796
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "7": {
+        "id": "everywhere",
+        "seed": 7,
+        "year": 2326,
+        "populationM": 1454.7375123489705,
+        "earthLocatedM": 1013.7630245304259,
+        "earthEmbodiedM": 405.447372695229,
+        "offworldM": 440.97448781854473,
+        "offworldShare": 0.3031299351774475,
+        "orbitalM": 440.96448781854474,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 0,
+        "marsCapacityM": 0.01,
+        "digitalM": 871.9271170652192,
+        "habitats": {
+          "floating": 2.2371915958494037,
+          "subsea": 0.0711540109399827,
+          "vertical": 0.5739851314422743,
+          "underground": 0.18117537235709813,
+          "floatingCondition": 0.7010216573548383,
+          "subseaCondition": 0.8203928018254353,
+          "verticalCondition": 0.7089079735879539,
+          "undergroundCondition": 0.7807978468862221
+        },
+        "rewilding": 0.03238657563607984,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.0%/yr; 10 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.1878264699068264,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8058897292967964,
+          "humanDevelopment": 0.9804873829609723,
+          "institutionalHealth": 0.76538553118692,
+          "ecologicalSafety": 0.7212743918757755,
+          "distribution": 0.9942621919618321,
+          "resilience": 0.7427526075505675,
+          "broadFlourishing": 0.8279559859300754
+        },
+        "society": {
+          "basicProvision": 0.7851938925537002,
+          "trust": 0.7155722643714922,
+          "stability": 0.7288135386448641,
+          "gini": 0.2167322799117978,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 518.7365622085845,
+          "outputPerCapitaMean": 41.347642067693066,
+          "outputPerCapitaMax": 51.111036286539886
+        },
+        "energyGW": {
+          "solar": 8058.678399100649,
+          "wind": 1867.1856179522572,
+          "nuclear": 6.03552007028002e-13,
+          "geothermal": 827.9567535551427,
+          "bioenergy": 378.5506650519716,
+          "ocean": 304.39526521123014,
+          "fusion": 1196.35552740188,
+          "hydrogenElectrolyzer": 2914.0107436183002
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      },
+      "19": {
+        "id": "everywhere",
+        "seed": 19,
+        "year": 2326,
+        "populationM": 1726.4225458690335,
+        "earthLocatedM": 1322.9198415594294,
+        "earthEmbodiedM": 520.6620366440766,
+        "offworldM": 403.5027043096039,
+        "offworldShare": 0.2337218691189484,
+        "orbitalM": 395.93533192206763,
+        "marsPopulationM": 0.01,
+        "deepSpaceM": 7.55737238753628,
+        "marsCapacityM": 0.01,
+        "digitalM": 1046.3548150580377,
+        "habitats": {
+          "floating": 1.0892803857274151,
+          "subsea": 0.0740635807071464,
+          "vertical": 0.48105425695155946,
+          "underground": 0.18106556650701475,
+          "floatingCondition": 0.8345058701106658,
+          "subseaCondition": 0.9732835658133077,
+          "verticalCondition": 0.8590887718834227,
+          "undergroundCondition": 0.9270795190857269
+        },
+        "rewilding": 0.02719204318760134,
+        "trajectory": "growth",
+        "trajectoryNote": "Output per person growing 0.3%/yr; 13 frontier milestones reached.",
+        "developmentForm": "mixed",
+        "kardashev": 1.6579783649371005,
+        "agi": true,
+        "asi": true,
+        "outcome": {
+          "materialSecurity": 0.8787012956789184,
+          "humanDevelopment": 0.9803092642334158,
+          "institutionalHealth": 0.7728290685726582,
+          "ecologicalSafety": 0.8765122955550705,
+          "distribution": 0.9942646743940742,
+          "resilience": 0.9192639433439967,
+          "broadFlourishing": 0.9005296400753761
+        },
+        "society": {
+          "basicProvision": 0.7841666666666663,
+          "trust": 0.7193720679069023,
+          "stability": 0.7415497008399585,
+          "gini": 0.21580616992736154,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 747.6886273598509,
+          "outputPerCapitaMean": 49.63423026515022,
+          "outputPerCapitaMax": 55.10546838992062
+        },
+        "energyGW": {
+          "solar": 8121.415540751768,
+          "wind": 1126.5485376954284,
+          "nuclear": 9.191708127053812e-13,
+          "geothermal": 829.8502754765661,
+          "bioenergy": 378.59089681570117,
+          "ocean": 0.0006507441674493259,
+          "fusion": 1307.2275588540547,
+          "hydrogenElectrolyzer": 3202.1084703333063
+        },
+        "polityStatuses": {
+          "veloria": "active",
+          "ardan": "active",
+          "nemea": "active"
+        }
+      }
+    },
+    "terminal_cascade": {
+      "3": {
+        "id": "terminal_cascade",
+        "seed": 3,
+        "year": 2326,
+        "populationM": 0,
+        "earthLocatedM": 0,
+        "earthEmbodiedM": 0,
+        "offworldM": 0,
+        "offworldShare": 0,
+        "orbitalM": 0,
+        "marsPopulationM": 0,
+        "deepSpaceM": 0,
+        "marsCapacityM": 0,
+        "digitalM": 0,
+        "habitats": {
+          "floating": 0,
+          "subsea": 0,
+          "vertical": 0.028333333333333335,
+          "underground": 0,
+          "floatingCondition": 0.03345317336687553,
+          "subseaCondition": 0.01,
+          "verticalCondition": 0.19705128961944665,
+          "undergroundCondition": 0.1835270793181638
+        },
+        "rewilding": 0.9927528610153908,
+        "trajectory": "extinction",
+        "trajectoryNote": "No embodied, off-world or digital population remains. Only physical and ecological processes continue.",
+        "developmentForm": "earthbound",
+        "kardashev": 0.3,
+        "agi": true,
+        "asi": false,
+        "outcome": {
+          "materialSecurity": 0,
+          "humanDevelopment": 0,
+          "institutionalHealth": 0,
+          "ecologicalSafety": 0.9552955929632467,
+          "distribution": 0,
+          "resilience": 0,
+          "broadFlourishing": 0
+        },
+        "society": {
+          "basicProvision": 0.13023313755546614,
+          "trust": 0,
+          "stability": 0,
+          "gini": 0.6264726081175475,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 0,
+          "outputPerCapitaMean": 0,
+          "outputPerCapitaMax": 0
+        },
+        "energyGW": {
+          "solar": 3.584663784735457e-08,
+          "wind": 4.670838999008536e-09,
+          "nuclear": 1.1593806659701172e-09,
+          "geothermal": 7.18672407420814e-10,
+          "bioenergy": 7.135559111849292e-10,
+          "ocean": 4.774118597525982e-08,
+          "fusion": 0,
+          "hydrogenElectrolyzer": 23.65975128939563
+        },
+        "polityStatuses": {
+          "veloria": "abandoned",
+          "ardan": "abandoned",
+          "nemea": "abandoned"
+        }
+      },
+      "7": {
+        "id": "terminal_cascade",
+        "seed": 7,
+        "year": 2326,
+        "populationM": 0.005106572849984161,
+        "earthLocatedM": 0.005106572849984161,
+        "earthEmbodiedM": 0.005106572849984161,
+        "offworldM": 0,
+        "offworldShare": 0,
+        "orbitalM": 0,
+        "marsPopulationM": 0,
+        "deepSpaceM": 0,
+        "marsCapacityM": 0,
+        "digitalM": 0,
+        "habitats": {
+          "floating": 0,
+          "subsea": 0,
+          "vertical": 0,
+          "underground": 0,
+          "floatingCondition": 1,
+          "subseaCondition": 1,
+          "verticalCondition": 1,
+          "undergroundCondition": 1
+        },
+        "rewilding": 0.9865205226671617,
+        "trajectory": "collapse",
+        "trajectoryNote": "0.005M people remain: a remnant civilization, not literal extinction. Recovery depends on surviving institutions, off-world/digital continuity and resettlement.",
+        "developmentForm": "earthbound",
+        "kardashev": 0.5330070598630966,
+        "agi": true,
+        "asi": false,
+        "outcome": {
+          "materialSecurity": 0.51397421939409,
+          "humanDevelopment": 0.8330451777605236,
+          "institutionalHealth": 0.143174399982474,
+          "ecologicalSafety": 0.7243272147066637,
+          "distribution": 0.4518047676107918,
+          "resilience": 0.2475911939101908,
+          "broadFlourishing": 0.41306273037288754
+        },
+        "society": {
+          "basicProvision": 0.23144083833717674,
+          "trust": 0.15965248565679346,
+          "stability": 0.16380484744654092,
+          "gini": 0.5658845394892947,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 0.08496405868426403,
+          "outputPerCapitaMean": 83.83991069341725,
+          "outputPerCapitaMax": 226.78387001128624
+        },
+        "energyGW": {
+          "solar": 0.12517459925072863,
+          "wind": 0.36116721880708924,
+          "nuclear": 0.03449611535257454,
+          "geothermal": 2.8294696950027425,
+          "bioenergy": 0.7530863267961725,
+          "ocean": 3.287705343317919e-13,
+          "fusion": 0,
+          "hydrogenElectrolyzer": 21.9323449300895
+        },
+        "polityStatuses": {
+          "veloria": "abandoned",
+          "ardan": "abandoned",
+          "nemea": "failed"
+        }
+      },
+      "19": {
+        "id": "terminal_cascade",
+        "seed": 19,
+        "year": 2326,
+        "populationM": 0,
+        "earthLocatedM": 0,
+        "earthEmbodiedM": 0,
+        "offworldM": 0,
+        "offworldShare": 0,
+        "orbitalM": 0,
+        "marsPopulationM": 0,
+        "deepSpaceM": 0,
+        "marsCapacityM": 0,
+        "digitalM": 0,
+        "habitats": {
+          "floating": 0,
+          "subsea": 0,
+          "vertical": 0.05104520453853062,
+          "underground": 0,
+          "floatingCondition": 0.025663891014090983,
+          "subseaCondition": 0.01,
+          "verticalCondition": 0.10469756706130577,
+          "undergroundCondition": 0.16078973565311458
+        },
+        "rewilding": 0.9939943305323814,
+        "trajectory": "extinction",
+        "trajectoryNote": "No embodied, off-world or digital population remains. Only physical and ecological processes continue.",
+        "developmentForm": "earthbound",
+        "kardashev": 0.3,
+        "agi": true,
+        "asi": false,
+        "outcome": {
+          "materialSecurity": 0,
+          "humanDevelopment": 0,
+          "institutionalHealth": 0,
+          "ecologicalSafety": 0.8227382847040334,
+          "distribution": 0,
+          "resilience": 0,
+          "broadFlourishing": 0
+        },
+        "society": {
+          "basicProvision": 0.13023115828958007,
+          "trust": 0,
+          "stability": 0,
+          "gini": 0.6269506436365663,
+          "foodShortage": 0
+        },
+        "economy": {
+          "output": 0,
+          "outputPerCapitaMean": 0,
+          "outputPerCapitaMax": 0
+        },
+        "energyGW": {
+          "solar": 4.153364414613505e-08,
+          "wind": 2.1483686477537748e-08,
+          "nuclear": 9.798941447750123e-11,
+          "geothermal": 1.0433227268981672e-07,
+          "bioenergy": 1.0629277954887571e-11,
+          "ocean": 1.3032806947256868e-11,
+          "fusion": 0,
+          "hydrogenElectrolyzer": 18.40286752499379
+        },
+        "polityStatuses": {
+          "veloria": "abandoned",
+          "ardan": "abandoned",
+          "nemea": "abandoned"
+        }
+      }
+    }
+  },
+  "extinctionAbsorbing": {
+    "death": {
+      "year": 2291,
+      "chron": 2038,
+      "relations": "[{\"a\":\"veloria\",\"b\":\"ardan\",\"relation\":-0.465498967807714,\"tradeOpenness\":0.24,\"sciCollaboration\":0.225,\"chipExportAllowed\":false,\"tension\":0.576235602928188,\"grievances\":[]},{\"a\":\"veloria\",\"b\":\"nemea\",\"relation\":-0.46549570490480363,\"tradeOpenness\":0.24,\"sciCollaboration\":0.225,\"chipExportAllowed\":false,\"tension\":0.5397448588792602,\"grievances\":[]},{\"a\":\"ardan\",\"b\":\"nemea\",\"relation\":-0.4654961260473235,\"tradeOpenness\":0.24,\"sciCollaboration\":0.225,\"chipExportAllowed\":false,\"tension\":0.5611542654033173,\"grievances\":[]}]"
+    },
+    "after": {
+      "population": 0,
+      "chronicleFrozen": true,
+      "last": "The last population disappears",
+      "techFrozen": true,
+      "relationsFrozen": true,
+      "pending": 0,
+      "projects": 0,
+      "conflicts": 0,
+      "bad": [],
+      "trajectory": "extinction",
+      "rewild": [
+        0.9969025636908494,
+        0.9970920702408791,
+        0.9944388546335392
+      ],
+      "activeEarth": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "rendererZeroWorld": {
+    "total": 0,
+    "maxActive": 0,
+    "maxLaunch": 0,
+    "built": 0.12630966074768335,
+    "rewild": 0.9843512931672358,
+    "bad": []
+  },
+  "collapseAndReturnPath": {
+    "transitions": [
+      {
+        "year": 2230,
+        "civ": "veloria",
+        "from": "active",
+        "to": "failed",
+        "pop": 7.858957867168295,
+        "off": 0.405
+      },
+      {
+        "year": 2273,
+        "civ": "ardan",
+        "from": "active",
+        "to": "failed",
+        "pop": 26.898451563982434,
+        "off": 1
+      },
+      {
+        "year": 2281,
+        "civ": "veloria",
+        "from": "failed",
+        "to": "resettling",
+        "pop": 0.08263523141065733,
+        "off": 0.025160141357575116
+      },
+      {
+        "year": 2286,
+        "civ": "veloria",
+        "from": "resettling",
+        "to": "active",
+        "pop": 0.1433199643593175,
+        "off": 0.02737282823921307
+      },
+      {
+        "year": 2291,
+        "civ": "veloria",
+        "from": "active",
+        "to": "failed",
+        "pop": 0.10898013907861236,
+        "off": 0.029588604267678564
+      },
+      {
+        "year": 2306,
+        "civ": "veloria",
+        "from": "failed",
+        "to": "resettling",
+        "pop": 0.07252160614526496,
+        "off": 0.01889390345005167
+      },
+      {
+        "year": 2311,
+        "civ": "veloria",
+        "from": "resettling",
+        "to": "active",
+        "pop": 0.1371873925331672,
+        "off": 0.021117533881449727
+      },
+      {
+        "year": 2316,
+        "civ": "veloria",
+        "from": "active",
+        "to": "failed",
+        "pop": 0.1005068252541491,
+        "off": 0.023300672342580535
+      }
+    ],
+    "final": [
+      {
+        "id": "veloria",
+        "status": "failed",
+        "pop": 0.028507979390777552,
+        "off": 0.02496468860885582
+      },
+      {
+        "id": "ardan",
+        "status": "failed",
+        "pop": 11.343553658982222,
+        "off": 1
+      },
+      {
+        "id": "nemea",
+        "status": "active",
+        "pop": 139.36790340843368,
+        "off": 20.24088586908738
+      }
+    ],
+    "events": [
+      {
+        "year": 2256,
+        "title": "Veloria becomes a remnant society"
+      },
+      {
+        "year": 2280,
+        "title": "Veloria is abandoned"
+      },
+      {
+        "year": 2280,
+        "title": "Veloria is being resettled"
+      },
+      {
+        "year": 2305,
+        "title": "Veloria is abandoned"
+      },
+      {
+        "year": 2305,
+        "title": "Veloria is being resettled"
+      }
+    ]
+  },
+  "limitations": [
+    "No automated pixel-perfect WebGL screenshot validation in this container.",
+    "Prebuilt no-Node browser runtime uses version-pinned esm.sh packages and therefore requires browser internet access."
+  ]
+}
