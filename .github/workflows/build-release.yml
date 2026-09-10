@@ -1,0 +1,230 @@
+name: Build release artifacts
+
+# On every push to main:
+#   1. build, validate and test the browser runtime into dist/, then repack
+#      standalone/CivilizationLab_NoNode.pyz, and commit both back here;
+#   2. push dist/ to the xhostd app repo (git.xhostd.com/tamir/civ);
+#   3. tell the xhostd MCP server to deploy that branch, and wait for the result.
+# Node/npm exist only here in CI; no developer machine needs them.
+
+on:
+  push:
+    branches: [main]
+    # The commit this workflow makes touches only these paths, so it cannot
+    # retrigger itself. (Pushes made with GITHUB_TOKEN do not start workflows
+    # either; this is the second lock on the same door.)
+    paths-ignore:
+      - 'dist/**'
+      - 'standalone/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # The xhostd app: its git repo holds the contents of dist/ at the repo root
+  # (static template -> committed files are served as-is), and `prod` is the
+  # channel that serves them. A push only stores code; the deploy call ships it.
+  XHOST_OWNER: tamir
+  XHOST_APP: civ
+  XHOST_CHANNEL: prod
+  XHOST_BRANCH: master
+  XHOST_GIT_HOST: git.xhostd.com
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # No package-lock.json in the repo, so `npm ci` is not available and the
+      # setup-node npm cache has nothing to key on. Cache the download cache
+      # instead, keyed by the dependency list itself.
+      - name: Cache npm downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # tools/build-cdn.py invokes `tsc` and `node` as bare commands.
+      - name: Put local binaries on PATH
+        run: echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Unit tests
+        run: npm test
+
+      # Compiles src/ with tsc, rewrites imports, emits the import map, then
+      # evaluates the whole module graph under Node (tools/smoke-esm.mjs).
+      # It exits non-zero on a syntax error or a graph that will not evaluate.
+      - name: Build browser runtime into dist/
+        run: python3 tools/build-cdn.py
+
+      - name: Check the build produced a complete dist/
+        run: |
+          set -euo pipefail
+          for f in dist/index.html dist/index.css dist/check.html dist/package.json \
+                   dist/RUNNING.txt dist/app/main.js dist/app/App.js dist/app/sim/index.js; do
+            test -s "$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+          grep -q 'type="importmap"' dist/index.html
+          echo "dist/: $(find dist -name '*.js' | wc -l) modules, $(du -sh dist | cut -f1)"
+
+      - name: Pack standalone/CivilizationLab_NoNode.pyz
+        run: python3 tools/build-no-node-pyz.py
+
+      # The real gate: run the archive exactly as a user would and serve from it.
+      - name: Boot the .pyz and verify it serves the app
+        run: |
+          set -euo pipefail
+          python3 standalone/CivilizationLab_NoNode.pyz --no-browser --port 4173 --verbose \
+            > pyz.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+
+          for _ in $(seq 1 40); do
+            curl -fsS -o served-index.html http://127.0.0.1:4173/ && break
+            kill -0 "$pid" 2>/dev/null || { echo "server exited early"; cat pyz.log; exit 1; }
+            sleep 0.5
+          done
+          test -s served-index.html || { echo "server never answered"; cat pyz.log; exit 1; }
+
+          grep -q '<div id="root">' served-index.html
+          grep -q 'type="importmap"' served-index.html
+          for p in app/main.js app/App.js app/sim/index.js index.css check.html; do
+            curl -fsS -o /dev/null "http://127.0.0.1:4173/$p" || { echo "404 from archive: $p"; exit 1; }
+          done
+
+          # Path traversal must stay blocked. --path-as-is stops curl from
+          # collapsing the ".." itself, so the server really sees it.
+          code=$(curl -s --path-as-is -o /dev/null -w '%{http_code}' \
+            'http://127.0.0.1:4173/../../package.json')
+          test "$code" != "200" || { echo "traversal escaped dist/"; exit 1; }
+
+          # Every module on disk must be inside the archive.
+          python3 - <<'PY'
+          import pathlib, zipfile
+          disk = {str(p.relative_to('dist')) for p in pathlib.Path('dist').rglob('*')
+                  if p.is_file() and '.git' not in p.parts}
+          zipped = {n[len('dist/'):] for n in zipfile.ZipFile('standalone/CivilizationLab_NoNode.pyz').namelist()
+                    if n.startswith('dist/') and not n.endswith('/')}
+          missing = disk - zipped
+          assert not missing, f"not packed: {sorted(missing)[:10]}"
+          print(f"archive holds all {len(disk)} dist files")
+          PY
+
+      - name: Commit dist/ and the standalone archive
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # dist/ is listed in .gitignore for local development; these artifacts
+          # are tracked deliberately, so staging them needs -f.
+          git add -A -f dist standalone tsconfig.cdn.json
+
+          if git diff --cached --quiet; then
+            echo "Artifacts already match ${GITHUB_SHA}; nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "build: rebuild dist/ and CivilizationLab_NoNode.pyz [skip ci]" \
+                     -m "Built from ${GITHUB_SHA}."
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            echo "push rejected (attempt $attempt); rebasing onto origin/main"
+            git fetch origin main
+            git rebase FETCH_HEAD || { git rebase --abort; exit 1; }
+          done
+          echo "could not push artifacts after 3 attempts"
+          exit 1
+
+      # Everything below is reached only after the build, the tests, the
+      # module-graph smoke test and the live .pyz boot have all passed.
+
+      - name: Push dist/ to git.xhostd.com
+        id: mirror
+        env:
+          XHOST_TOKEN: ${{ secrets.XHOST_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${XHOST_TOKEN:-}" ]; then
+            echo "::error::Secret XHOST_TOKEN is not set. Create a token (xh_...) at" \
+                 "https://console.xhostd.com and add it under Settings > Secrets and" \
+                 "variables > Actions."
+            exit 1
+          fi
+
+          # Credentials go in a file, never in the remote URL or in argv.
+          creds="$RUNNER_TEMP/.git-credentials"
+          ( umask 077; printf 'https://%s:%s@%s\n' "$XHOST_OWNER" "$XHOST_TOKEN" "$XHOST_GIT_HOST" > "$creds" )
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=credential.helper
+          export GIT_CONFIG_VALUE_0="store --file=$creds"
+          export GIT_TERMINAL_PROMPT=0   # a bad token must fail, never hang on a prompt
+
+          repo="https://$XHOST_GIT_HOST/$XHOST_OWNER/$XHOST_APP.git"
+          mirror="$RUNNER_TEMP/xhost-mirror"
+
+          # Shallow clone keeps the app repo's history: this build lands as one
+          # commit on top of it rather than replacing the branch.
+          if ! git clone --depth 1 --branch "$XHOST_BRANCH" "$repo" "$mirror"; then
+            echo "Branch $XHOST_BRANCH not found on the app repo; starting it."
+            git init -q -b "$XHOST_BRANCH" "$mirror"
+            git -C "$mirror" remote add origin "$repo"
+          fi
+
+          # Replace the worktree wholesale so deleted modules disappear upstream.
+          # tar rather than cp: it excludes any stray dist/.git, which would
+          # otherwise overwrite the mirror's own repository metadata.
+          find "$mirror" -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+          tar -c --exclude=.git -C dist . | tar -x -C "$mirror"
+
+          cd "$mirror"
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo "App repo already holds this build; nothing to push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -q -m "civ static build" -m "Built from ${GITHUB_REPOSITORY}@${GITHUB_SHA}."
+          git push origin "HEAD:$XHOST_BRANCH"
+          echo "Pushed $(git ls-files | wc -l) files to $repo ($XHOST_BRANCH)."
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # Runs whether or not the push changed anything: a deploy is the only
+      # thing that makes the channel serve the current branch head, so this also
+      # repairs a run that pushed but failed before deploying.
+      - name: Deploy the channel via the xhostd MCP server
+        env:
+          XHOST_TOKEN: ${{ secrets.XHOST_TOKEN }}
+        run: |
+          python3 tools/xhost-deploy.py \
+            --app "$XHOST_APP" \
+            --channel "$XHOST_CHANNEL" \
+            --ref "$XHOST_BRANCH"
+
+      - name: Remove xhostd credentials from the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/.git-credentials"

@@ -6,6 +6,8 @@ I gave AI agents a world and asked them to make it behave like a civilization.
 
 This project simulates a civilization instead of building a city, sketching a technology roadmap, or scripting a happy ending.
 
+Author: **Tamir Khason** ([@tamir](https://x.com/tamir)) • [LinkedIn](https://www.linkedin.com/in/tamirk/)
+
 Three invented countries share one finite island. People are born, grow old, migrate and die. Power plants wear out. Farms lose land. Governments borrow. Scientists fail. Elections and wars change what gets built. Cities rise, dig downward, move onto and under the sea, spread into orbit and eventually stop treating Earth as the center of civilization.
 
 Then the clock runs one month at a time.
@@ -26,7 +28,7 @@ When this world does something that feels disturbingly familiar, inspect why. Wh
 
 ## How it was built
 
-The idea started with Cagri Kacmaz's project comparing GPT-6 Astra and Gemini 3.8 Flash on the same build brief (github.com/cagrikacmaz/gpt-6-astra-vs-gemini-3-8-flash), and with a talk I gave to a forum of senior tech and business executives about which human skills keep their value once AI makes answers cheap. Both left me with the same question: what does a model actually believe about how a civilization works, once you force it to build one instead of describe one?
+The idea started with Cagri Kacmaz's [project](github.com/cagrikacmaz/gpt-6-astra-vs-gemini-3-8-flash) comparing GPT-6 Astra and Gemini 3.8 Flash on the same build brief, and with a talk I gave to a forum of senior tech and business executives about which human skills keep their value once AI makes answers cheap. Both left me with the same question: what does a model actually believe about how a civilization works, once you force it to build one instead of describe one?
 
 I didn't sit down and write a future. I wrote a brief: start close to the world we know, use real research where evidence exists, make resources finite, make infrastructure age, make causes inspectable, never let a scenario secretly dictate its ending.
 
@@ -121,3 +123,5 @@ The repository is open because the project stays unfinished in the useful sense:
 `knowledge/` holds research notes, evidence and unresolved questions. `RED_TEAM_REPORT.md` records assumptions and failure modes already found. `VALIDATION_REPORT.md` says what's actually been tested. `CHANGES.md` records why important mechanics changed. Developers need one more document: `README-DEV.md`.
 
 If you find a rule that makes no sense, challenge it. If you find a future this model can't represent, add it. If the simulation does something you believe without questioning, challenge that too. The worst modelling errors usually come from assumptions that look like common sense, not the ones that look absurd.
+
+Special thank to [Yair Lifshitz](https://www.linkedin.com/in/yairlifshitz/) for hosting on [xhostd](https://xhostd.com/)

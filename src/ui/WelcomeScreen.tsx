@@ -27,7 +27,7 @@ export function WelcomeScreen() {
         <div className="welcome-desc">
           September 2026. Three synthetic civilizations share one finite island. People are born, migrate and die; grids age; farms fail; institutions recover or do not. Cities can grow upward, underground, into the sea and eventually away from Earth.
           <br /><br />
-          This is not a forecast. It is an inspectable set of assumptions running one month at a time. Pick a question below. The scenario sets the conditions — it does not choose the ending.
+          This is not a forecast. It is an inspectable set of assumptions running one month at a time. Pick a question below. The scenario sets the conditions — it does not choose the ending. <a href="https://github.com/utamir/aicivilization" target="_blank">GitHub</a>.
         </div>
         <div className="welcome-presets">
           {featured.map((p) => (
@@ -39,6 +39,8 @@ export function WelcomeScreen() {
         </div>
         <div className="welcome-foot">
           Eight starting questions shown here · the full scenario library is inside Scenario Lab · seeded & reproducible · important events carry their causes
+          <br />
+          Yours, <a href="https://www.linkedin.com/in/tamirk/" target="_blank">Tamir</a>
         </div>
       </div>
     </div>
