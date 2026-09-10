@@ -1,0 +1,15 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+// ─────────────────────────────────────────────────────────────────────────────
+// EVIDENCE REGISTRY — the calibration layer, browsable. Each entry carries
+// provenance; provisional entries are marked. Research data is distinct from
+// gameplay tuning (gameplay scaling lives in the tech definitions, shown here).
+// ─────────────────────────────────────────────────────────────────────────────
+import { useState } from 'react';
+import { useUI } from '../state/store.js';
+import { EVIDENCE, TECH_DEFS, TECH_IDS } from '../sim/index.js';
+const CONF_COLOR = { high: '#4caf50', medium: '#ffc107', provisional: '#f44336' };
+export function EvidencePanel() {
+    const set = useUI((s) => s.set);
+    const [openId, setOpenId] = useState(null);
+    return (_jsx("div", { className: "modal-backdrop", onClick: () => set({ panel: null }), children: _jsxs("div", { className: "modal glass-panel evidence", onClick: (e) => e.stopPropagation(), children: [_jsxs("div", { className: "panel-head", children: [_jsx("span", { className: "panel-title", children: "Evidence Registry \u2014 calibration provenance" }), _jsx("button", { className: "ghost-btn", onClick: () => set({ panel: null }), children: "\u2715" })] }), _jsxs("div", { className: "tab-scroll", style: { maxHeight: '62vh' }, children: [EVIDENCE.map((e) => (_jsxs("div", { className: "ev-item", children: [_jsxs("button", { className: "ev-head", onClick: () => setOpenId(openId === e.id ? null : e.id), children: [_jsx("span", { className: "ev-domain", children: e.domain }), _jsx("span", { className: "ev-metric", children: e.metric }), _jsxs("span", { className: "ev-value", children: [e.value, " ", e.unit] }), _jsx("span", { className: "ev-conf", style: { color: CONF_COLOR[e.confidence] }, children: e.confidence })] }), openId === e.id && (_jsxs("div", { className: "ev-detail", children: [_jsxs("div", { children: [_jsx("b", { children: e.sourceTitle }), " (", e.sourceType, ", published ", e.publicationDate, ", retrieved ", e.retrievalDate, ")"] }), _jsx("div", { className: "ev-url", children: e.sourceUrl }), _jsxs("div", { children: ["Observation: ", e.observationPeriod, " \u00B7 ", e.geography, " \u00B7 model family: ", e.modelFamily] }), e.fitParameters && _jsxs("div", { children: ["Fit: ", e.fitParameters] }), _jsxs("div", { children: ["Valid extrapolation window: ", e.validExtrapolationWindow] }), _jsxs("div", { children: ["Known constraints: ", e.knownConstraints] }), e.notes && _jsx("div", { className: "ev-notes", children: e.notes })] }))] }, e.id))), _jsx("div", { className: "sub-head", style: { marginTop: 14 }, children: "Gameplay tuning (not empirical)" }), _jsxs("div", { className: "tuning-note", children: ["Scaling constants used purely for playability \u2014 kept separate from research data:", TECH_IDS.map((id) => (_jsxs("span", { className: "tuning-chip", children: [TECH_DEFS[id].name, " \u00D7", TECH_DEFS[id].gameplayScaling] }, id)))] })] })] }) }));
+}

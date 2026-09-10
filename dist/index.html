@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>WHAT IF? Civilization Lab</title>
+      <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Never a blank page: show loading, then surface any error with its source.
+      (function () {
+        var root = document.getElementById('root');
+        var box = document.createElement('div');
+        box.id = 'boot';
+        box.style.cssText = 'position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07110f;color:#e8f1ec;font:14px/1.5 Inter,system-ui,sans-serif;text-align:center;padding:40px;z-index:9999';
+        box.innerHTML = '<div style="font:500 26px Georgia,serif">WHAT IF? Civilization Lab</div><div id="boot-msg" style="color:#93ada3">Loading the world… (React, three.js and the react-three packages come from esm.sh on first load)</div><pre id="boot-err" style="max-width:820px;white-space:pre-wrap;color:#ff8a5c;font-size:12px;text-align:left"></pre>';
+        document.body.appendChild(box);
+        var errs = [];
+        function show(msg) { errs.push(msg); var e = document.getElementById('boot-err'); if (e) e.textContent = errs.join('\n\n'); var m = document.getElementById('boot-msg'); if (m) m.textContent = 'The world failed to load. Details below; open check.html for a module-by-module test.'; }
+        window.addEventListener('error', function (ev) { show((ev.message || 'error') + (ev.filename ? '\n  at ' + ev.filename + ':' + ev.lineno : '')); });
+        window.addEventListener('unhandledrejection', function (ev) { var r = ev.reason; show('Unhandled: ' + (r && (r.stack || r.message) || String(r))); });
+        var t = setInterval(function () { if (root && root.childElementCount > 0) { clearInterval(t); box.remove(); } }, 200);
+        setTimeout(function () { if (root && root.childElementCount === 0 && errs.length === 0) show('Nothing rendered after 20 seconds. Usually a module from esm.sh failed to load (network, firewall, or a version that no longer resolves). Open check.html.'); }, 20000);
+      })();
+    </script>
+    <script type="importmap">{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.0",
+    "react/": "https://esm.sh/react@19.2.0/",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@19.2.0?external=react",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client?external=react",
+    "three": "https://esm.sh/three@0.185.1",
+    "three/": "https://esm.sh/three@0.185.1/",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@9.7.0?external=react,react-dom,three",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@10.7.8?external=react,react-dom,three",
+    "@react-three/postprocessing": "https://esm.sh/@react-three/postprocessing@3.1.1?external=react,react-dom,three",
+    "zustand": "https://esm.sh/zustand@5.0.15?external=react",
+    "react-router": "https://esm.sh/react-router@7.6.1?external=react,react-dom"
+  }
+}</script>
+    <script type="module" src="./app/main.js"></script>
+  </body>
+</html>

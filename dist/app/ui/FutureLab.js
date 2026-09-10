@@ -1,0 +1,23 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+// ─────────────────────────────────────────────────────────────────────────────
+// FUTURE LAB — scenario presets, scenario builder (labeled axes → structured
+// parameters), and custom What-If text via the safe parser. Starts a new
+// simulation from September 2026 under the chosen assumptions.
+// ─────────────────────────────────────────────────────────────────────────────
+import { useMemo, useState } from 'react';
+import { useUI } from '../state/store.js';
+import { engine } from '../state/engine.js';
+import { SCENARIO_PRESETS, BUILDER_AXES, parseWhatIf, mergeDeltas } from '../sim/index.js';
+export function FutureLab() {
+    const set = useUI((s) => s.set);
+    const [mode, setMode] = useState('presets');
+    const [axes, setAxes] = useState(BUILDER_AXES.map((a) => a.defaultIndex));
+    const [whatIfText, setWhatIfText] = useState('');
+    const parsed = useMemo(() => (whatIfText.trim().length >= 4 ? parseWhatIf(whatIfText) : null), [whatIfText]);
+    const builderDelta = useMemo(() => mergeDeltas(...BUILDER_AXES.map((a, i) => a.options[axes[i]].delta)), [axes]);
+    const launch = (scenarioId, delta, label) => {
+        engine.newScenario(scenarioId, delta, label);
+        set({ panel: null, started: true, selectedEventId: null, selectedCharacter: null });
+    };
+    return (_jsx("div", { className: "modal-backdrop", onClick: () => set({ panel: null }), children: _jsxs("div", { className: "modal glass-panel futurelab", onClick: (e) => e.stopPropagation(), children: [_jsxs("div", { className: "panel-head", children: [_jsx("span", { className: "panel-title", children: "Future Lab \u2014 choose the assumptions" }), _jsx("button", { className: "ghost-btn", onClick: () => set({ panel: null }), children: "\u2715" })] }), _jsx("div", { className: "modal-modes", children: ['presets', 'builder', 'whatif'].map((m) => (_jsx("button", { className: `right-tab ${mode === m ? 'active' : ''}`, onClick: () => setMode(m), children: m === 'presets' ? 'Presets' : m === 'builder' ? 'Scenario Builder' : 'Custom What-If' }, m))) }), mode === 'presets' && (_jsx("div", { className: "preset-grid", children: SCENARIO_PRESETS.map((p) => (_jsxs("button", { className: "preset-card", style: { ['--accent']: p.accent }, onClick: () => launch(p.id, p.delta, p.name), children: [_jsx("span", { className: "preset-name", children: p.name }), _jsx("span", { className: "preset-tagline", children: p.tagline }), _jsx("span", { className: "preset-desc", children: p.description }), _jsx("span", { className: "preset-go", children: "Run this future \u2192" })] }, p.id))) })), mode === 'builder' && (_jsxs("div", { className: "builder", children: [BUILDER_AXES.map((a, ai) => (_jsxs("div", { className: "axis-row", children: [_jsx("span", { className: "axis-label", children: a.label }), _jsx("div", { className: "axis-options", children: a.options.map((o, oi) => (_jsx("button", { className: `axis-opt ${axes[ai] === oi ? 'active' : ''}`, onClick: () => setAxes((prev) => prev.map((v, i) => (i === ai ? oi : v))), children: o.label }, oi))) })] }, a.id))), _jsx("button", { className: "launch-btn", onClick: () => launch('custom', builderDelta, 'Custom scenario'), children: "Start simulation from September 2026 \u2192" })] })), mode === 'whatif' && (_jsxs("div", { className: "whatif", children: [_jsxs("div", { className: "whatif-hint", children: ["Describe an assumption in plain words. It is parsed into validated simulation parameters \u2014 never arbitrary code. Try: ", _jsx("i", { children: "\u201CAI improves itself rapidly but the grid can\u2019t keep up\u201D" }), ", ", _jsx("i", { children: "\u201Cfusion arrives early\u201D" }), ", ", _jsx("i", { children: "\u201Ca fragmented world with chip controls\u201D" }), "."] }), _jsx("textarea", { className: "whatif-input", rows: 3, placeholder: "What if\u2026", value: whatIfText, onChange: (e) => setWhatIfText(e.target.value) }), parsed && (_jsx("div", { className: `whatif-result ${parsed.ok ? 'ok' : 'fail'}`, children: parsed.ok ? (_jsxs(_Fragment, { children: [_jsx("b", { children: parsed.label }), _jsx("div", { children: parsed.explanation }), _jsx("div", { className: "whatif-params", children: Object.entries(parsed.delta).map(([k, v]) => `${k} ×${v.toFixed(2)}`).join(' · ') || 'baseline parameters' })] })) : (_jsx("div", { children: parsed.explanation })) })), _jsx("button", { className: "launch-btn", disabled: !parsed?.ok, onClick: () => parsed?.ok && launch('custom', parsed.delta, parsed.label), children: "Start this counterfactual \u2192" })] }))] }) }));
+}
