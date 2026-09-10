@@ -51,18 +51,28 @@ jobs:
         with:
           python-version: '3.12'
 
-      # No package-lock.json in the repo, so `npm ci` is not available and the
-      # setup-node npm cache has nothing to key on. Cache the download cache
-      # instead, keyed by the dependency list itself.
       - name: Cache npm downloads
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json') }}
           restore-keys: npm-${{ runner.os }}-
 
+      # Install from the lockfile when there is one, and commit the lockfile
+      # this resolves when there is not (see the commit step). Floating ranges
+      # are what broke this build once already: react 19.3.0 shipped, ^19.2.0
+      # floated onto it, and @react-three/fiber caps react at <19.3. Falling
+      # back to `npm install` also self-heals a lockfile that package.json has
+      # outgrown, which matters because no developer machine here has Node.
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ] && npm ci --no-audit --no-fund; then
+            echo "installed from package-lock.json"
+          else
+            echo "no usable lockfile; resolving a fresh dependency tree"
+            npm install --no-audit --no-fund
+          fi
 
       # tools/build-cdn.py invokes `tsc` and `node` as bare commands.
       - name: Put local binaries on PATH
@@ -138,7 +148,7 @@ jobs:
 
           # dist/ is listed in .gitignore for local development; these artifacts
           # are tracked deliberately, so staging them needs -f.
-          git add -A -f dist standalone tsconfig.cdn.json
+          git add -A -f dist standalone tsconfig.cdn.json package-lock.json
 
           if git diff --cached --quiet; then
             echo "Artifacts already match ${GITHUB_SHA}; nothing to commit."
