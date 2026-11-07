@@ -1689,7 +1689,9 @@ function stepSociety(w: WorldState) {
     const robotsAbout = w.techs.robotics_gp.adoption[c.id].intensity;
     const aversion = clamp01(ec.displacedShare * 0.85 + s.backlash * 0.6 - s.basicProvision * 0.35);
     const viability = clamp01(c.population.urbanization * 0.85 + s.autonomousInfrastructure * 0.5);
-    const primacyTarget = clamp(0.36 + 0.52 * clamp01(aversion * (0.35 + 0.75 * robotsAbout)) * (0.55 + 0.45 * viability), 0.3, 0.94);
+    // The 0.62 baseline is the largest city's share implied by the settlement
+    // layout; aversion and pervasive robots push it up from there.
+    const primacyTarget = clamp(0.62 + 0.33 * clamp01(aversion * (0.35 + 0.75 * robotsAbout)) * (0.55 + 0.45 * viability), 0.3, 0.95);
     const prevPrimacy = s.primacy;
     s.primacy = clamp(lerp(s.primacy, primacyTarget, 0.004 * DT), 0.25, 0.95);
     if (prevPrimacy < 0.68 && s.primacy >= 0.68 && !w.flags[`metro-${c.id}`]) {

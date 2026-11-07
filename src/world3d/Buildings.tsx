@@ -187,7 +187,7 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     [district],
   );
   const bucketRefs = useRef<Partial<Record<BucketKind, THREE.InstancedMesh>>>({});
-  const applied = useRef({ built: -1, active: -1, era: -1 as number, vert: -1, der: -1, sub: -1 });
+  const applied = useRef({ built: -1, active: -1, era: -1 as number, vert: -1, der: -1, sub: -1, rd: -1 });
   const specsRef = useRef<BuildingSpec[]>([]);
   const arcSetRef = useRef<Set<number>>(new Set());
   const countsRef = useRef<Record<BucketKind, number>>({ wallPlaster: 0, wallBrick: 0, wallConcrete: 0, wallPanel: 0, gableTile: 0, gableSeam: 0, slab: 0, rail: 0, winFrame: 0, winGlass: 0, glassBand: 0, context: 0, arcCore: 0, arcSlab: 0, arcRing: 0, arcGreen: 0, arcDebris: 0, arcGlass: 0, arcPier: 0, arcPlanter: 0 });
@@ -255,6 +255,16 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     buildSpecs(2);
     return { ...countsRef.current };
   }, [plots]);
+  // Redevelopment eligibility: non-heritage houses and apartments, ordered
+  // core-ward (land value is highest near the centre). These redevelop into
+  // higher-density blocks as the city densifies.
+  const redevOrder = useMemo(() => {
+    const heritageMax = Math.floor(plots.length * 0.22);
+    return plots
+      .map((p, i) => ({ p, i }))
+      .filter(({ p, i }) => i >= heritageMax && (p.kind === 'house' || p.kind === 'apartment'))
+      .sort((a, b) => a.p.dist - b.p.dist || a.i - b.i);
+  }, [plots]);
   useMemo(() => buildSpecs(0), [plots]);
 
   const writeCity = (vis: NonNullable<WorldVisual['cities'][number]> | undefined, builtF: number, activeF: number, era: 0 | 1 | 2) => {
@@ -267,6 +277,12 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     const constructionBand = vis.growth > 1.03 ? Math.min(5, Math.max(2, Math.floor(N * 0.045))) : 0;
     const cursors: Record<BucketKind, number> = { wallPlaster: 0, wallBrick: 0, wallConcrete: 0, wallPanel: 0, gableTile: 0, gableSeam: 0, slab: 0, rail: 0, winFrame: 0, winGlass: 0, glassBand: 0, context: 0, arcCore: 0, arcSlab: 0, arcRing: 0, arcGreen: 0, arcDebris: 0, arcGlass: 0, arcPier: 0, arcPlanter: 0 };
     const meshes = bucketRefs.current;
+    // Redevelopment pressure: population beyond the original footprint, eased by
+    // visible crowding (unmet demand pressures land use the fastest).
+    const popRatio = vis.population / Math.max(0.001, city.basePop);
+    const redev = Math.max(0, Math.min(1, (popRatio - 1.1) * 0.8 + vis.crowding * 0.12));
+    const redevCount = Math.floor(redevOrder.length * redev);
+    let redevCursor = 0;
     void skyState.nightFactor;
     void vis.nightDim;
     selectArcologies(era, vis);
@@ -316,10 +332,25 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
         continue;
       }
 
+      // redevelopment: low-rise fabric re-emerges as higher-density blocks,
+      // staged plot by plot with construction sites on the current front
+      let density = 0;
+      const entry = redevOrder[redevCursor];
+      if (entry && entry.i === i && redevCount > 0) {
+        redevCursor++;
+        const k = redevCursor;
+        if (k <= redevCount) {
+          const h = Math.abs(Math.sin(spec.plot.lotIndex * 53.3 + 7)) % 1;
+          density = h < 0.45 ? 1 : 2;
+          if (redev < 0.97 && k > redevCount - 3) state = 'construction';
+          else state = state === 'derelict' ? 'derelict' : 'active';
+        }
+      }
       // regenerate this spec's parts for its state
       const fresh = generateBuilding(spec.plot, {
         tier: spec.tier, state,
         seed: spec.plot.lotIndex * 977 + city.id.length * 31 + 7, era,
+        density,
       });
       for (const part of fresh.parts) {
         writePart(bucketFor(part.kind, part.family), part.x, part.y, part.z, part.sx, part.sy, part.sz, part.rotY, part.color, (spec.plot.lotIndex % 7 / 7 - 0.5));
@@ -330,7 +361,6 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     // Plots beyond the original footprint fill when the settlement outgrows
     // its base (population × primacy pressure), and never exist for shrinking
     // settlements — where the countryside stays open.
-    const popRatio = vis.population / Math.max(0.001, city.basePop);
     const suburbBuilt = Math.max(0, Math.min(1, (popRatio - 0.94) * 1.4));
     const suburbN = Math.floor(district.suburbPlots.length * suburbBuilt);
     for (let i = 0; i < district.suburbPlots.length; i++) {
@@ -373,11 +403,14 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     // dirty key so towers appear as the sim develops and update their state.
     const vert = Math.round(vis.vertical * 10) / 10;
     const der = Math.round(vis.derelict * 20) / 20;
-    const sub = Math.round(Math.max(0, Math.min(1, (vis.population / Math.max(0.001, city.basePop) - 0.94) * 1.4)) * 40) / 40;
+    const popRatio0 = vis.population / Math.max(0.001, city.basePop);
+    const sub = Math.round(Math.max(0, Math.min(1, (popRatio0 - 0.94) * 1.4)) * 40) / 40;
+    const rd = Math.round(Math.max(0, Math.min(1, (popRatio0 - 1.1) * 0.8 + vis.crowding * 0.12)) * 60) / 60;
     if (b === applied.current.built && a === applied.current.active && era === applied.current.era
-        && vert === applied.current.vert && der === applied.current.der && sub === applied.current.sub) return;
+        && vert === applied.current.vert && der === applied.current.der && sub === applied.current.sub
+        && rd === applied.current.rd) return;
     if (era !== applied.current.era) buildSpecs(era);
-    applied.current = { built: b, active: a, era, vert, der, sub };
+    applied.current = { built: b, active: a, era, vert, der, sub, rd };
     writeCity(vis, b, a, era);
   });
 

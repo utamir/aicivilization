@@ -39,6 +39,15 @@ export interface BuildingSpec {
   height: number;
 }
 
+export interface GenerateOpts {
+  tier: 0 | 1 | 2;
+  state: 'built' | 'active' | 'derelict' | 'construction';
+  seed: number;
+  era: 0 | 1 | 2;
+  /** 0 = original fabric; ≥1 = the plot was redeveloped upward as the city densified */
+  density?: number;
+}
+
 // palettes keyed by tier: believable regional range
 const WALL_T0 = ['#c9bfae', '#d8cfbc', '#b8ab94', '#cfc0a5', '#c2b3a0', '#d3c2ab'];
 const WALL_T1 = ['#e3ddd3', '#d9d5cc', '#cfc6b6', '#e8e2d8'];
@@ -62,18 +71,21 @@ const WIN_H = 0.5;
 
 export function generateBuilding(
   plot: Plot,
-  opts: {
-    tier: 0 | 1 | 2;
-    state: 'built' | 'active' | 'derelict' | 'construction';
-    seed: number;          // stable per lot
-    era: 0 | 1 | 2;       // city-level advancement (from sim)
-  },
+  opts: GenerateOpts,
 ): BuildingSpec {
   const r1 = Math.abs(Math.sin(opts.seed * 127.1)) % 1;
   const r2 = Math.abs(Math.sin(opts.seed * 311.7)) % 1;
   const r3 = Math.abs(Math.sin(opts.seed * 74.7)) % 1;
   const r4 = Math.abs(Math.sin(opts.seed * 53.1)) % 1;
   const { tier, state } = opts;
+  // Redevelopment: land pressure converts low-rise fabric into higher-density
+  // blocks. Houses become compact apartment blocks (footprint capped to the
+  // plot); apartments and offices gain floors. The same plot, one generation
+  // later.
+  const dens = opts.density ?? 0;
+  let kind: Plot['kind'] = plot.kind;
+  let widthCap: number | null = null;
+  if (dens >= 1 && kind === 'house') { kind = 'apartment'; widthCap = plot.w - 0.55; }
   const parts: Part[] = [];
   const cos = Math.cos(plot.rot), sin = Math.sin(plot.rot);
   // local plot frame: u along street, v into the plot
@@ -161,7 +173,7 @@ export function generateBuilding(
   const cosR = Math.cos(plot.rot), sinR = Math.sin(plot.rot);
   void cosR; void sinR;
 
-  if (plot.kind === 'house') {
+  if (kind === 'house') {
     // ── small house: 1–2 storeys, gable roof, yard-facing entrance ──────────
     const storeys = r1 < 0.55 ? 1 : 2;
     const w = 1.5 + r2 * 0.5;               // along street
@@ -217,10 +229,10 @@ export function generateBuilding(
     // era upgrades: rooftop solar + green roof on modern tiers
     if (opts.era >= 1 && r2 < 0.5) addBox('solarRoof', 0, 0.1, wallH + 0.66, w * 0.5, 0.04, 0.5, '#1d2f52');
     if (opts.era >= 2 && r3 < 0.4) addBox('greenRoof', w * 0.2, -0.2, wallH + 0.64, w * 0.4, 0.05, d * 0.35, '#4a7a3c');
-  } else if (plot.kind === 'apartment') {
+  } else if (kind === 'apartment') {
     // ── apartment block: 3–6 storeys, balconies, parapet, roof equipment ────
-    const floors = 3 + Math.floor(r1 * 4) + (tier >= 1 ? 1 : 0);
-    const w = 2.6 + r2 * 0.7;
+    const floors = 3 + Math.floor(r1 * 4) + (tier >= 1 ? 1 : 0) + dens;
+    const w = widthCap != null ? Math.min(2.6 + r2 * 0.7, widthCap) : 2.6 + r2 * 0.7;
     const d = 1.7 + r3 * 0.3;
     const wallH = floors * FLOOR;
     height = wallH + 0.3;
@@ -270,9 +282,9 @@ export function generateBuilding(
     if (r1 < 0.5) addBox('stack', w * 0.3, d * 0.2, wallH + 0.5, 0.12, 0.7, 0.12, '#7a7268');
     if (opts.era >= 1 && r2 < 0.45) addBox('solarRoof', -w * 0.2, 0, wallH + 0.18, w * 0.5, 0.05, d * 0.4, '#1d2f52');
     if (opts.era >= 2 && r4 < 0.35) addBox('greenRoof', w * 0.25, -d * 0.2, wallH + 0.18, w * 0.4, 0.06, d * 0.35, '#4a7a3c');
-  } else if (plot.kind === 'office' || plot.kind === 'civic') {
+  } else if (kind === 'office' || kind === 'civic') {
     // ── offices: towers with glass bands; civic: stone with portico ─────────
-    const floors = plot.kind === 'office' ? 5 + Math.floor(r1 * 5) + tier : 2 + Math.floor(r1 * 2);
+    const floors = (kind === 'office' ? 5 + Math.floor(r1 * 5) + tier : 2 + Math.floor(r1 * 2)) + dens;
     const w = 2.5 + r2 * 0.9;
     const d = 2.0 + r3 * 0.5;
     const wallH = floors * FLOOR;
@@ -291,7 +303,7 @@ export function generateBuilding(
       });
       return { plot, tier, state, parts, height: wallH * 0.45 };
     }
-    if (plot.kind === 'civic') {
+    if (kind === 'civic') {
       const stone = pick(['#c4b8a4', '#bfb3a0', '#cbc0ac'], r1);
       addBox('wall', 0, 0, wallH / 2, w, wallH, d, stone);
       addBox('flatroof', 0, 0, wallH + 0.09, w + 0.1, 0.18, d + 0.1, '#8a8276');
