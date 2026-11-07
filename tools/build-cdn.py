@@ -70,7 +70,6 @@ importmap = {"imports": {
   "@react-three/drei": f"https://esm.sh/@react-three/drei@{v('@react-three/drei')}?{ext}",
   "@react-three/postprocessing": f"https://esm.sh/@react-three/postprocessing@{v('@react-three/postprocessing')}?{ext}",
   "zustand": f"https://esm.sh/zustand@{v('zustand')}?external=react",
-  "react-router": f"https://esm.sh/react-router@{v('react-router')}?external=react,react-dom",
 }}
 DIAG = r'''
     <script>
