@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { INFRA_ZONES, CITIES, civMainCity } from './layout.js';
 import { heightAt } from './terrain.js';
+import { skyState } from './skyState.js';
 import { CIV_IDS } from '../sim/index.js';
 import { makeRng, nextFloat } from '../sim/rng.js';
 function zoneRng(id) {
@@ -50,8 +51,8 @@ function WindFarm({ zone, visualRef }) {
     });
     return (_jsx("group", { ref: groupRef, children: spots.map(([x, z], i) => {
             const y = heightAt(x, z);
-            return (_jsxs("group", { position: [x, y, z], children: [_jsxs("mesh", { position: [0, 2.6, 0], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.09, 0.16, 5.2, 6] }), _jsx("meshStandardMaterial", { color: "#d8dde2", roughness: 0.55 })] }), _jsxs("group", { position: [0, 5.2, 0], children: [_jsxs("mesh", { castShadow: true, children: [_jsx("boxGeometry", { args: [0.34, 0.3, 0.7] }), _jsx("meshStandardMaterial", { color: "#cfd5da", roughness: 0.5 })] }), _jsxs("group", { ref: (g) => { if (g)
-                                    bladesRef.current[i] = g; }, position: [0, 0, 0.4], children: [[0, 1, 2].map((k) => (_jsxs("mesh", { rotation: [0, 0, (k * Math.PI * 2) / 3], position: [0, 0, 0], children: [_jsx("boxGeometry", { args: [0.1, 2.5, 0.03] }), _jsx("meshStandardMaterial", { color: "#e8ecef", roughness: 0.4 })] }, k))), _jsxs("mesh", { children: [_jsx("sphereGeometry", { args: [0.14, 8, 8] }), _jsx("meshStandardMaterial", { color: "#d8dde2" })] })] })] })] }, i));
+            return (_jsxs("group", { position: [x, y, z], children: [_jsxs("mesh", { position: [0, 0.06, 0], receiveShadow: true, children: [_jsx("cylinderGeometry", { args: [0.55, 0.65, 0.12, 10] }), _jsx("meshStandardMaterial", { color: "#b0aaa0", roughness: 0.95 })] }), _jsxs("mesh", { position: [0, 4, 0], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.14, 0.3, 8, 8] }), _jsx("meshStandardMaterial", { color: "#e4e8ec", roughness: 0.4, metalness: 0.1 })] }), _jsxs("group", { position: [0, 8, 0], children: [_jsxs("mesh", { castShadow: true, children: [_jsx("boxGeometry", { args: [0.5, 0.42, 1.1] }), _jsx("meshStandardMaterial", { color: "#dde2e6", roughness: 0.45, metalness: 0.2 })] }), _jsxs("group", { ref: (g) => { if (g)
+                                    bladesRef.current[i] = g; }, position: [0, 0, 0.62], children: [[0, 1, 2].map((k) => (_jsxs("mesh", { rotation: [0, 0, (k * Math.PI * 2) / 3], position: [0, 0, 0], children: [_jsx("boxGeometry", { args: [0.16, 3.2, 0.05] }), _jsx("meshStandardMaterial", { color: "#eef1f3", roughness: 0.35 })] }, k))), _jsxs("mesh", { children: [_jsx("sphereGeometry", { args: [0.2, 8, 8] }), _jsx("meshStandardMaterial", { color: "#d8dde2" })] })] })] })] }, i));
         }) }));
 }
 // ── Solar fields ─────────────────────────────────────────────────────────────
@@ -88,7 +89,49 @@ function SolarField({ zone, visualRef }) {
         }
         mesh.instanceMatrix.needsUpdate = true;
     });
-    return (_jsxs("instancedMesh", { ref: meshRef, args: [undefined, undefined, MAX_SOLAR_ROWS], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#1d2f52", roughness: 0.25, metalness: 0.65 })] }));
+    return (_jsxs("instancedMesh", { ref: meshRef, args: [undefined, undefined, MAX_SOLAR_ROWS], castShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#1d2f52", roughness: 0.25, metalness: 0.65 })] }));
+}
+// support posts under each solar row
+const MAX_SOLAR_POSTS = 96;
+function SolarPosts({ zone, visualRef }) {
+    const meshRef = useRef(null);
+    const applied = useRef(-1);
+    useFrame(() => {
+        const mesh = meshRef.current;
+        if (!mesh)
+            return;
+        const level = visualRef.current?.infra.get(zone.id) ?? 0;
+        const rows = Math.min(MAX_SOLAR_ROWS, Math.round(8 + level * 12));
+        if (rows === applied.current)
+            return;
+        applied.current = rows;
+        const cols = 8;
+        let i = 0;
+        for (let r = 0; r < rows; r++) {
+            const gx = (r % cols) / cols - 0.44;
+            const gz = Math.floor(r / cols) / Math.ceil(MAX_SOLAR_ROWS / cols) - 0.45;
+            const x = zone.x + gx * zone.size;
+            const z = zone.z + gz * zone.size;
+            const y = heightAt(x, z);
+            for (const off of [-0.7, 0.7]) {
+                if (i >= MAX_SOLAR_POSTS)
+                    break;
+                tmpObj.position.set(x + off * 0.0 + off, y + 0.14, z);
+                tmpObj.rotation.set(0, 0, 0);
+                tmpObj.scale.set(0.06, 0.28, 0.06);
+                tmpObj.updateMatrix();
+                mesh.setMatrixAt(i++, tmpObj.matrix);
+            }
+        }
+        for (let k = i; k < MAX_SOLAR_POSTS; k++) {
+            tmpObj.position.set(0, -60, 0);
+            tmpObj.scale.setScalar(0.001);
+            tmpObj.updateMatrix();
+            mesh.setMatrixAt(k, tmpObj.matrix);
+        }
+        mesh.instanceMatrix.needsUpdate = true;
+    });
+    return (_jsxs("instancedMesh", { ref: meshRef, args: [undefined, undefined, MAX_SOLAR_POSTS], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 6] }), _jsx("meshStandardMaterial", { color: "#5a616b", roughness: 0.7, metalness: 0.4 })] }));
 }
 // ── Nuclear plants ───────────────────────────────────────────────────────────
 function SteamPuff({ x, y, z, phase }) {
@@ -120,7 +163,7 @@ function NuclearPlant({ zone, visualRef }) {
         const n = Math.min(3, Math.max(level > 0.05 ? 1 : 0, Math.round(level)));
         groupRef.current?.children.forEach((c, i) => { c.visible = i < n; });
     });
-    return (_jsx("group", { ref: groupRef, children: units.map((u, i) => (_jsxs("group", { position: [u.x, u.y, u.z], children: [_jsxs("mesh", { position: [0, 0.9, 0], castShadow: true, children: [_jsx("sphereGeometry", { args: [0.95, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2] }), _jsx("meshStandardMaterial", { color: "#dfe3e7", roughness: 0.6 })] }), _jsxs("mesh", { position: [0, 0.45, 0], children: [_jsx("cylinderGeometry", { args: [0.95, 0.95, 0.9, 16] }), _jsx("meshStandardMaterial", { color: "#cfd4d9", roughness: 0.7 })] }), _jsxs("mesh", { position: [1.7, 1.1, 0.6], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.55, 0.8, 2.2, 12] }), _jsx("meshStandardMaterial", { color: "#d5d9de", roughness: 0.75 })] }), _jsx(SteamPuff, { x: 1.7, y: 2.3, z: 0.6, phase: i * 0.33 }), _jsxs("mesh", { position: [-1.3, 0.4, 1.4], castShadow: true, children: [_jsx("boxGeometry", { args: [1.6, 0.8, 1.1] }), _jsx("meshStandardMaterial", { color: "#b9bfc6", roughness: 0.8 })] })] }, i))) }));
+    return (_jsx("group", { ref: groupRef, children: units.map((u, i) => (_jsxs("group", { position: [u.x, u.y, u.z], children: [_jsxs("mesh", { position: [0, 0.9, 0], castShadow: true, children: [_jsx("sphereGeometry", { args: [0.95, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2] }), _jsx("meshStandardMaterial", { color: "#dfe3e7", roughness: 0.6 })] }), _jsxs("mesh", { position: [0, 0.45, 0], children: [_jsx("cylinderGeometry", { args: [0.95, 0.95, 0.9, 16] }), _jsx("meshStandardMaterial", { color: "#cfd4d9", roughness: 0.7 })] }), _jsxs("mesh", { position: [1.9, 2.0, 0.6], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.72, 1.05, 4.0, 14, 1, true] }), _jsx("meshStandardMaterial", { color: "#d5d9de", roughness: 0.75, side: THREE.DoubleSide })] }), _jsx(SteamPuff, { x: 1.9, y: 4.1, z: 0.6, phase: i * 0.33 }), _jsxs("mesh", { position: [-1.5, 0.5, 1.6], castShadow: true, children: [_jsx("boxGeometry", { args: [2.2, 1.0, 1.5] }), _jsx("meshStandardMaterial", { color: "#b9bfc6", roughness: 0.8 })] }), _jsxs("mesh", { position: [-1.5, 1.02, 1.6], children: [_jsx("boxGeometry", { args: [2.24, 0.08, 0.5] }), _jsx("meshStandardMaterial", { color: "#39424c", emissive: "#8fb4d8", emissiveIntensity: 0.25 })] }), [0, 1, 2].map((k) => (_jsxs("group", { position: [-2.2 + k * 0.9, 0, -1.6], children: [_jsxs("mesh", { position: [0, 0.16, 0], castShadow: true, children: [_jsx("boxGeometry", { args: [0.5, 0.32, 0.5] }), _jsx("meshStandardMaterial", { color: "#8a8478", roughness: 0.9 })] }), _jsxs("mesh", { position: [0, 0.4, 0], children: [_jsx("cylinderGeometry", { args: [0.08, 0.08, 0.2, 6] }), _jsx("meshStandardMaterial", { color: "#6e7278", roughness: 0.5, metalness: 0.5 })] })] }, k))), _jsxs("mesh", { position: [-1.3, 0.95, -1.6], children: [_jsx("boxGeometry", { args: [2.4, 0.06, 0.08] }), _jsx("meshStandardMaterial", { color: "#5a616b", roughness: 0.6, metalness: 0.5 })] }), _jsxs("mesh", { position: [0, 0.02, 3.4], rotation: [-Math.PI / 2, 0, 0], receiveShadow: true, children: [_jsx("planeGeometry", { args: [6.5, 2.2] }), _jsx("meshStandardMaterial", { color: "#6e6a62", roughness: 1 })] })] }, i))) }));
 }
 // ── Data centers ─────────────────────────────────────────────────────────────
 const MAX_HALLS = 10;
@@ -136,7 +179,7 @@ function DataCenter({ zone, visualRef }) {
         const level = visualRef.current?.infra.get(zone.id) ?? 0;
         const halls = Math.min(MAX_HALLS, Math.floor(level * 2.4));
         if (halls === applied.current) { /* still update glow pulse */ }
-        const night = window.__nightFactor ?? 0;
+        const night = skyState.nightFactor;
         glow.material.emissiveIntensity = 0.25 + night * 1.6;
         if (halls === applied.current)
             return;
@@ -162,7 +205,15 @@ function DataCenter({ zone, visualRef }) {
         mesh.instanceMatrix.needsUpdate = true;
         glow.instanceMatrix.needsUpdate = true;
     });
-    return (_jsxs("group", { children: [_jsxs("instancedMesh", { ref: meshRef, args: [undefined, undefined, MAX_HALLS], castShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#3a4149", roughness: 0.7, metalness: 0.3 })] }), _jsxs("instancedMesh", { ref: glowRef, args: [undefined, undefined, MAX_HALLS], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#22d3ee", emissive: "#22d3ee", emissiveIntensity: 0.4 })] })] }));
+    return (_jsxs("group", { children: [_jsxs("mesh", { position: [zone.x, heightAt(zone.x, zone.z) + 0.02, zone.z], rotation: [-Math.PI / 2, 0, 0], receiveShadow: true, children: [_jsx("planeGeometry", { args: [zone.size * 1.15, zone.size * 0.72] }), _jsx("meshStandardMaterial", { color: "#77746c", roughness: 1 })] }), _jsxs("instancedMesh", { ref: meshRef, args: [undefined, undefined, MAX_HALLS], castShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#3a4149", roughness: 0.7, metalness: 0.3 })] }), _jsxs("instancedMesh", { ref: glowRef, args: [undefined, undefined, MAX_HALLS], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#22d3ee", emissive: "#22d3ee", emissiveIntensity: 0.4 })] }), [0, 1].map((k) => {
+                const x = zone.x - zone.size * 0.36 + k * 1.6;
+                const z = zone.z + zone.size * 0.3;
+                return (_jsxs("group", { position: [x, heightAt(x, z), z], children: [_jsxs("mesh", { position: [0, 0.22, 0], castShadow: true, children: [_jsx("boxGeometry", { args: [0.7, 0.44, 0.6] }), _jsx("meshStandardMaterial", { color: "#6e7278", roughness: 0.6, metalness: 0.4 })] }), _jsxs("mesh", { position: [0, 0.5, 0], children: [_jsx("cylinderGeometry", { args: [0.07, 0.07, 0.2, 6] }), _jsx("meshStandardMaterial", { color: "#5a616b", metalness: 0.6, roughness: 0.4 })] })] }, k));
+            }), (() => {
+                const x = zone.x, z = zone.z - zone.size * 0.38;
+                const y = heightAt(x, z);
+                return (_jsxs("group", { position: [x, y, z], children: [_jsxs("mesh", { position: [0, 0.3, 0], castShadow: true, children: [_jsx("boxGeometry", { args: [1.3, 0.6, 0.4] }), _jsx("meshStandardMaterial", { color: "#8a9096", roughness: 0.6 })] }), _jsxs("mesh", { position: [0, 0.62, 0], children: [_jsx("boxGeometry", { args: [1.34, 0.06, 0.44] }), _jsx("meshStandardMaterial", { color: "#28323c", roughness: 0.4 })] })] }));
+            })()] }));
 }
 // ── Ports ────────────────────────────────────────────────────────────────────
 function Port({ zone }) {
@@ -200,7 +251,7 @@ function Farm({ zone, visualRef }) {
                 x: zone.x + gx * zone.size,
                 z: zone.z + gz * zone.size,
                 w: zone.size * (0.16 + nextFloat(rng) * 0.06),
-                hue: 0.22 + nextFloat(rng) * 0.08, // base healthy green
+                hue: 0.2 + nextFloat(rng) * 0.08, // muted healthy green
                 light: 0.3 + nextFloat(rng) * 0.12,
                 rot: (nextFloat(rng) - 0.5) * 0.3,
             };
@@ -236,8 +287,8 @@ function Farm({ zone, visualRef }) {
                     return;
                 const m = child.material;
                 const p = patches[i];
-                // healthy green → drought/shortage brown
-                m.color.setHSL(p.hue * (1 - stress) + 0.07 * stress, 0.5 - stress * 0.15, p.light * (1 - stress * 0.4));
+                // healthy green → drought/shortage brown (muted: real fields are dusty)
+                m.color.setHSL(p.hue * (1 - stress) + 0.07 * stress, 0.28 - stress * 0.1, 0.3 * (1 - stress * 0.4) + p.light * 0.18);
             });
         }
         const tg = towerRef.current;
@@ -342,7 +393,7 @@ export function Infrastructure({ visualRef }) {
     return (_jsxs("group", { children: [INFRA_ZONES.map((z) => {
                 switch (z.type) {
                     case 'wind': return _jsx(WindFarm, { zone: z, visualRef: visualRef }, z.id);
-                    case 'solar': return _jsx(SolarField, { zone: z, visualRef: visualRef }, z.id);
+                    case 'solar': return _jsxs("group", { children: [_jsx(SolarField, { zone: z, visualRef: visualRef }), _jsx(SolarPosts, { zone: z, visualRef: visualRef })] }, z.id);
                     case 'nuclear': return _jsx(NuclearPlant, { zone: z, visualRef: visualRef }, z.id);
                     case 'datacenter': return _jsx(DataCenter, { zone: z, visualRef: visualRef }, z.id);
                     case 'port': return _jsx(Port, { zone: z, visualRef: visualRef }, z.id);

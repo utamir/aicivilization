@@ -1,34 +1,395 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 // ─────────────────────────────────────────────────────────────────────────────
-// BUILDINGS — instanced city blocks. Facade windows are procedural (shader);
-// lit windows at night dim during power scarcity (nightDim). Heights and the
-// share of constructed lots grow with simulated population/output.
+// BUILDINGS — part-based architecture on street-facing plots. Buildings are
+// composed from positioned parts (walls, gable roofs, recessed windows with
+// frames, doors, balconies, chimneys, rooftop equipment, construction cranes)
+// generated deterministically per lot (district.ts + architect.ts).
+//
+// Evolution is driven by the simulation: built/active fractions decide which
+// plots stand and which are occupied; the city's era tier decides façade
+// modernity (0 contemporary → 1 modernized → 2 advanced) with heritage
+// protection for the oldest core; actively growing cities show construction
+// sites with cranes on their newest plots. Plots never move.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { CITIES } from './layout.js';
+import { cityDistrict } from './district.js';
+import { generateBuilding } from './architect.js';
+import { generateArcology } from './arcology.js';
+import { skyState } from './skyState.js';
 import { heightAt } from './terrain.js';
-import { makeRng, nextFloat, range } from '../sim/rng.js';
-function hashStr(s) {
-    let h = 2166136261;
-    for (let i = 0; i < s.length; i++) {
-        h ^= s.charCodeAt(i);
-        h = Math.imul(h, 16777619);
+import { plasterFacade, brickFacade, concreteFacade, panelFacade, tileRoof, seamRoof, membraneRoof, textureSeed } from './textures.js';
+import { patchWorldUV } from './worldUV.js';
+// ── geometry ─────────────────────────────────────────────────────────────────
+// unit box, scaled per instance
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+// triangular prism with its ridge along +X: houses & sawtooth roofs
+function gableGeometry() {
+    const g = new THREE.BufferGeometry();
+    const v = new Float32Array([
+        // two slope faces (quads → 2 tris each)
+        -0.5, 0, -0.5, 0.5, 0, -0.5, 0.5, 1, 0, -0.5, 1, 0, // front slope (z-)
+        0.5, 0, 0.5, -0.5, 0, 0.5, -0.5, 1, 0, 0.5, 1, 0, // back slope (z+)
+        // triangular ends
+        -0.5, 0, -0.5, -0.5, 1, 0, -0.5, 0, 0.5,
+        0.5, 0, -0.5, 0.5, 0, 0.5, 0.5, 1, 0,
+        // bottom
+        -0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, 0.5, 0, -0.5,
+    ]);
+    const idx = [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+    g.setAttribute('position', new THREE.BufferAttribute(v, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+}
+const GABLE = gableGeometry();
+const tmpObj = new THREE.Object3D();
+const tmpColor = new THREE.Color();
+// ── materials ────────────────────────────────────────────────────────────────
+function mat(color, rough, metal = 0) {
+    return new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal });
+}
+// shared glass: windows glow at night; brownouts dim everything
+function glassMaterial() {
+    return new THREE.MeshStandardMaterial({
+        color: '#2a3138', roughness: 0.2, metalness: 0.35,
+        emissive: new THREE.Color('#ffcf8e'), emissiveIntensity: 0,
+    });
+}
+// textured facade/roof materials: light-neutral tiles tinted by instanceColor.
+// Textures are generated once (canvas) and applied via the world-UV patch so
+// texel density is true to meters on every box regardless of instance scale.
+let familyMats = null;
+function familyMaterials() {
+    if (familyMats)
+        return familyMats;
+    textureSeed(20260907);
+    const plaster = plasterFacade('#f0ebe2');
+    const brick = brickFacade('#f0e8e0', '#c9c2b6');
+    const concrete = concreteFacade('#edeae4');
+    const panel = panelFacade('#f0f0ee');
+    const tile = tileRoof('#f2e8e0');
+    const seam = seamRoof('#e8ecef');
+    const membrane = membraneRoof('#efefec');
+    const mk = (tex, metersPerRepeat, rough = 0.9) => {
+        const m = mat('#ffffff', rough);
+        m.map = tex;
+        patchWorldUV(m, metersPerRepeat);
+        return m;
+    };
+    familyMats = {
+        wallPlaster: mk(plaster, 3.4, 0.95),
+        wallBrick: mk(brick, 3.4, 0.95),
+        wallConcrete: mk(concrete, 3.0, 0.85),
+        wallPanel: mk(panel, 3.2, 0.7),
+        gableTile: mk(tile, 2.6, 0.85),
+        gableSeam: mk(seam, 2.2, 0.6),
+        slab: mk(membrane, 3.0, 0.9),
+        rail: mat('#8a8478', 0.6, 0.4),
+        winFrame: mat('#f2f0ea', 0.7),
+        winGlass: glassMaterial(),
+        glassBand: glassMaterial(),
+        context: mat('#ffffff', 0.9),
+        // arcology: warm ceramic with concrete texture (paler = newer, weathered = darker)
+        arcCore: mk(concreteFacade('#f0ebe2'), 3.0, 0.65),
+        arcSlab: mk(concreteFacade('#ede6da'), 2.4, 0.6),
+        arcRing: mat('#3a4148', 0.4, 0.5),
+        arcGreen: mat('#4a7a3c', 0.95),
+        arcDebris: mk(concreteFacade('#b0aaa0'), 2.0, 0.9),
+        // glazing: lit at night through the shared emissive material
+        arcGlass: (() => { const m = glassMaterial(); m.color.set('#2f3f4a'); return m; })(),
+        arcPier: mk(concreteFacade('#f2ece2'), 1.6, 0.6),
+        arcPlanter: mk(concreteFacade('#cfc8ba'), 1.8, 0.85),
+    };
+    return familyMats;
+}
+// HEX: hexagonal prism with radius 1, height 1, base at y=0 (origin at base center)
+// CENTER-origin hex prism, matching the box parts' positioning convention.
+function hexGeometry() {
+    return new THREE.CylinderGeometry(1, 1, 1, 6, 1);
+}
+const HEX = hexGeometry();
+// arcology part → bucket
+function arcBucket(kind) {
+    switch (kind) {
+        case 'core':
+        case 'podium':
+        case 'crown':
+        case 'fin': return 'arcCore';
+        case 'slab':
+        case 'fascia':
+        case 'bridge': return 'arcSlab';
+        case 'ring': return 'arcRing';
+        case 'green': return 'arcGreen';
+        case 'glass': return 'arcGlass';
+        case 'pier': return 'arcPier';
+        case 'planter':
+        case 'patch': return 'arcPlanter';
+        case 'brace': return 'arcRing';
+        default: return 'arcDebris';
     }
-    return h >>> 0;
+}
+const WALL_BUCKET = {
+    plaster: 'wallPlaster', brick: 'wallBrick', concrete: 'wallConcrete', panel: 'wallPanel',
+};
+const GABLE_BUCKET = { tile: 'gableTile', seam: 'gableSeam', membrane: 'gableSeam' };
+function bucketFor(kind, family) {
+    switch (kind) {
+        case 'wall':
+        case 'shell':
+        case 'door':
+        case 'chimney':
+        case 'stack':
+        case 'ac':
+        case 'canopy':
+        case 'craneMast':
+            return (family && WALL_BUCKET[family]) || 'wallPlaster';
+        case 'gable':
+            return (family && GABLE_BUCKET[family]) || 'gableTile';
+        case 'flatroof':
+        case 'balcony':
+        case 'solarRoof':
+        case 'greenRoof':
+        case 'pier':
+        case 'craneBoom':
+            return 'slab';
+        case 'context': return 'context';
+        case 'debris': return 'context';
+        case 'rail': return 'rail';
+        case 'winFrame': return 'winFrame';
+        case 'winGlass': return 'winGlass';
+        case 'glassBand': return 'glassBand';
+    }
+}
+const BUCKETS = ['wallPlaster', 'wallBrick', 'wallConcrete', 'wallPanel', 'gableTile', 'gableSeam', 'slab', 'rail', 'winFrame', 'winGlass', 'glassBand', 'context', 'arcCore', 'arcSlab', 'arcRing', 'arcGreen', 'arcDebris', 'arcGlass', 'arcPier', 'arcPlanter'];
+const GEO_OF = {
+    wallPlaster: BOX, wallBrick: BOX, wallConcrete: BOX, wallPanel: BOX,
+    gableTile: GABLE, gableSeam: GABLE,
+    slab: BOX, rail: BOX, winFrame: BOX, winGlass: BOX, glassBand: BOX, context: BOX,
+    arcCore: HEX, arcSlab: HEX, arcRing: HEX, arcGreen: HEX, arcDebris: BOX,
+    arcGlass: HEX, arcPier: BOX, arcPlanter: HEX,
+};
+// instanceColor multiplies the (light) texture: keep tints subtle
+const TINT_OF = {
+    wallPlaster: 0.05, wallBrick: 0.05, wallConcrete: 0.04, wallPanel: 0.05,
+    gableTile: 0.05, gableSeam: 0.05, slab: 0.06, rail: 0.1, winFrame: 0.0, winGlass: 0.25, glassBand: 0.2, context: 0.0,
+    arcCore: 0.03, arcSlab: 0.02, arcRing: 0.0, arcGreen: 0.18, arcDebris: 0.06,
+    arcGlass: 0.05, arcPier: 0.03, arcPlanter: 0.03,
+};
+function quantize(f) { return Math.round(f * 120) / 120; }
+function CityArchitecture({ city, visualRef }) {
+    const district = useMemo(() => cityDistrict(city), [city]);
+    // plots sorted core → edge: the core is the oldest fabric (heritage), the
+    // edge is where growth and construction happen
+    const plots = useMemo(() => [...district.plots].sort((a, b) => a.dist - b.dist || a.lotIndex - b.lotIndex), [district]);
+    const bucketRefs = useRef({});
+    const applied = useRef({ built: -1, active: -1, era: -1, vert: -1, der: -1 });
+    const specsRef = useRef([]);
+    const arcSetRef = useRef(new Set());
+    const countsRef = useRef({ wallPlaster: 0, wallBrick: 0, wallConcrete: 0, wallPanel: 0, gableTile: 0, gableSeam: 0, slab: 0, rail: 0, winFrame: 0, winGlass: 0, glassBand: 0, context: 0, arcCore: 0, arcSlab: 0, arcRing: 0, arcGreen: 0, arcDebris: 0, arcGlass: 0, arcPier: 0, arcPlanter: 0 });
+    // which plots become arcologies at the advanced era (tier 2). Selected
+    // deterministically among the newer half of plots (mid-core → edge), never
+    // on heritage fabric or industrial yards. Arcology adoption scales with
+    // development: a handful at the start, a cluster at high development.
+    const arcologyAdoption = (era, vis) => {
+        if (era < 2)
+            return 0;
+        const vertical = vis?.vertical ?? 0; // sim-driven vertical-build pressure
+        const base = 0.18 + Math.min(0.35, vertical * 0.6);
+        return base;
+    };
+    const selectArcologies = (era, vis) => {
+        const adoption = arcologyAdoption(era, vis);
+        const set = new Set();
+        if (adoption > 0) {
+            const target = Math.max(2, Math.round(plots.length * adoption * 0.18));
+            const start = Math.floor(plots.length * 0.24);
+            const end = Math.floor(plots.length * 0.92);
+            for (let i = start; i < end && set.size < target; i++) {
+                const p = plots[i];
+                if (!p || p.kind === 'industrial')
+                    continue;
+                // deterministic hash selects which plots host towers
+                const h = Math.abs(Math.sin(p.lotIndex * 37.1 + city.id.length * 3)) % 1;
+                if (h < 0.55)
+                    set.add(p.lotIndex);
+            }
+        }
+        arcSetRef.current = set;
+    };
+    // build specs for the whole city at a given era tier (heritage keeps core old)
+    const buildSpecs = (era) => {
+        const heritageMax = Math.floor(plots.length * 0.22);
+        specsRef.current = plots.map((p, i) => {
+            const heritage = i < heritageMax;
+            const tier = heritage ? 0 : (era >= 2 ? 2 : era);
+            return generateBuilding(p, { tier, state: 'active', seed: p.lotIndex * 977 + city.id.length * 31 + 7, era });
+        });
+        // size buckets from the fullest possible spec set
+        const counts = countsRef.current;
+        for (const k of Object.keys(counts))
+            counts[k] = 0;
+        for (const s of specsRef.current)
+            for (const part of s.parts)
+                counts[bucketFor(part.kind, part.family)]++;
+        // arcology bucket capacity: generous bound over the maximum possible
+        // adoption (adoption ≤ 0.53) and the tallest tower (14 floors), so no
+        // tower part is ever silently dropped when vertical pressure is high.
+        if (era >= 2) {
+            const maxTowers = Math.ceil(plots.length * 0.53 * 0.18) + 1;
+            counts.arcCore += maxTowers * 16;
+            counts.arcSlab += maxTowers * 18;
+            counts.arcRing += maxTowers * 16;
+            counts.arcGreen += maxTowers * 40;
+            counts.arcDebris += maxTowers * 24;
+            counts.arcGlass += maxTowers * 20;
+            counts.arcPier += maxTowers * 80;
+            counts.arcPlanter += maxTowers * 24;
+        }
+        countsRef.current = counts;
+    };
+    // Capacity is computed ONCE for the worst case (era 2) because instanced
+    // mesh counts are fixed at mount and cannot grow later. Specs still rebuild
+    // per era; only the buffer sizes are pre-allocated.
+    const capacity = useMemo(() => {
+        buildSpecs(2);
+        return { ...countsRef.current };
+    }, [plots]);
+    useMemo(() => buildSpecs(0), [plots]);
+    const writeCity = (vis, builtF, activeF, era) => {
+        const specs = specsRef.current;
+        if (!vis)
+            return;
+        const N = plots.length;
+        const builtCount = Math.floor(N * builtF);
+        const activeCount = Math.min(builtCount, Math.floor(N * activeF));
+        const derelictBand = Math.floor(builtCount * vis.derelict * 0.9);
+        const constructionBand = vis.growth > 1.03 ? Math.min(5, Math.max(2, Math.floor(N * 0.045))) : 0;
+        const cursors = { wallPlaster: 0, wallBrick: 0, wallConcrete: 0, wallPanel: 0, gableTile: 0, gableSeam: 0, slab: 0, rail: 0, winFrame: 0, winGlass: 0, glassBand: 0, context: 0, arcCore: 0, arcSlab: 0, arcRing: 0, arcGreen: 0, arcDebris: 0, arcGlass: 0, arcPier: 0, arcPlanter: 0 };
+        const meshes = bucketRefs.current;
+        void skyState.nightFactor;
+        void vis.nightDim;
+        selectArcologies(era, vis);
+        const arcSet = arcSetRef.current;
+        const writePart = (bucket, x, y, z, sx, sy, sz, rotY, color, tintJitter, rot) => {
+            const cursor = cursors[bucket]++;
+            const mesh = meshes[bucket];
+            if (!mesh || cursor >= mesh.count)
+                return;
+            tmpObj.position.set(x, y, z);
+            if (rot)
+                tmpObj.rotation.set(rot[0], rot[1], rot[2], 'XYZ');
+            else
+                tmpObj.rotation.set(0, rotY, 0);
+            tmpObj.scale.set(sx, sy, sz);
+            tmpObj.updateMatrix();
+            mesh.setMatrixAt(cursor, tmpObj.matrix);
+            tmpColor.set(color);
+            const tint = TINT_OF[bucket];
+            if (tint > 0)
+                tmpColor.offsetHSL(0, 0, tintJitter * tint * 2);
+            mesh.setColorAt(cursor, tmpColor);
+        };
+        for (let i = 0; i < N; i++) {
+            const spec = specs[i];
+            if (!spec)
+                continue;
+            let state;
+            if (i >= builtCount)
+                continue; // not built: hidden (ground shows)
+            else if (i >= builtCount - constructionBand && activeCount > 0)
+                state = 'construction';
+            else if (i >= builtCount - derelictBand && derelictBand > 0)
+                state = 'derelict';
+            else if (i < activeCount)
+                state = 'active';
+            else
+                state = 'built'; // vacant but intact
+            // arcology: a distinctive future structure replaces the plot's building
+            const isArc = arcSet.has(spec.plot.lotIndex);
+            if (isArc && era >= 2 && state !== 'construction') {
+                // lifecycle derived from this plot's own sim condition + age hash
+                const age = (Math.abs(Math.sin(spec.plot.lotIndex * 53.3)) % 1);
+                const arcState = state === 'derelict' ? 'ruined'
+                    : vis.derelict > 0.04 && age < vis.derelict * 1.4 ? 'ruined'
+                        : state === 'built' || age < 0.3 ? 'aged'
+                            : 'occupied';
+                const arc = generateArcology(spec.plot, { seed: spec.plot.lotIndex * 977 + 11, state: arcState });
+                for (const p of arc.parts) {
+                    // hex prisms have base at y=0; arcology parts use center-y already
+                    writePart(arcBucket(p.kind), p.x, p.y, p.z, p.sx, p.sy, p.sz, p.rotY, p.color, 0, p.rot);
+                }
+                continue;
+            }
+            // regenerate this spec's parts for its state
+            const fresh = generateBuilding(spec.plot, {
+                tier: spec.tier, state,
+                seed: spec.plot.lotIndex * 977 + city.id.length * 31 + 7, era,
+            });
+            for (const part of fresh.parts) {
+                writePart(bucketFor(part.kind, part.family), part.x, part.y, part.z, part.sx, part.sy, part.sz, part.rotY, part.color, (spec.plot.lotIndex % 7 / 7 - 0.5));
+            }
+        }
+        // park unused slots far below
+        tmpObj.position.set(0, -90, 0);
+        tmpObj.rotation.set(0, 0, 0);
+        tmpObj.scale.setScalar(0.001);
+        tmpObj.updateMatrix();
+        for (const bucket of BUCKETS) {
+            const mesh = meshes[bucket];
+            const used = cursors[bucket];
+            if (!mesh)
+                continue;
+            for (let i = used; i < mesh.count; i++)
+                mesh.setMatrixAt(i, tmpObj.matrix);
+            mesh.instanceMatrix.needsUpdate = true;
+            if (mesh.instanceColor)
+                mesh.instanceColor.needsUpdate = true;
+        }
+    };
+    useFrame(() => {
+        const vis = visualRef.current?.cities.find((c) => c.city.id === city.id);
+        if (!vis)
+            return;
+        // night glow of windows: shared emissive material tracks darkness & brownouts
+        familyMaterials().winGlass.emissiveIntensity = skyState.nightFactor * 0.9 * (1 - vis.nightDim * 0.82);
+        const b = quantize(vis.builtFraction);
+        const a = quantize(vis.activeFraction);
+        const era = vis.era;
+        // vertical pressure changes which plots host arcologies; include it in the
+        // dirty key so towers appear as the sim develops and update their state.
+        const vert = Math.round(vis.vertical * 10) / 10;
+        const der = Math.round(vis.derelict * 20) / 20;
+        if (b === applied.current.built && a === applied.current.active && era === applied.current.era
+            && vert === applied.current.vert && der === applied.current.der)
+            return;
+        if (era !== applied.current.era)
+            buildSpecs(era);
+        applied.current = { built: b, active: a, era, vert, der };
+        writeCity(vis, b, a, era);
+    });
+    const mats = familyMaterials();
+    const counts = capacity;
+    return (_jsx("group", { children: BUCKETS.map((bucket) => {
+            const count = Math.max(1, counts[bucket]);
+            const shadow = bucket.startsWith('wall') || bucket.startsWith('gable') || bucket === 'slab';
+            return (_jsx("instancedMesh", { ref: (m) => { if (m)
+                    bucketRefs.current[bucket] = m; }, args: [undefined, undefined, count], castShadow: shadow, receiveShadow: true, frustumCulled: false, material: mats[bucket], children: _jsx("primitive", { object: GEO_OF[bucket], attach: "geometry" }) }, bucket));
+        }) }));
 }
 export function genLots(city) {
-    const rng = makeRng(hashStr(city.id), 7);
+    const rng = makeRngCompat(hashStr(city.id), 7);
     const count = city.kind === 'capital' ? 400 : city.kind === 'industrial' ? 470 : city.kind === 'campus' ? 330 : city.kind === 'port' ? 260 : 210;
     const lots = [];
     for (let i = 0; i < count; i++) {
-        const ang = nextFloat(rng) * Math.PI * 2;
-        const rr = Math.sqrt(nextFloat(rng)) * city.districtRadius;
+        const ang = nextFloatCompat(rng) * Math.PI * 2;
+        const rr = Math.sqrt(nextFloatCompat(rng)) * city.districtRadius;
         const x = city.x + Math.cos(ang) * rr;
         const z = city.z + Math.sin(ang) * rr;
         if (heightAt(x, z) < 1.2)
-            continue; // don't build in the sea
+            continue;
         const t = rr / city.districtRadius;
         let district;
         if (city.kind === 'industrial')
@@ -37,176 +398,64 @@ export function genLots(city) {
             district = t < 0.22 ? 0 : t < 0.55 ? 2 : t < 0.75 ? 3 : 2;
         else
             district = t < 0.22 ? 0 : t < 0.6 ? 1 : 2;
-        if (city.kind === 'campus' && district === 1 && nextFloat(rng) < 0.4)
+        if (city.kind === 'campus' && district === 1 && nextFloatCompat(rng) < 0.4)
             district = 2;
         const tall = district === 0;
         const mid = district === 1;
-        const baseH = tall ? range(rng, 5, 15) : mid ? range(rng, 2, 6.5) : district === 3 ? range(rng, 1.4, 3.2) : range(rng, 1.1, 3.4);
-        const w = tall ? range(rng, 1.3, 2.2) : range(rng, 1.0, 2.0);
-        const d = tall ? range(rng, 1.3, 2.2) : range(rng, 1.0, 2.0);
-        lots.push({ dx: x - city.x, dz: z - city.z, baseH, w, d, rot: Math.floor(nextFloat(rng) * 4) * (Math.PI / 2) + (district === 0 ? 0 : range(rng, -0.12, 0.12)), district });
+        const baseH = tall ? 5 + nextFloatCompat(rng) * 10 : mid ? 2 + nextFloatCompat(rng) * 4.5 : district === 3 ? 1.4 + nextFloatCompat(rng) * 1.8 : 1.1 + nextFloatCompat(rng) * 2.3;
+        const w = tall ? 1.3 + nextFloatCompat(rng) * 0.9 : 1.0 + nextFloatCompat(rng) * 1.0;
+        const d = w;
+        lots.push({ dx: x - city.x, dz: z - city.z, baseH, w, d, rot: Math.floor(nextFloatCompat(rng) * 4) * (Math.PI / 2), district });
     }
     return lots.sort((a, b) => (a.dx * a.dx + a.dz * a.dz) - (b.dx * b.dx + b.dz * b.dz));
 }
-function makeCityMaterial() {
-    const mat = new THREE.MeshStandardMaterial({ color: '#a7abb2', roughness: 0.82, metalness: 0.08 });
-    const uniforms = { uNight: { value: 0 }, uDim: { value: 0 } };
-    mat.onBeforeCompile = (shader) => {
-        shader.uniforms.uNight = uniforms.uNight;
-        shader.uniforms.uDim = uniforms.uDim;
-        shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', `#include <common>
-        varying vec3 vLocal; varying vec3 vScaleW; varying float vRand; varying vec3 vObjNormal; varying float vDistrict;`)
-            .replace('#include <begin_vertex>', `#include <begin_vertex>
-        vLocal = position; vObjNormal = normal;
-        #ifdef USE_INSTANCING
-          vec3 ipos = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
-          vScaleW = vec3(length(instanceMatrix[0].xyz), length(instanceMatrix[1].xyz), length(instanceMatrix[2].xyz));
-          vRand = fract(sin(dot(ipos.xz, vec2(12.9898, 78.233))) * 43758.5453);
-          vDistrict = fract(sin(dot(ipos.xz, vec2(39.346, 11.135))) * 24634.6345) * 4.0;
-        #else
-          vScaleW = vec3(4.0); vRand = 0.5; vDistrict = 0.0;
-        #endif`);
-        shader.fragmentShader = shader.fragmentShader
-            .replace('#include <common>', `#include <common>
-        varying vec3 vLocal; varying vec3 vScaleW; varying float vRand; varying vec3 vObjNormal; varying float vDistrict;
-        uniform float uNight; uniform float uDim;
-        float whash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }`)
-            .replace('#include <color_fragment>', `#include <color_fragment>
-        {
-          float d = floor(vDistrict);
-          vec3 dc = d < 0.5 ? vec3(0.494, 0.576, 0.658) : d < 1.5 ? vec3(0.604, 0.627, 0.651) : d < 2.5 ? vec3(0.702, 0.647, 0.561) : vec3(0.553, 0.522, 0.471);
-          diffuseColor.rgb = dc * (0.9 + vRand * 0.2);
-        }`)
-            .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-        if (abs(vObjNormal.y) < 0.5) {
-          vec2 facadeUv = abs(vObjNormal.x) > 0.5 ? vec2(vLocal.z, vLocal.y) : vec2(vLocal.x, vLocal.y);
-          vec2 cells = vec2(max(2.0, floor(vScaleW.x * 1.1)), max(2.0, floor(vScaleW.y * 0.62)));
-          vec2 fuv = facadeUv * cells;
-          vec2 cellUv = fract(fuv);
-          vec2 cellId = floor(fuv);
-          float win = step(0.22, cellUv.x) * (1.0 - step(0.72, cellUv.x)) * step(0.28, cellUv.y) * (1.0 - step(0.74, cellUv.y));
-          float litR = whash(cellId + floor(vRand * 91.7));
-          float litRatio = uNight * (0.66 - uDim * 0.62);
-          float lit = step(litR, max(litRatio, 0.0));
-          vec3 warm = mix(vec3(1.0, 0.68, 0.38), vec3(0.75, 0.85, 1.0), step(0.82, whash(cellId * 1.7)));
-          totalEmissiveRadiance += warm * win * lit * (1.5 - uDim * 1.35);
-          diffuseColor.rgb *= 1.0 - win * 0.10;
-        }
-        // rooftop beacon on tall towers at night
-        if (vObjNormal.y > 0.5 && vScaleW.y > 9.0) {
-          totalEmissiveRadiance += vec3(1.0, 0.25, 0.2) * uNight * step(0.93, vRand) * 0.9;
-        }`);
-    };
-    return { mat, uniforms };
-}
-const tmpObj = new THREE.Object3D();
-function CityBlocks({ city, visualRef }) {
-    const lots = useMemo(() => genLots(city), [city]);
-    const meshRef = useRef(null);
-    const crownRef = useRef(null);
-    const roofRef = useRef(null);
-    const antennaRef = useRef(null);
-    const { mat, uniforms } = useMemo(() => makeCityMaterial(), []);
-    const applied = useRef({ built: -1, active: -1 });
-    useFrame(() => {
-        const mesh = meshRef.current;
-        const crowns = crownRef.current, roofs = roofRef.current, antennas = antennaRef.current;
-        if (!mesh || !crowns || !roofs || !antennas)
-            return;
-        const night = window.__nightFactor ?? 0;
-        uniforms.uNight.value = night;
-        const vis = visualRef.current?.cities.find((c) => c.city.id === city.id);
-        uniforms.uDim.value = vis ? vis.nightDim : 0;
-        if (!vis)
-            return;
-        // Existing structures occupy immutable lots. Demographic growth fills new lots
-        // or adds explicit arcologies; it never pushes old buildings across the map or
-        // stretches every tower at once. Inactive shells are rendered by the ruin layer.
-        const b = Math.round(vis.builtFraction * 80) / 80;
-        const a = Math.round(vis.activeFraction * 80) / 80;
-        if (b === applied.current.built && a === applied.current.active)
-            return;
-        applied.current = { built: b, active: a };
-        const activeCount = Math.min(Math.floor(lots.length * b), Math.floor(lots.length * a));
-        for (let i = 0; i < lots.length; i++) {
-            const lot = lots[i];
-            if (i < activeCount) {
-                const sy = lot.baseH;
-                const x = city.x + lot.dx;
-                const z = city.z + lot.dz;
-                const ground = heightAt(x, z);
-                tmpObj.position.set(x, ground + sy / 2 - 0.05, z);
-                tmpObj.rotation.set(0, lot.rot, 0);
-                tmpObj.scale.set(lot.w, sy, lot.d);
-                tmpObj.updateMatrix();
-                mesh.setMatrixAt(i, tmpObj.matrix);
-                // Roof/service geometry gives the ordinary city a built, engineered silhouette
-                // without moving lots or scaling the whole city when population changes.
-                const roofH = lot.district === 0 ? 0.28 : lot.district === 1 ? 0.18 : 0.10;
-                tmpObj.position.set(x, ground + sy + roofH / 2 - 0.08, z);
-                tmpObj.rotation.set(0, lot.rot, 0);
-                tmpObj.scale.set(lot.w * (lot.district === 0 ? 0.72 : 0.52), roofH, lot.d * (lot.district === 0 ? 0.72 : 0.52));
-                tmpObj.updateMatrix();
-                roofs.setMatrixAt(i, tmpObj.matrix);
-                if (lot.district === 0 && sy > 8) {
-                    const crownH = Math.min(1.8, 0.65 + sy * 0.055);
-                    tmpObj.position.set(x, ground + sy + roofH + crownH / 2, z);
-                    tmpObj.rotation.set(0, lot.rot + Math.PI / 8, 0);
-                    tmpObj.scale.set(lot.w * 0.34, crownH, lot.d * 0.34);
-                    tmpObj.updateMatrix();
-                    crowns.setMatrixAt(i, tmpObj.matrix);
-                    const antennaH = ((i * 31 + city.id.length) % 5 === 0) ? Math.min(3.4, sy * 0.2) : 0;
-                    if (antennaH > 0) {
-                        tmpObj.position.set(x, ground + sy + roofH + crownH + antennaH / 2, z);
-                        tmpObj.rotation.set(0, 0, 0);
-                        tmpObj.scale.set(0.06, antennaH, 0.06);
-                        tmpObj.updateMatrix();
-                        antennas.setMatrixAt(i, tmpObj.matrix);
-                    }
-                    else {
-                        tmpObj.position.set(0, -70, 0);
-                        tmpObj.scale.setScalar(.001);
-                        tmpObj.updateMatrix();
-                        antennas.setMatrixAt(i, tmpObj.matrix);
-                    }
-                }
-                else {
-                    for (const extra of [crowns, antennas]) {
-                        tmpObj.position.set(0, -70, 0);
-                        tmpObj.scale.setScalar(.001);
-                        tmpObj.rotation.set(0, 0, 0);
-                        tmpObj.updateMatrix();
-                        extra.setMatrixAt(i, tmpObj.matrix);
-                    }
-                }
-            }
-            else {
-                for (const target of [mesh, crowns, roofs, antennas]) {
-                    tmpObj.position.set(0, -50, 0);
-                    tmpObj.scale.set(0.001, 0.001, 0.001);
-                    tmpObj.rotation.set(0, 0, 0);
-                    tmpObj.updateMatrix();
-                    target.setMatrixAt(i, tmpObj.matrix);
-                }
-            }
-        }
-        for (const m of [mesh, crowns, roofs, antennas])
-            m.instanceMatrix.needsUpdate = true;
-    });
-    return (_jsxs("group", { children: [_jsx("instancedMesh", { ref: meshRef, args: [undefined, undefined, lots.length], material: mat, castShadow: true, receiveShadow: true, frustumCulled: false, children: _jsx("boxGeometry", { args: [1, 1, 1] }) }), _jsxs("instancedMesh", { ref: roofRef, args: [undefined, undefined, lots.length], castShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#808991", metalness: 0.24, roughness: 0.62 })] }), _jsxs("instancedMesh", { ref: crownRef, args: [undefined, undefined, lots.length], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.22, 1, 8] }), _jsx("meshStandardMaterial", { color: "#aebbc3", metalness: 0.42, roughness: 0.35 })] }), _jsxs("instancedMesh", { ref: antennaRef, args: [undefined, undefined, lots.length], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 6] }), _jsx("meshStandardMaterial", { color: "#d9e5e8", emissive: "#ff665c", emissiveIntensity: 0.12, metalness: 0.55, roughness: 0.32 })] })] }));
+// tiny local rng (mirrors sim/rng helpers without importing)
+function makeRngCompat(seed, stream) { let a = (seed ^ (stream * 7919)) >>> 0; return { get s() { return a; }, next: () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), a | 1); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; } }; }
+function nextFloatCompat(r) { return r.next(); }
+function hashStr(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
 }
 // ── Shantytowns & smog — housing shortage and waste made visible ─────────────
+// Informal settlements appear on the ring just outside the street grid when
+// crowding bites; waste reads as soft haze hugging the city.
 const MAX_SHANTY = 26;
+const SMOG_VERT = /* glsl */ `
+varying vec3 vN;
+varying vec3 vW;
+void main() {
+  vN = normalize(mat3(modelMatrix) * normal);
+  vec4 wp = modelMatrix * vec4(position, 1.0);
+  vW = wp.xyz;
+  gl_Position = projectionMatrix * viewMatrix * wp;
+}
+`;
+const SMOG_FRAG = /* glsl */ `
+uniform float uWaste;
+uniform vec3 uFogColor;
+varying vec3 vN;
+varying vec3 vW;
+void main() {
+  vec3 V = normalize(cameraPosition - vW);
+  float center = max(dot(vN, V), 0.0);
+  float alpha = pow(center, 1.7) * uWaste * 0.55;
+  gl_FragColor = vec4(mix(vec3(0.42, 0.38, 0.33), uFogColor, 0.35), alpha);
+}
+`;
 function CityFringe({ city, visualRef }) {
     const shantyRef = useRef(null);
     const smogRef = useRef(null);
+    const smogMat = useRef(null);
     const huts = useMemo(() => {
-        const rng = makeRng(hashStr(city.id + '-sh'), 11);
+        const rng = makeRngCompat(hashStr(city.id + '-sh'), 11);
         return Array.from({ length: MAX_SHANTY }, () => {
-            const ang = nextFloat(rng) * Math.PI * 2;
-            const rr = city.districtRadius * range(rng, 1.02, 1.35);
-            return { dx: Math.cos(ang) * rr, dz: Math.sin(ang) * rr, s: range(rng, 0.35, 0.7), rot: nextFloat(rng) * Math.PI };
+            const ang = nextFloatCompat(rng) * Math.PI * 2;
+            const rr = city.districtRadius * (1.02 + nextFloatCompat(rng) * 0.33);
+            return { dx: Math.cos(ang) * rr, dz: Math.sin(ang) * rr, s: 0.35 + nextFloatCompat(rng) * 0.35, rot: nextFloatCompat(rng) * Math.PI };
         });
     }, [city]);
     useFrame(() => {
@@ -215,7 +464,6 @@ function CityFringe({ city, visualRef }) {
         if (mesh) {
             const crowd = vis?.crowding ?? 0;
             const n = Math.round(clampN(crowd - 0.1, 0, 1) * MAX_SHANTY * 1.4);
-            const sprawl = vis?.sprawl ?? 1;
             for (let i = 0; i < MAX_SHANTY; i++) {
                 if (i < n) {
                     const h = huts[i];
@@ -227,7 +475,7 @@ function CityFringe({ city, visualRef }) {
                 }
                 else {
                     tmpObj.position.set(0, -60, 0);
-                    tmpObj.scale.set(0.001, 0.001, 0.001);
+                    tmpObj.scale.setScalar(0.001);
                 }
                 tmpObj.updateMatrix();
                 mesh.setMatrixAt(i, tmpObj.matrix);
@@ -235,19 +483,19 @@ function CityFringe({ city, visualRef }) {
             mesh.instanceMatrix.needsUpdate = true;
         }
         const smog = smogRef.current;
-        if (smog) {
+        if (smog && smogMat.current) {
             const waste = vis?.waste ?? 0;
-            const m = smog.material;
-            m.opacity = waste * 0.28;
+            smogMat.current.uniforms.uWaste.value = waste;
+            smogMat.current.uniforms.uFogColor.value.copy(skyState.fogColor);
             smog.visible = waste > 0.04;
-            const r = city.districtRadius * (vis?.sprawl ?? 1) * 1.15;
-            smog.scale.set(r, r * 0.45, r);
-            smog.position.set(city.x, heightAt(city.x, city.z) + 2.2, city.z);
+            const r = city.districtRadius * (vis?.sprawl ?? 1) * 1.05;
+            smog.scale.set(r, r * 0.34, r);
+            smog.position.set(city.x, heightAt(city.x, city.z) + 1.1, city.z);
         }
     });
-    return (_jsxs("group", { children: [_jsxs("instancedMesh", { ref: shantyRef, args: [undefined, undefined, MAX_SHANTY], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#6b5d4f", roughness: 1 })] }), _jsxs("mesh", { ref: smogRef, visible: false, children: [_jsx("sphereGeometry", { args: [1, 20, 12] }), _jsx("meshStandardMaterial", { color: "#8a8578", transparent: true, opacity: 0, roughness: 1, depthWrite: false })] })] }));
+    return (_jsxs("group", { children: [_jsxs("instancedMesh", { ref: shantyRef, args: [undefined, undefined, MAX_SHANTY], castShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#6b5d4f", roughness: 1 })] }), _jsxs("mesh", { ref: smogRef, visible: false, renderOrder: 2, children: [_jsx("sphereGeometry", { args: [1, 24, 16] }), _jsx("shaderMaterial", { ref: smogMat, vertexShader: SMOG_VERT, fragmentShader: SMOG_FRAG, uniforms: { uWaste: { value: 0 }, uFogColor: { value: new THREE.Color('#b8c8d8') } }, transparent: true, depthWrite: false })] })] }));
 }
 function clampN(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
 export function Buildings({ visualRef }) {
-    return (_jsx("group", { children: CITIES.map((c) => (_jsxs("group", { children: [_jsx(CityBlocks, { city: c, visualRef: visualRef }), _jsx(CityFringe, { city: c, visualRef: visualRef })] }, c.id))) }));
+    return (_jsx("group", { children: CITIES.map((c) => (_jsxs("group", { children: [_jsx(CityArchitecture, { city: c, visualRef: visualRef }), _jsx(CityFringe, { city: c, visualRef: visualRef })] }, c.id))) }));
 }

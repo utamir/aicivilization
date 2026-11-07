@@ -68,6 +68,22 @@ export function computeWorldVisual(w, night) {
             subseaCondition: civ.land.subseaCondition,
             verticalCondition: civ.land.verticalCondition,
             undergroundCondition: civ.land.undergroundCondition,
+            // How advanced the built environment looks: modernized once automation,
+            // computing and prosperity rise together; advanced when the frontier
+            // systems (frontier AI, fusion-era energy) are actually in service.
+            era: (() => {
+                const ai = w.techs.ai_models?.adoption[city.civId]?.intensity ?? 0;
+                const rob = w.techs.robotics_ind?.adoption[city.civId]?.intensity ?? 0;
+                const fab = w.techs.semiconductor_fab?.adoption[city.civId]?.intensity ?? 0;
+                const techLevel = (ai + rob + fab) / 3;
+                const rich = civ.economy.wageIndex;
+                const frontier = Math.max(civ.energy.sources.fusion.cap / 6, w.techs.fusion_power?.adoption[city.civId]?.intensity ?? 0);
+                if (frontier > 0.7 || (techLevel > 1.25 && rich > 1.15))
+                    return 2;
+                if (techLevel > 0.45 || rich > 1.04)
+                    return 1;
+                return 0;
+            })(),
         };
     });
     const infra = new Map();

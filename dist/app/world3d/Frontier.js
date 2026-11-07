@@ -12,9 +12,10 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useUI } from '../state/store.js';
 import { CITIES, INFRA_ZONES, civMainCity } from './layout.js';
+import { cityDistrict } from './district.js';
 import { heightAt, SEA_LEVEL } from './terrain.js';
 import { CIV_IDS } from '../sim/index.js';
-import { genLots } from './Buildings.js';
+import { skyState } from './skyState.js';
 const tmp = new THREE.Object3D();
 const tmpColor = new THREE.Color();
 /** Direction from a city toward the nearest open water (unit vector in xz). */
@@ -38,83 +39,6 @@ function seaDirection(city) {
         }
     }
     return best;
-}
-// ── Ruins: physical shells persist; failure is heterogeneous and discrete ─────
-function Ruins({ city, visualRef }) {
-    const lots = useMemo(() => genLots(city), [city]);
-    const shells = useRef(null);
-    const fragments = useRef(null);
-    const rubble = useRef(null);
-    const applied = useRef('');
-    useFrame(() => {
-        const sm = shells.current, fm = fragments.current, rm = rubble.current;
-        if (!sm || !fm || !rm)
-            return;
-        const vis = visualRef.current?.cities.find((c) => c.city.id === city.id);
-        if (!vis)
-            return;
-        const key = `${Math.round(vis.builtFraction * 80)}:${Math.round(vis.activeFraction * 80)}:${Math.round(vis.decay * 20)}:${Math.round(vis.rewilding * 20)}`;
-        if (key === applied.current)
-            return;
-        applied.current = key;
-        const builtCount = Math.floor(lots.length * vis.builtFraction);
-        const activeCount = Math.min(builtCount, Math.floor(lots.length * vis.activeFraction));
-        const failurePressure = Math.min(1, vis.rewilding * 0.78 + vis.decay * 0.52);
-        let out = 0;
-        for (let idx = activeCount; idx < builtCount && out < lots.length; idx++, out++) {
-            const lot = lots[idx];
-            const x = city.x + lot.dx, z = city.z + lot.dz, ground = heightAt(x, z);
-            const individual = ((idx * 37 + city.id.length * 19) % 101) / 100;
-            // Abandonment does not scale a building down. It first leaves a full-height dark
-            // shell; later failures remove different parts of each structure. We represent
-            // that as surviving cores/walls + fallen fragments + rubble on the original lot.
-            const stage = failurePressure > individual * 0.9 + 0.36 ? 2 : failurePressure > individual * 0.75 + 0.14 ? 1 : 0;
-            if (stage === 0) {
-                tmp.position.set(x, ground + lot.baseH / 2, z);
-                tmp.rotation.set(0, lot.rot, 0);
-                tmp.scale.set(lot.w, lot.baseH, lot.d);
-                tmp.updateMatrix();
-                sm.setMatrixAt(out, tmp.matrix);
-                tmp.position.set(0, -70, 0);
-                tmp.scale.setScalar(.001);
-                tmp.updateMatrix();
-                fm.setMatrixAt(out, tmp.matrix);
-                rm.setMatrixAt(out, tmp.matrix);
-            }
-            else {
-                const coreH = lot.baseH * (stage === 1 ? 0.82 : 0.43);
-                const side = stage === 1 ? 0.68 : 0.28;
-                tmp.position.set(x + (individual - .5) * lot.w * .25, ground + coreH / 2, z - (individual - .5) * lot.d * .18);
-                tmp.rotation.set((individual - .5) * .035, lot.rot, (individual - .5) * (stage === 1 ? .06 : .13));
-                tmp.scale.set(lot.w * side, coreH, lot.d * (stage === 1 ? .78 : .58));
-                tmp.updateMatrix();
-                sm.setMatrixAt(out, tmp.matrix);
-                const fragH = lot.baseH * (stage === 1 ? .44 : .24);
-                tmp.position.set(x + (individual > .5 ? 1 : -1) * lot.w * .48, ground + fragH * .38, z + (individual - .5) * lot.d * .55);
-                tmp.rotation.set(.18 + (individual * .28), lot.rot + individual * .9, .48 * (individual - .5));
-                tmp.scale.set(lot.w * (stage === 1 ? .28 : .42), fragH, lot.d * (stage === 1 ? .62 : .48));
-                tmp.updateMatrix();
-                fm.setMatrixAt(out, tmp.matrix);
-                const rh = 0.14 + lot.baseH * (stage === 2 ? 0.055 : 0.024);
-                tmp.position.set(x + (individual - 0.5) * 0.8, ground + rh / 2, z + (0.5 - individual) * 0.7);
-                tmp.rotation.set(0, lot.rot + individual, 0);
-                tmp.scale.set(lot.w * (stage === 2 ? 1.55 : 1.05), rh, lot.d * (stage === 2 ? 1.45 : 1.0));
-                tmp.updateMatrix();
-                rm.setMatrixAt(out, tmp.matrix);
-            }
-        }
-        for (let i = out; i < lots.length; i++)
-            for (const m of [sm, fm, rm]) {
-                tmp.position.set(0, -70, 0);
-                tmp.scale.setScalar(.001);
-                tmp.rotation.set(0, 0, 0);
-                tmp.updateMatrix();
-                m.setMatrixAt(i, tmp.matrix);
-            }
-        for (const m of [sm, fm, rm])
-            m.instanceMatrix.needsUpdate = true;
-    });
-    return _jsxs("group", { children: [_jsxs("instancedMesh", { ref: shells, args: [undefined, undefined, lots.length], castShadow: true, receiveShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#454844", roughness: 1, metalness: 0.02 })] }), _jsxs("instancedMesh", { ref: fragments, args: [undefined, undefined, lots.length], castShadow: true, receiveShadow: true, frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#4b4e49", roughness: 1, metalness: 0.03 })] }), _jsxs("instancedMesh", { ref: rubble, args: [undefined, undefined, lots.length], receiveShadow: true, frustumCulled: false, children: [_jsx("dodecahedronGeometry", { args: [1, 0] }), _jsx("meshStandardMaterial", { color: "#55564f", roughness: 1 })] })] });
 }
 // ── Coastal works: reclaimed slabs and floating modular districts ─────────────
 const MAX_RECLAIM = 18;
@@ -376,10 +300,10 @@ function Orbitals({ visualRef }) {
         const t = state.clock.elapsedTime;
         for (let i = 0; i < MAX_HABITATS; i++) {
             if (i < habitatCount) {
-                const a = t * .012 + i * .52, r = 420 + (i % 4) * 60, y = 260 + (i % 3) * 45;
+                const a = t * .012 + i * .52, r = 420 + (i % 4) * 60, y = 360 + (i % 3) * 55;
                 tmp.position.set(Math.cos(a) * r, y, Math.sin(a) * r * .55);
                 tmp.rotation.set(Math.PI / 2 + Math.sin(a) * .3, a, 0);
-                tmp.scale.setScalar(1);
+                tmp.scale.setScalar(.7);
                 tmp.updateMatrix();
                 rings.current.setMatrixAt(i, tmp.matrix);
                 tmp.scale.set(2.4, 6.6, 2.4);
@@ -425,12 +349,12 @@ function Orbitals({ visualRef }) {
         for (const m of [rings.current, hubs.current, industry.current, panels.current])
             m.instanceMatrix.needsUpdate = true;
         if (glint.current) {
-            const night = window.__nightFactor ?? 0;
+            const night = skyState.nightFactor;
             glint.current.material.opacity = Math.min(1, v.dysonProgress * 3) * (.35 + night * .65);
             glint.current.rotation.y = t * .004;
         }
     });
-    return _jsxs(_Fragment, { children: [_jsxs("instancedMesh", { ref: rings, args: [undefined, undefined, MAX_HABITATS], frustumCulled: false, children: [_jsx("torusGeometry", { args: [9, 2.15, 12, 40] }), _jsx("meshStandardMaterial", { ref: ringMat, color: "#e6ecf5", emissive: "#9fc4ff", emissiveIntensity: .35, metalness: .55, roughness: .32 })] }), _jsxs("instancedMesh", { ref: hubs, args: [undefined, undefined, MAX_HABITATS], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 12] }), _jsx("meshStandardMaterial", { ref: hubMat, color: "#bfcbd7", emissive: "#6a9bc4", emissiveIntensity: .16, metalness: .52, roughness: .38 })] }), _jsxs("instancedMesh", { ref: industry, args: [undefined, undefined, MAX_ORBITAL_INDUSTRY], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#adb5bd", emissive: "#d39d58", emissiveIntensity: .12, metalness: .64, roughness: .34 })] }), _jsxs("instancedMesh", { ref: panels, args: [undefined, undefined, MAX_POWER_ARRAYS], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#315c7b", emissive: "#4b90b8", emissiveIntensity: .22, metalness: .5, roughness: .2 })] }), _jsx("points", { ref: glint, geometry: glintGeo, renderOrder: -8, children: _jsx("pointsMaterial", { size: 2.2, sizeAttenuation: false, color: "#ffe9b0", transparent: true, opacity: 0, depthWrite: false }) })] });
+    return _jsxs(_Fragment, { children: [_jsxs("instancedMesh", { ref: rings, args: [undefined, undefined, MAX_HABITATS], frustumCulled: false, children: [_jsx("torusGeometry", { args: [9, 2.15, 12, 40] }), _jsx("meshStandardMaterial", { ref: ringMat, color: "#c8d0d8", emissive: "#9fc4ff", emissiveIntensity: .08, metalness: .3, roughness: .5 })] }), _jsxs("instancedMesh", { ref: hubs, args: [undefined, undefined, MAX_HABITATS], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 12] }), _jsx("meshStandardMaterial", { ref: hubMat, color: "#bfcbd7", emissive: "#6a9bc4", emissiveIntensity: .16, metalness: .52, roughness: .38 })] }), _jsxs("instancedMesh", { ref: industry, args: [undefined, undefined, MAX_ORBITAL_INDUSTRY], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#adb5bd", emissive: "#d39d58", emissiveIntensity: .12, metalness: .64, roughness: .34 })] }), _jsxs("instancedMesh", { ref: panels, args: [undefined, undefined, MAX_POWER_ARRAYS], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { color: "#315c7b", emissive: "#4b90b8", emissiveIntensity: .22, metalness: .5, roughness: .2 })] }), _jsx("points", { ref: glint, geometry: glintGeo, renderOrder: -8, children: _jsx("pointsMaterial", { size: 2.2, sizeAttenuation: false, color: "#ffe9b0", transparent: true, opacity: 0, depthWrite: false }) })] });
 }
 // ── Mars + deep-space continuity: schematic, explicitly not to scale ─────────
 const MAX_ARKS = 7;
@@ -573,11 +497,20 @@ function DomesAndPlatforms({ civId, visualRef }) {
     });
     return _jsxs("group", { children: [_jsxs("instancedMesh", { ref: bases, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.08, 1, 18] }), _jsx("meshStandardMaterial", { color: "#52636b", metalness: .42, roughness: .52 })] }), _jsxs("instancedMesh", { ref: domes, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, children: [_jsx("sphereGeometry", { args: [1, 28, 18] }), _jsx("meshStandardMaterial", { ref: domeMat, color: "#ffffff", emissive: "#184c59", emissiveIntensity: .32, transparent: true, opacity: .78, depthWrite: true, depthTest: true, metalness: .15, roughness: .22 })] }), _jsxs("instancedMesh", { ref: shafts, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 8] }), _jsx("meshStandardMaterial", { color: "#577a82", metalness: .55, roughness: .42 })] }), _jsxs("instancedMesh", { ref: domeX, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, visible: subsurface, children: [_jsx("sphereGeometry", { args: [1, 18, 12] }), _jsx("meshBasicMaterial", { color: "#7fe2ef", wireframe: true, transparent: true, opacity: .14, depthWrite: false, depthTest: true })] }), _jsxs("instancedMesh", { ref: shaftX, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, visible: subsurface, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 6] }), _jsx("meshBasicMaterial", { color: "#79c9dc", wireframe: true, transparent: true, opacity: .13, depthWrite: false, depthTest: true })] }), _jsxs("instancedMesh", { ref: buoys, args: [undefined, undefined, MAX_DOMES], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.2, 1, 12] }), _jsx("meshStandardMaterial", { ref: buoyMat, color: "#f0c46c", emissive: "#f0a84f", emissiveIntensity: .28, metalness: .2, roughness: .44 })] }), _jsxs("instancedMesh", { ref: platforms, args: [undefined, undefined, MAX_AERIAL], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [4.5, 3.5, .8, 16] }), _jsx("meshStandardMaterial", { ref: aerialMat, color: "#eef3ff", emissive: "#bcd4ff", emissiveIntensity: .32, metalness: .18, roughness: .36 })] })] });
 }
-// ── Ecological succession: shrubs, saplings and trees invade abandoned lots ─
+// ── Ecological succession: shrubs, saplings and trees invade abandoned plots ─
+// Positions come from the same district plots the buildings stand on, so
+// regrowth appears where structures actually stood, not at random offsets.
 const MAX_REWILD = 72, MAX_SHRUBS = 144;
 function Rewilding({ city, visualRef }) {
     const trunks = useRef(null), crowns = useRef(null), shrubs = useRef(null);
-    const pts = useMemo(() => { const lots = genLots(city); return Array.from({ length: MAX_SHRUBS }, (_, i) => { const lot = lots[(i * 17 + 3) % Math.max(1, lots.length)], j = ((i * 43) % 17) / 17 - .5; return { x: city.x + lot.dx + j * lot.w, z: city.z + lot.dz - j * lot.d, s: .35 + ((i * 29) % 13) / 13, i }; }); }, [city]);
+    const pts = useMemo(() => {
+        const plots = cityDistrict(city).plots;
+        return Array.from({ length: MAX_SHRUBS }, (_, i) => {
+            const p = plots[(i * 17 + 3) % Math.max(1, plots.length)];
+            const j = ((i * 43) % 17) / 17 - .5;
+            return { x: p.x + j * p.w * .5, z: p.z - j * p.d * .5, s: .35 + ((i * 29) % 13) / 13, i };
+        });
+    }, [city]);
     useFrame(() => {
         const vis = visualRef.current?.cities.find((c) => c.city.id === city.id);
         if (!vis || !trunks.current || !crowns.current || !shrubs.current)
@@ -624,65 +557,24 @@ function Rewilding({ city, visualRef }) {
     });
     return _jsxs("group", { children: [_jsxs("instancedMesh", { ref: shrubs, args: [undefined, undefined, MAX_SHRUBS], frustumCulled: false, children: [_jsx("dodecahedronGeometry", { args: [1, 0] }), _jsx("meshStandardMaterial", { color: "#557a53", roughness: 1 })] }), _jsxs("instancedMesh", { ref: trunks, args: [undefined, undefined, MAX_REWILD], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.15, 1, 6] }), _jsx("meshStandardMaterial", { color: "#5f4d3e", roughness: 1 })] }), _jsxs("instancedMesh", { ref: crowns, args: [undefined, undefined, MAX_REWILD], frustumCulled: false, children: [_jsx("icosahedronGeometry", { args: [1, 1] }), _jsx("meshStandardMaterial", { color: "#496b4f", roughness: 1 })] })] });
 }
-// ── Vertical / underground city exits: engineered, fixed-site systems ─────
-const MAX_ARCOLOGIES = 7, MAX_UNDERGROUND = 18;
+// ── Underground city exits: engineered, fixed-site systems ──────────────────
+// Arcology towers are owned by Buildings.tsx (district plots, full lifecycle).
+// This layer renders only the subsurface access system: portals, shafts and
+// chambers, with a wireframe cutaway in the below-ground camera mode.
+const MAX_UNDERGROUND = 18;
 function VerticalHabitats({ civId, visualRef }) {
     const subsurface = useUI((s) => s.cameraMode === 'subsurface');
     const city = useMemo(() => civMainCity(civId), [civId]);
-    const arcs = useRef(null), skyLobbies = useRef(null), upperDecks = useRef(null), cores = useRef(null), crowns = useRef(null), portals = useRef(null), shafts = useRef(null), chambers = useRef(null), shaftX = useRef(null), chamberX = useRef(null);
-    const chamberMat = useRef(null), skyMat = useRef(null), coreMat = useRef(null);
+    const portals = useRef(null), shafts = useRef(null), chambers = useRef(null), shaftX = useRef(null), chamberX = useRef(null);
+    const chamberMat = useRef(null);
     useFrame(() => {
         const vis = visualRef.current?.cities.find((c) => c.city.id === city.id);
-        if (!vis || !arcs.current || !skyLobbies.current || !upperDecks.current || !cores.current || !crowns.current || !portals.current || !shafts.current || !chambers.current || !shaftX.current || !chamberX.current)
+        if (!vis || !portals.current || !shafts.current || !chambers.current || !shaftX.current || !chamberX.current)
             return;
         const inhabited = vis.population > .00001;
         if (chamberMat.current)
             chamberMat.current.emissiveIntensity = inhabited ? .22 * Math.max(.12, vis.undergroundCondition) : 0;
-        if (skyMat.current)
-            skyMat.current.emissiveIntensity = inhabited ? .11 * Math.max(.15, vis.verticalCondition) : 0;
-        if (coreMat.current)
-            coreMat.current.emissiveIntensity = inhabited ? .28 * Math.max(.12, vis.verticalCondition) : 0;
-        const na = Math.round(vis.vertical * MAX_ARCOLOGIES), nu = Math.round(vis.underground * MAX_UNDERGROUND);
-        for (let i = 0; i < MAX_ARCOLOGIES; i++) {
-            if (i < na) {
-                const a = i * 1.71 + .4, r = city.districtRadius * (.16 + (i % 3) * .11), x = city.x + Math.cos(a) * r, z = city.z + Math.sin(a) * r, ground = heightAt(x, z), h = 18 + i * 5.5, rad = 2.5 + (i % 2) * .7;
-                tmp.position.set(x, ground + h / 2, z);
-                tmp.rotation.set(0, a * .4, 0);
-                tmp.scale.set(rad, h, rad);
-                tmpColor.set(vis.verticalCondition < .3 ? '#5f6260' : vis.verticalCondition < .6 ? '#8f9695' : '#c8d0d8');
-                arcs.current.setColorAt(i, tmpColor);
-                tmp.updateMatrix();
-                arcs.current.setMatrixAt(i, tmp.matrix);
-                tmp.position.set(x, ground + h * .44, z);
-                tmp.rotation.set(0, a * .4 + .2, 0);
-                tmp.scale.set(rad * 1.38, .55, rad * 1.38);
-                tmp.updateMatrix();
-                skyLobbies.current.setMatrixAt(i, tmp.matrix);
-                tmp.position.set(x, ground + h * .73, z);
-                tmp.rotation.set(0, a * .4 - .15, 0);
-                tmp.scale.set(rad * 1.18, .38, rad * 1.18);
-                tmp.updateMatrix();
-                upperDecks.current.setMatrixAt(i, tmp.matrix);
-                tmp.position.set(x, ground + h * .52, z);
-                tmp.rotation.set(0, a * .4, 0);
-                tmp.scale.set(rad * .34, h * .84, rad * .34);
-                tmp.updateMatrix();
-                cores.current.setMatrixAt(i, tmp.matrix);
-                tmp.position.set(x, ground + h + .9, z);
-                tmp.rotation.set(0, a * .4, 0);
-                tmp.scale.set(rad * .62, 1.8, rad * .62);
-                tmp.updateMatrix();
-                crowns.current.setMatrixAt(i, tmp.matrix);
-            }
-            else
-                for (const m of [arcs.current, skyLobbies.current, upperDecks.current, cores.current, crowns.current]) {
-                    tmp.position.set(0, -80, 0);
-                    tmp.scale.setScalar(.001);
-                    tmp.rotation.set(0, 0, 0);
-                    tmp.updateMatrix();
-                    m.setMatrixAt(i, tmp.matrix);
-                }
-        }
+        const nu = Math.round(vis.underground * MAX_UNDERGROUND);
         for (let i = 0; i < MAX_UNDERGROUND; i++) {
             if (i < nu) {
                 const a = i * 2.13 + .7, ring = Math.floor(i / 6), r = city.districtRadius * (.48 + (i % 6) * .075), x = city.x + Math.cos(a) * r, z = city.z + Math.sin(a) * r, ground = heightAt(x, z), depth = 5.2 + i * 1.22 + ring * 1.8, growth = .88 + Math.min(.55, i / MAX_UNDERGROUND * .7);
@@ -715,14 +607,12 @@ function VerticalHabitats({ civId, visualRef }) {
                     m.setMatrixAt(i, tmp.matrix);
                 }
         }
-        for (const m of [arcs.current, skyLobbies.current, upperDecks.current, cores.current, crowns.current, portals.current, shafts.current, chambers.current, shaftX.current, chamberX.current])
+        for (const m of [portals.current, shafts.current, chambers.current, shaftX.current, chamberX.current])
             m.instanceMatrix.needsUpdate = true;
-        if (arcs.current.instanceColor)
-            arcs.current.instanceColor.needsUpdate = true;
         if (chambers.current.instanceColor)
             chambers.current.instanceColor.needsUpdate = true;
     });
-    return _jsxs("group", { children: [_jsxs("instancedMesh", { ref: arcs, args: [undefined, undefined, MAX_ARCOLOGIES], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, .68, 1, 16] }), _jsx("meshStandardMaterial", { color: "#ffffff", roughness: .34, metalness: .28 })] }), _jsxs("instancedMesh", { ref: skyLobbies, args: [undefined, undefined, MAX_ARCOLOGIES], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 20] }), _jsx("meshStandardMaterial", { ref: skyMat, color: "#91a7b3", emissive: "#7299aa", emissiveIntensity: .08, metalness: .36, roughness: .28 })] }), _jsxs("instancedMesh", { ref: upperDecks, args: [undefined, undefined, MAX_ARCOLOGIES], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 24] }), _jsx("meshStandardMaterial", { color: "#bfd0d7", metalness: .42, roughness: .24 })] }), _jsxs("instancedMesh", { ref: cores, args: [undefined, undefined, MAX_ARCOLOGIES], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 16] }), _jsx("meshStandardMaterial", { ref: coreMat, color: "#8fb6be", emissive: "#62b2c2", emissiveIntensity: .25, metalness: .5, roughness: .2 })] }), _jsxs("instancedMesh", { ref: crowns, args: [undefined, undefined, MAX_ARCOLOGIES], castShadow: true, frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [.65, 1, 1, 14] }), _jsx("meshStandardMaterial", { color: "#d8e2e7", metalness: .42, roughness: .3 })] }), _jsxs("instancedMesh", { ref: portals, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.25, 1, 18] }), _jsx("meshStandardMaterial", { color: "#4e545a", roughness: .78, metalness: .22 })] }), _jsxs("instancedMesh", { ref: shafts, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 8] }), _jsx("meshStandardMaterial", { color: "#50706c", roughness: .55, metalness: .32 })] }), _jsxs("instancedMesh", { ref: chambers, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { ref: chamberMat, color: "#ffffff", emissive: "#32675f", emissiveIntensity: .22, transparent: true, opacity: .82, depthWrite: true, depthTest: true, metalness: .18, roughness: .34 })] }), _jsxs("instancedMesh", { ref: shaftX, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, visible: subsurface, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 6] }), _jsx("meshBasicMaterial", { color: "#79b9b0", wireframe: true, transparent: true, opacity: .12, depthWrite: false, depthTest: true })] }), _jsxs("instancedMesh", { ref: chamberX, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, visible: subsurface, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshBasicMaterial", { color: "#87dfd2", wireframe: true, transparent: true, opacity: .13, depthWrite: false, depthTest: true })] })] });
+    return _jsxs("group", { children: [_jsxs("instancedMesh", { ref: portals, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1.25, 1, 18] }), _jsx("meshStandardMaterial", { color: "#4e545a", roughness: .78, metalness: .22 })] }), _jsxs("instancedMesh", { ref: shafts, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 8] }), _jsx("meshStandardMaterial", { color: "#50706c", roughness: .55, metalness: .32 })] }), _jsxs("instancedMesh", { ref: chambers, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshStandardMaterial", { ref: chamberMat, color: "#ffffff", emissive: "#32675f", emissiveIntensity: .22, transparent: true, opacity: .82, depthWrite: true, depthTest: true, metalness: .18, roughness: .34 })] }), _jsxs("instancedMesh", { ref: shaftX, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, visible: subsurface, children: [_jsx("cylinderGeometry", { args: [1, 1, 1, 6] }), _jsx("meshBasicMaterial", { color: "#79b9b0", wireframe: true, transparent: true, opacity: .12, depthWrite: false, depthTest: true })] }), _jsxs("instancedMesh", { ref: chamberX, args: [undefined, undefined, MAX_UNDERGROUND], frustumCulled: false, visible: subsurface, children: [_jsx("boxGeometry", { args: [1, 1, 1] }), _jsx("meshBasicMaterial", { color: "#87dfd2", wireframe: true, transparent: true, opacity: .13, depthWrite: false, depthTest: true })] })] });
 }
 // ── A diversified energy landscape: not every future is solar + fusion ──────
 function DiversifiedEnergy({ civId, visualRef }) {
@@ -747,5 +637,5 @@ function DiversifiedEnergy({ civId, visualRef }) {
     return _jsxs("group", { children: [_jsxs("group", { ref: geothermal, visible: false, position: [city.x + 18, heightAt(city.x + 18, city.z + 12), city.z + 12], children: [_jsxs("mesh", { position: [0, 1.2, 0], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.8, 1.05, 2.4, 12] }), _jsx("meshStandardMaterial", { color: "#9f8f7b", roughness: 0.85 })] }), _jsxs("mesh", { position: [1.3, 0.65, 0], children: [_jsx("torusGeometry", { args: [0.7, 0.12, 8, 18] }), _jsx("meshStandardMaterial", { color: "#786b5c", metalness: 0.3 })] })] }), _jsxs("group", { ref: bio, visible: false, position: [city.x - 18, heightAt(city.x - 18, city.z + 14), city.z + 14], children: [_jsxs("mesh", { position: [-0.8, 1.1, 0], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.9, 1, 2.2, 12] }), _jsx("meshStandardMaterial", { color: "#85916f", roughness: 0.75 })] }), _jsxs("mesh", { position: [1, 0.9, 0], castShadow: true, children: [_jsx("cylinderGeometry", { args: [0.75, 0.85, 1.8, 12] }), _jsx("meshStandardMaterial", { color: "#6f7d5c", roughness: 0.75 })] })] }), _jsxs("group", { ref: hydrogen, visible: false, position: [city.x + 12, baseY, city.z - 17], children: [_jsxs("mesh", { position: [-0.9, 0.9, 0], castShadow: true, children: [_jsx("sphereGeometry", { args: [0.9, 14, 10] }), _jsx("meshStandardMaterial", { color: "#d9eef2", roughness: 0.35, metalness: 0.15 })] }), _jsxs("mesh", { position: [1.1, 0.9, 0], castShadow: true, children: [_jsx("sphereGeometry", { args: [0.9, 14, 10] }), _jsx("meshStandardMaterial", { color: "#d9eef2", roughness: 0.35, metalness: 0.15 })] }), _jsxs("mesh", { position: [0.1, 0.2, 0], children: [_jsx("boxGeometry", { args: [3.3, 0.18, 0.25] }), _jsx("meshStandardMaterial", { color: "#74b9c6", metalness: 0.45 })] })] }), _jsxs("group", { ref: ocean, visible: false, position: [ox, SEA_LEVEL + 0.15, oz], children: [_jsxs("mesh", { position: [-2.1, 0, 0], children: [_jsx("cylinderGeometry", { args: [0.35, 0.55, 0.55, 10] }), _jsx("meshStandardMaterial", { color: "#d9b65f", roughness: 0.55 })] }), _jsxs("mesh", { position: [0, 0.08, 0], children: [_jsx("cylinderGeometry", { args: [0.35, 0.55, 0.55, 10] }), _jsx("meshStandardMaterial", { color: "#d9b65f", roughness: 0.55 })] }), _jsxs("mesh", { position: [2.1, -0.04, 0], children: [_jsx("cylinderGeometry", { args: [0.35, 0.55, 0.55, 10] }), _jsx("meshStandardMaterial", { color: "#d9b65f", roughness: 0.55 })] })] })] });
 }
 export function FrontierLayer({ visualRef }) {
-    return (_jsxs("group", { children: [CITIES.map((c) => _jsx(Ruins, { city: c, visualRef: visualRef }, `ruins-${c.id}`)), CITIES.map((c) => _jsx(Rewilding, { city: c, visualRef: visualRef }, `rewild-${c.id}`)), CIV_IDS.map((id) => _jsx(CoastalWorks, { civId: id, visualRef: visualRef }, `coast-${id}`)), CIV_IDS.map((id) => _jsx(VerticalHabitats, { civId: id, visualRef: visualRef }, `vertical-${id}`)), CIV_IDS.map((id) => _jsx(DiversifiedEnergy, { civId: id, visualRef: visualRef }, `divenergy-${id}`)), INFRA_ZONES.filter((z) => z.type === 'nuclear').map((z) => _jsx(FusionPlant, { zone: z, visualRef: visualRef }, `fusion-${z.id}`)), INFRA_ZONES.filter((z) => z.type === 'spaceport').map((z) => _jsx(Spaceport, { zone: z, visualRef: visualRef }, `sp-${z.id}`)), CIV_IDS.map((id) => _jsx(SpaceElevator, { civId: id, visualRef: visualRef }, `elev-${id}`)), CIV_IDS.map((id) => _jsx(DomesAndPlatforms, { civId: id, visualRef: visualRef }, `dome-${id}`)), _jsx(Orbitals, { visualRef: visualRef }), _jsx(OffworldBodies, { visualRef: visualRef })] }));
+    return (_jsxs("group", { children: [CITIES.map((c) => _jsx(Rewilding, { city: c, visualRef: visualRef }, `rewild-${c.id}`)), CIV_IDS.map((id) => _jsx(CoastalWorks, { civId: id, visualRef: visualRef }, `coast-${id}`)), CIV_IDS.map((id) => _jsx(VerticalHabitats, { civId: id, visualRef: visualRef }, `vertical-${id}`)), CIV_IDS.map((id) => _jsx(DiversifiedEnergy, { civId: id, visualRef: visualRef }, `divenergy-${id}`)), INFRA_ZONES.filter((z) => z.type === 'nuclear').map((z) => _jsx(FusionPlant, { zone: z, visualRef: visualRef }, `fusion-${z.id}`)), INFRA_ZONES.filter((z) => z.type === 'spaceport').map((z) => _jsx(Spaceport, { zone: z, visualRef: visualRef }, `sp-${z.id}`)), CIV_IDS.map((id) => _jsx(SpaceElevator, { civId: id, visualRef: visualRef }, `elev-${id}`)), CIV_IDS.map((id) => _jsx(DomesAndPlatforms, { civId: id, visualRef: visualRef }, `dome-${id}`)), _jsx(Orbitals, { visualRef: visualRef }), _jsx(OffworldBodies, { visualRef: visualRef })] }));
 }

@@ -716,6 +716,11 @@ body { background: var(--s-bg); }
 .city-label .lbl-sub { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--s-muted); margin-top: 2px; }
 .city-label.lbl-selected .lbl-name { border-color: var(--s-mint); }
 .city-label.civ-veloria .lbl-sub { color: #9db8ff; } .city-label.civ-ardan .lbl-sub { color: #ffd08a; } .city-label.civ-nemea .lbl-sub { color: #8fe3b9; }
+/* compact world labels: sub-line only on selection, tight pill always */
+.city-label-sm .lbl-sub { display: none; }
+.city-label-sm.lbl-selected .lbl-sub, .city-label-sm.lbl-main .lbl-sub { display: block; }
+.city-label-sm .lbl-name { font-size: 10px !important; padding: 1px 6px; }
+.city-label-sm.lbl-main .lbl-name { font-size: 12px !important; }
 @media (max-width: 1180px) { .s-left { width: 230px; } .s-right { width: 280px; } .s-stage { width: 360px; } }
 
 .s-decision-backdrop { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(4, 12, 10, .55); backdrop-filter: blur(6px); z-index: 30; }

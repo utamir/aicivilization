@@ -43,5 +43,11 @@ function AppInner() {
     const visualRef = useRef(null);
     const started = useUI((s) => s.started);
     const panel = useUI((s) => s.panel);
+    // Controlled verification harness: ?arc=occupied|aged|ruined renders one
+    // fixed structure with a fixed camera and no interface chrome.
+    const preview = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('arc');
+    if (preview) {
+        return (_jsx("div", { className: "app-root", children: _jsx(WorldCanvas, { worldRef: worldRef, visualRef: visualRef }) }));
+    }
     return (_jsxs("div", { className: "app-root", children: [_jsx(WorldCanvas, { worldRef: worldRef, visualRef: visualRef }), started && (_jsxs(_Fragment, { children: [_jsx(Shell, { worldRef: worldRef }), _jsx(RightPanel, { worldRef: worldRef }), panel === 'futurelab' && _jsx(FutureLab, {}), panel === 'interventions' && _jsx(Interventions, { worldRef: worldRef }), panel === 'branch' && _jsx(BranchPanel, {}), panel === 'evidence' && _jsx(EvidencePanel, {})] })), !started && _jsx(WelcomeScreen, {})] }));
 }
