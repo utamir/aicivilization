@@ -46,6 +46,17 @@ function AppInner() {
   const visualRef = useRef(null) as VisualRef;
   const started = useUI((s) => s.started);
   const panel = useUI((s) => s.panel);
+  // Controlled verification harness: ?arc=occupied|aged|ruined renders one
+  // fixed structure with a fixed camera and no interface chrome.
+  const preview = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('arc');
+
+  if (preview) {
+    return (
+      <div className="app-root">
+        <WorldCanvas worldRef={worldRef} visualRef={visualRef} />
+      </div>
+    );
+  }
 
   return (
     <div className="app-root">
