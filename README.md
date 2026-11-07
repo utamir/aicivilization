@@ -14,7 +14,7 @@ Then the clock runs one month at a time.
 
 Nobody, including me, knows in advance where it ends.
 
-![Baseline world view of the WHAT IF? Civilization Lab, showing the island's three capitals and the Living World chronicle panel](images/world-view.png)
+![Baseline world view of the WHAT IF? Civilization Lab: the island with its settlements, the Civilization Observatory and the Living World chronicle](images/world-view.png)
 
 ## Why I built it
 

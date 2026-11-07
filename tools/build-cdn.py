@@ -58,6 +58,15 @@ open(os.path.join(DIST, 'index.css'), 'w').write(preflight + css)
 pkg = json.load(open('package.json')); d = pkg['dependencies']
 v = lambda k: d[k].lstrip('^~')
 ext = 'external=react,react-dom,three'
+# The react-three family must share ONE @react-three/fiber instance: drei and
+# postprocessing import fiber internally, and esm.sh resolves that to the newest
+# 9.x by itself - the day fiber 9.8.2 appeared, drei bundles carried a second
+# fiber whose hook context was not the <Canvas> context the app's fiber created,
+# and the world failed with "R3F: Hooks can only be used within the Canvas
+# component!" (worked for months while both sides resolved to 9.7.0). `deps=`
+# pins their dependency graph to exactly the fiber version package.json names.
+FIBER = v('@react-three/fiber')
+ext_r3f = f"{ext}&deps=@react-three/fiber@{FIBER}"
 importmap = {"imports": {
   "react": f"https://esm.sh/react@{v('react')}",
   "react/": f"https://esm.sh/react@{v('react')}/",
@@ -66,9 +75,9 @@ importmap = {"imports": {
   "react-dom/client": f"https://esm.sh/react-dom@{v('react-dom')}/client?external=react",
   "three": f"https://esm.sh/three@{v('three')}",
   "three/": f"https://esm.sh/three@{v('three')}/",
-  "@react-three/fiber": f"https://esm.sh/@react-three/fiber@{v('@react-three/fiber')}?{ext}",
-  "@react-three/drei": f"https://esm.sh/@react-three/drei@{v('@react-three/drei')}?{ext}",
-  "@react-three/postprocessing": f"https://esm.sh/@react-three/postprocessing@{v('@react-three/postprocessing')}?{ext}",
+  "@react-three/fiber": f"https://esm.sh/@react-three/fiber@{FIBER}?{ext}",
+  "@react-three/drei": f"https://esm.sh/@react-three/drei@{v('@react-three/drei')}?{ext_r3f}",
+  "@react-three/postprocessing": f"https://esm.sh/@react-three/postprocessing@{v('@react-three/postprocessing')}?{ext_r3f}",
   "zustand": f"https://esm.sh/zustand@{v('zustand')}?external=react",
 }}
 DIAG = r'''

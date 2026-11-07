@@ -199,6 +199,7 @@ tools/end.ts
 tools/inv.ts
 tools/known-test-failures.txt
 tools/land.ts
+tools/make_manifests.py
 tools/nan.ts
 tools/nan2.ts
 tools/pop.ts
