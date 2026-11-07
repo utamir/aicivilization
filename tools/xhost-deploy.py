@@ -141,6 +141,27 @@ def data_of(result: dict) -> dict:
     return parsed if isinstance(parsed, dict) else {}
 
 
+def build_args(schema: dict, values: dict, defaults: dict | None = None) -> tuple[dict, list[str]]:
+    """Fill a tool's arguments from the inputSchema the server itself advertised,
+    so a renamed or extended API is adapted to rather than guessed at."""
+    props = schema.get("properties", {}) if isinstance(schema, dict) else {}
+    defaults = defaults or {}
+    args: dict = {}
+    for name, spec in props.items():
+        if name in values:
+            args[name] = values[name]
+        elif name in defaults:
+            args[name] = defaults[name]
+        elif isinstance(spec, dict) and isinstance(spec.get("enum"), list):
+            # An unrecognised enum selector: pass a value matching our purpose if one exists.
+            for cand in spec["enum"]:
+                if isinstance(cand, str) and "deploy" in cand.lower():
+                    args[name] = cand
+                    break
+    missing = [r for r in schema.get("required", []) if r not in args]
+    return args, missing
+
+
 def status_in(line: str) -> str | None:
     return next((s for s in STATUSES if re.search(rf"\b{s}\b", line, re.I)), None)
 
@@ -178,17 +199,33 @@ def main() -> int:
         print(f"connected: {server.get('name', 'mcp')} {server.get('version', '')}".rstrip())
 
         # Fail loudly with the real tool list rather than guessing at names.
-        names = {t.get("name") for t in mcp.request("tools/list").get("tools", [])}
-        missing = {"deploy", "get_deploy_log"} - names
-        if missing:
-            gh_error(f"server does not expose {sorted(missing)}; it offers: "
-                     f"{sorted(n for n in names if n)}")
+        tools = {t.get("name"): t for t in mcp.request("tools/list").get("tools", [])}
+        log_tool = next((n for n in ("get_deploy_log", "get_logs") if n in tools), None)
+        if "deploy" not in tools or log_tool is None:
+            missing = sorted({"deploy", "get_deploy_log", "get_logs"} - set(tools))
+            gh_error(f"server does not expose {missing} (deploy tool and a log tool are required); "
+                     f"it offers: {sorted(n for n in tools if n)}")
             return 1
+
+        def schema_of(name: str) -> dict:
+            return tools[name].get("inputSchema") or {}
 
         started = data_of(
             mcp.call("deploy", {"app_name": ns.app, "channel": ns.channel, "ref": ns.ref})
         )
         deploy_id = started.get("deploy_id")
+        if not deploy_id:
+            # Retry with the exact argument names the server's own schema asks for.
+            args, unfilled = build_args(
+                schema_of("deploy"),
+                {"app_name": ns.app, "app": ns.app, "channel": ns.channel,
+                 "ref": ns.ref, "branch": ns.ref, "environment": ns.channel},
+            )
+            if unfilled:
+                gh_error(f"deploy schema requires {unfilled}, which this script does not supply")
+                return 1
+            started = data_of(mcp.call("deploy", args))
+            deploy_id = started.get("deploy_id") or started.get("deployId") or started.get("id")
         if not deploy_id:
             gh_error(f"deploy returned no deploy_id: {started or '(no structured payload)'}")
             return 1
@@ -197,18 +234,38 @@ def main() -> int:
         deadline = time.time() + ns.timeout
         last_line = ""
         while True:
-            log = text_of(
-                mcp.call(
-                    "get_deploy_log",
-                    {"app_name": ns.app, "channel": ns.channel, "deploy_id": deploy_id},
-                )
+            log_args, unfilled = build_args(
+                schema_of(log_tool),
+                {"app_name": ns.app, "app": ns.app, "channel": ns.channel,
+                 "deploy_id": deploy_id, "deployId": deploy_id, "id": deploy_id,
+                 "ref": ns.ref, "branch": ns.ref},
+                {"limit": 100, "tail": 100, "lines": 100},
             )
-            first = log.splitlines()[0] if log else ""
+            if unfilled:
+                gh_error(f"{log_tool} schema requires {unfilled}, which this script does not supply")
+                return 1
+            result = mcp.call(log_tool, log_args)
+            data = data_of(result)
+            log = text_of(result)
+            # The status may arrive as a structured field, the log's first line,
+            # or its last line - accept each in that order.
+            status = None
+            for key in ("status", "state", "phase"):
+                v = data.get(key)
+                if isinstance(v, str) and v.lower() in STATUSES:
+                    status = v.lower()
+                    break
+            lines = [ln for ln in log.splitlines() if ln.strip()] if log else []
+            first = lines[0] if lines else ""
+            if status is None:
+                for line in ([first, lines[-1]] if len(lines) > 1 else [first]):
+                    status = status_in(line)
+                    if status:
+                        break
             if first and first != last_line:
                 print(first, flush=True)
                 last_line = first
 
-            status = status_in(first)
             if status == "success":
                 print("deploy succeeded")
                 return 0
@@ -220,7 +277,7 @@ def main() -> int:
             if time.time() >= deadline:
                 gh_error(f"timed out after {ns.timeout}s waiting for deploy {deploy_id}; "
                          f"last status line: {first or '(none)'}")
-                print(f"--- deploy log ---", file=sys.stderr)
+                print("--- deploy log ---", file=sys.stderr)
                 print(log, file=sys.stderr)
                 return 1
             time.sleep(ns.poll)
