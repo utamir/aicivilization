@@ -187,7 +187,7 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     [district],
   );
   const bucketRefs = useRef<Partial<Record<BucketKind, THREE.InstancedMesh>>>({});
-  const applied = useRef({ built: -1, active: -1, era: -1 as number, vert: -1, der: -1 });
+  const applied = useRef({ built: -1, active: -1, era: -1 as number, vert: -1, der: -1, sub: -1 });
   const specsRef = useRef<BuildingSpec[]>([]);
   const arcSetRef = useRef<Set<number>>(new Set());
   const countsRef = useRef<Record<BucketKind, number>>({ wallPlaster: 0, wallBrick: 0, wallConcrete: 0, wallPanel: 0, gableTile: 0, gableSeam: 0, slab: 0, rail: 0, winFrame: 0, winGlass: 0, glassBand: 0, context: 0, arcCore: 0, arcSlab: 0, arcRing: 0, arcGreen: 0, arcDebris: 0, arcGlass: 0, arcPier: 0, arcPlanter: 0 });
@@ -325,6 +325,27 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
         writePart(bucketFor(part.kind, part.family), part.x, part.y, part.z, part.sx, part.sy, part.sz, part.rotY, part.color, (spec.plot.lotIndex % 7 / 7 - 0.5));
       }
     }
+
+    // ── suburb ring: the ground the city grows onto ──────────────────────────
+    // Plots beyond the original footprint fill when the settlement outgrows
+    // its base (population × primacy pressure), and never exist for shrinking
+    // settlements — where the countryside stays open.
+    const popRatio = vis.population / Math.max(0.001, city.basePop);
+    const suburbBuilt = Math.max(0, Math.min(1, (popRatio - 0.94) * 1.4));
+    const suburbN = Math.floor(district.suburbPlots.length * suburbBuilt);
+    for (let i = 0; i < district.suburbPlots.length; i++) {
+      if (i >= suburbN) continue; // open fields: not built yet
+      const p = district.suburbPlots[i];
+      const state: BuildingSpec['state'] = (i >= suburbN - 2 && vis.growth > 1.05) ? 'construction'
+        : (i < activeCount * 0.9) ? 'active' : 'built';
+      const fresh = generateBuilding(p, {
+        tier: era >= 2 ? 1 : 0, state,
+        seed: (p.lotIndex * 977 + city.id.length * 31 + 19), era,
+      });
+      for (const part of fresh.parts) {
+        writePart(bucketFor(part.kind, part.family), part.x, part.y, part.z, part.sx, part.sy, part.sz, part.rotY, part.color, (p.lotIndex % 5 / 5 - 0.5));
+      }
+    }
     // park unused slots far below
     tmpObj.position.set(0, -90, 0);
     tmpObj.rotation.set(0, 0, 0);
@@ -352,10 +373,11 @@ function CityArchitecture({ city, visualRef }: { city: CityLayout; visualRef: Re
     // dirty key so towers appear as the sim develops and update their state.
     const vert = Math.round(vis.vertical * 10) / 10;
     const der = Math.round(vis.derelict * 20) / 20;
+    const sub = Math.round(Math.max(0, Math.min(1, (vis.population / Math.max(0.001, city.basePop) - 0.94) * 1.4)) * 40) / 40;
     if (b === applied.current.built && a === applied.current.active && era === applied.current.era
-        && vert === applied.current.vert && der === applied.current.der) return;
+        && vert === applied.current.vert && der === applied.current.der && sub === applied.current.sub) return;
     if (era !== applied.current.era) buildSpecs(era);
-    applied.current = { built: b, active: a, era, vert, der };
+    applied.current = { built: b, active: a, era, vert, der, sub };
     writeCity(vis, b, a, era);
   });
 

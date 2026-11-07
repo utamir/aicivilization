@@ -31,6 +31,8 @@ export interface District {
   streets: CityStreet[];
   intersections: Array<[number, number]>;
   plots: Plot[];
+  /** outer-ring housing plots: unbuilt until the settlement outgrows its footprint */
+  suburbPlots: Plot[];
   plaza: { x: number; z: number } | null;
 }
 
@@ -169,7 +171,27 @@ export function buildDistrict(city: CityLayout): District {
     }
   }
 
-  return { streets, intersections, plots, plaza: null };
+  // ── suburb ring: the ground the city grows onto ────────────────────────────
+  // Two outer half-rings of plots beyond the original grid. They carry the
+  // same Plot identity rules as the inner city; Buildings keeps them unbuilt
+  // (open fields) until the settlement actually outgrows its footprint.
+  const suburbPlots: Plot[] = [];
+  for (const ring of [1.16, 1.42] as const) {
+    const rr = city.districtRadius * ring;
+    const step = 15;
+    for (let a = 0; a < 360; a += step) {
+      const ang = (a + ring * 40) * Math.PI / 180;
+      const px = city.x + Math.cos(ang) * rr;
+      const pz = city.z + Math.sin(ang) * rr;
+      if (heightAt(px, pz) < 1.35) continue;
+      suburbPlots.push({
+        x: px, z: pz, w: PLOT_W * 0.92, d: 2.0, rot: ang + Math.PI / 2,
+        dist: 1 + ring, kind: 'house', lotIndex: 5000 + suburbPlots.length,
+      });
+    }
+  }
+
+  return { streets, intersections, plots, suburbPlots, plaza: null };
 }
 
 const cache = new Map<string, District>();

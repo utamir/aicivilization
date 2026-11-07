@@ -7,7 +7,7 @@
 import type { WorldState, CivState, CivId, InterventionEffect, PendingDecision, SimParams } from '../types';
 type ParamDelta = Partial<SimParams>;
 import { addEvent, yearOf, proposeProject } from './step';
-import { clamp } from './formulas';
+import { clamp, clamp01 } from './formulas';
 import { startWar, syntheticBirthsAvailable } from './society';
 
 export interface DecisionOption {
@@ -184,6 +184,38 @@ export const DECISIONS: DecisionDef[] = [
       { id: 'natal', label: 'Pro-natal: housing, childcare, time', consequence: 'Fertility rises slowly; costs money for a generation before it pays.', apply: (_w, c) => { c.population.fertility = Math.min(3, c.population.fertility + 0.2); c.economy.publicDebt += 0.05; }, affinity: (c) => 1 - c.traits.openness * 0.5 },
       { id: 'migrate', label: 'Open the doors to migrants', consequence: 'Population holds; integration strains trust for a decade.', params: { migrationMult: 1.4 }, apply: (_w, c) => { c.society.trust = Math.max(0.05, c.society.trust - 0.03); }, affinity: (c) => c.traits.openness },
       { id: 'consolidate', label: 'Accept it: consolidate the cities', consequence: 'Fewer, better-kept districts; derelict blocks cleared; a smaller, older, richer polity.', apply: (_w, c) => { c.housing.abandoned *= 0.6; c.housing.stockIndex *= 0.97; }, affinity: (c) => c.traits.regulatoryCaution * 0.6 },
+    ],
+  },
+  {
+    id: 'robot_settlement', title: 'Living with the machines',
+    question: (w, c) => `General-purpose robots now do ${(w.techs.robotics_gp.adoption[c.id].intensity * 100).toFixed(0)}% of routine work across ${c.name}, and ${(c.economy.displacedShare * 100).toFixed(0)}% of adults have been displaced from their jobs. ${c.society.backlash > 0.45 ? 'People are openly unwilling to live alongside machines.' : 'People are uneasy about sharing their towns with robots.'} As the countryside empties and the machines tend it, where do people live?`,
+    trigger: (w, c) => w.techs.robotics_gp.adoption[c.id].intensity > 0.3 && (c.economy.displacedShare > 0.12 || c.society.backlash > 0.4) && c.population.urbanization > 0.6,
+    months: 24,
+    options: [
+      {
+        id: 'metro', label: 'Concentrate: one great human city',
+        consequence: 'Settlement clusters in the capital. It grows into a metropolis; the countryside and the older towns are left to the machines.',
+        apply: (_w, c) => { c.society.primacy = clamp(Math.min(0.93, c.society.primacy + 0.22), 0.25, 0.95); },
+        affinity: (c) => 0.22 + c.traits.marketOrientation * 0.4 + (c.population.education - 1) * 0.2,
+      },
+      {
+        id: 'poly', label: 'Disperse: many towns, linked by transit',
+        consequence: 'New towns keep people spread across the region, sharing it with the machines; backlash eases.',
+        apply: (_w, c) => { c.society.primacy = clamp(Math.max(0.25, c.society.primacy - 0.2), 0.25, 0.95); c.society.backlash = clamp01(c.society.backlash - 0.12); },
+        affinity: (c) => 0.3 + (1 - c.traits.marketOrientation) * 0.3 + c.society.trust * 0.2,
+      },
+      {
+        id: 'restrict', label: 'Robots in industry, not in towns',
+        consequence: 'General-purpose robots are limited to factories and fields; service robotics slows; displacement and aversion ease.',
+        apply: (w, c) => {
+          const a = w.techs.robotics_gp.adoption[c.id];
+          a.intensity = clamp01(a.intensity * 0.72);
+          a.penetration = clamp01(a.penetration * 0.8);
+          c.society.backlash = clamp01(c.society.backlash - 0.15);
+          c.society.regCaution = clamp01(c.society.regCaution + 0.1);
+        },
+        affinity: (c) => 0.2 + c.traits.regulatoryCaution * 0.5,
+      },
     ],
   },
 ];

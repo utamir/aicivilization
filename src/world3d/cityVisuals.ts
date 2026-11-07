@@ -74,6 +74,8 @@ export interface WorldVisual {
   food: Record<CivId, FoodVisual>;
   evShare: Record<CivId, number>;
   frontier: Record<CivId, CivFrontierVisual>;
+  /** 0..1 — how far agriculture and the countryside run on machines per civ */
+  agriAutomation: Record<CivId, number>;
   night: number;
   kardashev: number;
   dysonProgress: number;    // 0..1 — swarm elements glint in the sky
@@ -86,6 +88,36 @@ export interface WorldVisual {
 
 export function computeWorldVisual(w: WorldState, night: number): WorldVisual {
   const civOf = (id: CivId) => w.civs.find((c) => c.id === id)!;
+  // Primacy: society's settlement geography concentrates urban population in
+  // the primary metro (the largest city of the civ). Redistribute across each
+  // civ's cities, conserving the urban total: the primary gains the millions
+  // the secondary cities lose.
+  const primacyMult: Record<string, number> = {};
+  for (const civ of w.civs) {
+    const cc = CITIES.filter((x) => x.civId === civ.id);
+    if (cc.length < 2) { for (const x of cc) primacyMult[x.id] = 1; continue; }
+    const largest = cc.reduce((a, b) => (b.basePop > a.basePop ? b : a));
+    const totalBase = cc.reduce((a, b) => a + b.basePop, 0);
+    const baseline = largest.basePop / totalBase;
+    const p = Math.max(0.25, Math.min(0.95, civ.society.primacy));
+    const primaryMult = Math.max(0.55, Math.min(3.1, p / baseline));
+    primacyMult[largest.id] = primaryMult;
+    // others absorb the deficit (or the surplus under dispersal) by base share
+    const moved = largest.basePop * (primaryMult - 1);          // millions moved
+    const othersBase = totalBase - largest.basePop;
+    for (const o of cc) {
+      if (o.id === largest.id) continue;
+      primacyMult[o.id] = Math.max(0.05, Math.min(1.4, 1 - moved / othersBase));
+    }
+  }
+  const agriAutomation: Record<CivId, number> = {
+    veloria: 0, ardan: 0, nemea: 0,
+  };
+  for (const civ of w.civs) {
+    const gp = w.techs.robotics_gp.adoption[civ.id].intensity;
+    const ind = w.techs.robotics_ind.adoption[civ.id].intensity;
+    agriAutomation[civ.id] = Math.max(0, Math.min(1, gp * 0.7 + ind * 0.35));
+  }
   const cities: CityVisual[] = CITIES.map((city) => {
     const civ = civOf(city.civId);
     const def = civDef(city.civId);
@@ -95,7 +127,8 @@ export function computeWorldVisual(w: WorldState, night: number): WorldVisual {
     // Only embodied Earth residents live in these streets: off-world settlers and
     // digital minds left houses behind (which is why cities can empty while
     // population grows).
-    const cityPop = city.basePop * (physicalPopulation(civ) / def.population.total) * urbanFactor;
+    const cityPop = city.basePop * (physicalPopulation(civ) / def.population.total) * urbanFactor
+      * (primacyMult[city.id] ?? 1);
     const base = city.basePop;
     // Physical city form follows people, usable housing and vacancy — not a
     // national GDP counter. Rich but shrinking cities renovate rather than
@@ -234,7 +267,7 @@ export function computeWorldVisual(w: WorldState, night: number): WorldVisual {
     };
   }
   return {
-    cities, infra, food, evShare, frontier, night,
+    cities, infra, food, evShare, frontier, agriAutomation, night,
     kardashev: w.frontier.kardashev,
     dysonProgress: dyson && (dyson.status === 'in_progress' || dyson.status === 'achieved') ? dyson.progress : 0,
     offworldPopulationM: w.frontier.offworldPopulationM,

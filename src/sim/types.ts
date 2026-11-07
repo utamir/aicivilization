@@ -171,6 +171,8 @@ export interface SocietyState {
   fragmented: boolean;     // the polity has broken into regions
   lowStabilityMonths: number;
   revivalMonths: number;   // months left of a pro-natal cultural movement
+  primacy: number;         // share of the urban population living in the primary metro (0..1) —
+                           // rises when robots take the countryside and people will not or cannot live among them
   enhancement: 'none' | 'public' | 'private' | 'ban'; // germline enhancement policy
   familyFormation: number; // 0..1 structural/cultural support for having and raising children; evolves, not destiny
   polityStatus: 'active' | 'failed' | 'abandoned' | 'resettling';

@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createWorld, stepWorld, DEFAULT_PARAMS, SCENARIO_PRESETS, applyDelta,
-  createBranch, compareWorlds, taskHorizonHrs, resolveDecision,
+  createBranch, compareWorlds, taskHorizonHrs, resolveDecision, DECISIONS,
 } from '../index';
 import type { WorldState } from '../types';
 
@@ -392,3 +392,58 @@ describe('v9 epistemic and plural-futures hardening', () => {
     expect(w.frontier.asi).toBe(false);
   });
 });
+
+describe('settlement geography: robot segregation and city growth', () => {
+  it('primacy stays within bounds and drifts under long runs', () => {
+    for (const scenario of ['baseline_2026', 'automation_divide', 'human_centered_abundance'] as const) {
+      const w = run(600, scenario, 11);
+      for (const c of w.civs) {
+        expect(c.society.primacy).toBeGreaterThanOrEqual(0.25);
+        expect(c.society.primacy).toBeLessThanOrEqual(0.95);
+      }
+    }
+  });
+
+  it('sustained robot aversion concentrates settlement (held-pressure dynamics)', () => {
+    const w = run(12, 'automation_divide', 5); // short run: grab a live world
+    const c = w.civs[0];
+    c.society.primacy = 0.4;
+    // Hold the aversion drivers constant: displacement, backlash, robots in
+    // daily life, no universal floor. The polity cannot escape its aversion.
+    for (let m = 0; m < 1200; m++) {
+      c.economy.displacedShare = 0.34;
+      c.society.backlash = 0.8;
+      c.society.basicProvision = 0;
+      w.techs.robotics_gp.adoption[c.id].intensity = 0.85;
+      stepWorld(w, 1);
+    }
+    expect(c.society.primacy).toBeGreaterThan(0.65);
+  });
+
+  it('the settlement decision moves primacy and the machines', () => {
+    const w = run(12, 'automation_divide', 5);
+    const c = w.civs[0];
+    const def = DECISIONS.find((d) => d.id === 'robot_settlement')!;
+    c.society.primacy = 0.4;
+    w.pendingDecisions.push({
+      key: 'decision-robot_settlement-c0', defId: 'robot_settlement', civId: c.id,
+      title: def.title, question: def.question(w, c), raisedAt: 0, deadline: 24,
+      options: def.options.map((o) => ({ id: o.id, label: o.label, consequence: o.consequence })),
+    });
+    resolveDecision(w, 'decision-robot_settlement-c0', 'metro');
+    expect(c.society.primacy).toBeGreaterThanOrEqual(0.6);
+
+    // dispersal pulls it back down and eases the machines' spread
+    c.society.primacy = 0.85;
+    w.pendingDecisions.push({
+      key: 'decision-robot_settlement-c0-b', defId: 'robot_settlement', civId: c.id,
+      title: def.title, question: def.question(w, c), raisedAt: 0, deadline: 2400,
+      options: def.options.map((o) => ({ id: o.id, label: o.label, consequence: o.consequence })),
+    });
+    const gpBefore = w.techs.robotics_gp.adoption[c.id].intensity;
+    resolveDecision(w, 'decision-robot_settlement-c0-b', 'restrict');
+    expect(c.society.primacy).toBeLessThanOrEqual(0.85);
+    expect(w.techs.robotics_gp.adoption[c.id].intensity).toBeLessThan(gpBefore);
+  });
+});
+

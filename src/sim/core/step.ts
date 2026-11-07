@@ -1678,6 +1678,34 @@ function stepSociety(w: WorldState) {
     const ubs = civPolicy(w, c.id, 'ubs');
     const retrain = civPolicy(w, c.id, 'retraining');
     s.backlash = clamp01(s.backlash + (displacePressure * 0.045 - (0.022 + ubs * 0.04 + retrain * 0.03)) * DT);
+    // ── settlement geography: do people cluster away from the machines? ───────
+    // When robots take the fields, factories and roads, people who cannot or
+    // will not live alongside them converge on one metro. Aversion comes from
+    // displacement and visible backlash; general-purpose robots in daily life
+    // are the visible trigger; urbanization and autonomous infrastructure make
+    // a single dominant city physically viable. Universal floors and a slower
+    // robot rollout ease the aversion that drives it. Migration is slow: a
+    // household does not move because one quarter was unpleasant.
+    const robotsAbout = w.techs.robotics_gp.adoption[c.id].intensity;
+    const aversion = clamp01(ec.displacedShare * 0.85 + s.backlash * 0.6 - s.basicProvision * 0.35);
+    const viability = clamp01(c.population.urbanization * 0.85 + s.autonomousInfrastructure * 0.5);
+    const primacyTarget = clamp(0.36 + 0.52 * clamp01(aversion * (0.35 + 0.75 * robotsAbout)) * (0.55 + 0.45 * viability), 0.3, 0.94);
+    const prevPrimacy = s.primacy;
+    s.primacy = clamp(lerp(s.primacy, primacyTarget, 0.004 * DT), 0.25, 0.95);
+    if (prevPrimacy < 0.68 && s.primacy >= 0.68 && !w.flags[`metro-${c.id}`]) {
+      w.flags[`metro-${c.id}`] = true;
+      addEvent(w, {
+        title: `${c.name} concentrates: the rise of the metropolis`,
+        body: `With robots ${(w.techs.robotics_gp.adoption[c.id].intensity * 100).toFixed(0)}% pervasive in daily life and ${(ec.displacedShare * 100).toFixed(0)}% of adults displaced from their old work, settlement collapses into one dominant city. The countryside is tended by machines; the older towns empty.`,
+        category: 'society', civId: c.id, significance: 2,
+        causes: [
+          { factor: 'automation displacing people from robot-adjacent life', weight: 0.4 },
+          { factor: 'cultural aversion to living among machines', weight: 0.35 },
+          { factor: 'autonomous logistics making one metro viable', weight: 0.25 },
+        ],
+        counterforces: [{ factor: 'universal floors and decentralizing policy', weight: 0.4 }], confidence: 'medium',
+      });
+    }
     // Trust changes from lived outcomes, but mature institutions do not lose all
     // legitimacy from a modest reserve-margin problem. Severe, persistent
     // blackouts still destroy trust rapidly.

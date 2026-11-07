@@ -420,10 +420,13 @@ function Port({ zone }: { zone: InfraZone; visualRef: React.MutableRefObject<Wor
 // rewilded and glowing grow-towers rise at the city edge.
 const MAX_PATCHES = 14;
 const MAX_VF_TOWERS = 8;
+const MAX_ROVERS = 17;
 
 function Farm({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRefObject<WorldVisual | null> }) {
   const groupRef = useRef<THREE.Group>(null);
   const towerRef = useRef<THREE.Group>(null);
+  const roverRef = useRef<THREE.InstancedMesh>(null);
+  const lightRef = useRef<THREE.InstancedMesh>(null);
   const patches = useMemo(() => {
     const rng = zoneRng(zone.id + '-f');
     return Array.from({ length: MAX_PATCHES }, (_, i) => {
@@ -479,6 +482,43 @@ function Farm({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRe
       const n = Math.min(MAX_VF_TOWERS, Math.floor(art * 10));
       tg.children.forEach((child, i) => { child.visible = i < n; });
     }
+    // ── robot countryside: autonomous rovers working the field rows ─────────
+    // The countryside runs on machines when automation is high — the visible
+    // face of the segregation between robot-tended land and human settlement.
+    const rovers = roverRef.current, rlights = lightRef.current;
+    if (rovers && rlights) {
+      const agri = visualRef.current?.agriAutomation[zone.civId] ?? 0;
+      const n = Math.floor(agri * MAX_PATCHES * 1.2);
+      const t = performance.now() / 1000;
+      for (let i = 0; i < MAX_ROVERS; i++) {
+        const p = patches[i % MAX_PATCHES];
+        if (i < n) {
+          // each rover works one field, travelling along its row and back
+          const lap = (t * 0.22 + i * 0.37) % 2;
+          const u = lap < 1 ? lap * 2 - 1 : 1 - (lap - 1) * 2;   // -1..1 ping-pong
+          const dir = i % 2 === 0 ? 1 : -1;
+          tmpObj.position.set(p.x + Math.cos(p.rot) * p.w * 0.55 * u * dir, heightAt(p.x, p.z) + 0.14, p.z + Math.sin(p.rot) * p.w * 0.55 * u * dir);
+          tmpObj.rotation.set(0, p.rot + (lap < 1 ? 0 : Math.PI), 0);
+          tmpObj.scale.set(0.55, 0.16, 0.3);
+          tmpObj.updateMatrix();
+          rovers.setMatrixAt(i, tmpObj.matrix);
+          // status beacon on the mast
+          tmpObj.position.y += 0.26;
+          tmpObj.scale.set(0.1, 0.06, 0.06);
+          tmpObj.updateMatrix();
+          rlights.setMatrixAt(i, tmpObj.matrix);
+        } else {
+          tmpObj.position.set(0, -70, 0);
+          tmpObj.scale.setScalar(0.001);
+          tmpObj.updateMatrix();
+          rovers.setMatrixAt(i, tmpObj.matrix);
+          rlights.setMatrixAt(i, tmpObj.matrix);
+        }
+      }
+      rovers.instanceMatrix.needsUpdate = true;
+      rlights.instanceMatrix.needsUpdate = true;
+      (rlights.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.9 + Math.sin(t * 2.2) * 0.4;
+    }
   });
 
   return (
@@ -491,6 +531,14 @@ function Farm({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRe
           </mesh>
         ))}
       </group>
+      <instancedMesh ref={roverRef} args={[undefined, undefined, MAX_ROVERS]} castShadow frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#2f353c" roughness={0.5} metalness={0.45} />
+      </instancedMesh>
+      <instancedMesh ref={lightRef} args={[undefined, undefined, MAX_ROVERS]} frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#ffd9a0" emissive="#ffcf6e" emissiveIntensity={1} />
+      </instancedMesh>
       <group ref={towerRef}>
         {towerSpots.map((s, i) => {
           const y = heightAt(s.x, s.z);
