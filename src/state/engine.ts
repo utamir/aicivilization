@@ -54,6 +54,7 @@ export class SimEngine {
     this.worldA = createWorld(seed ?? (Math.random() * 2 ** 31) >>> 0, applyDelta(DEFAULT_PARAMS, delta), scenarioId, label);
     this.worldB = null;
     this.activeWorld = 'A';
+    this.dismissedDecisions.clear();
     this.speed = 1;
     this.acc = 0;
     this.version++;
@@ -78,9 +79,13 @@ export class SimEngine {
     stepWorld(this.worldA, ticks);
     if (this.worldB) stepWorld(this.worldB, ticks);
     // The world asks; the clock waits for an answer (or for the deadline, if the observer resumes without answering).
-    if (this.world.pendingDecisions.length > 0) {
-      if (this.askMode === 'never') { for (const p of [...this.world.pendingDecisions]) this.decide(p.key, null); }
-      else if (!this.dismissedDecisions.has(this.world.pendingDecisions[0].key)) { this.speed = 0; this.emit(); }
+    // decide() applies to both worlds symmetrically, so a pending decision in either one pauses the clock.
+    const asking = this.worldB
+      ? [...this.worldA.pendingDecisions, ...this.worldB.pendingDecisions]
+      : this.worldA.pendingDecisions;
+    if (asking.length > 0) {
+      if (this.askMode === 'never') { for (const p of asking) this.decide(p.key, null); }
+      else if (!this.dismissedDecisions.has(asking[0].key)) { this.speed = 0; this.emit(); }
     }
   }
 
@@ -96,6 +101,9 @@ export class SimEngine {
     this.worldB = b;
     this.branchNote = note;
     this.activeWorld = 'B';
+    // The branch is a new pair of futures; a dismissal made before the split
+    // must not suppress a re-issued decision in either of them.
+    this.dismissedDecisions.clear();
     this.version++;
     this.emit();
   }
@@ -105,6 +113,7 @@ export class SimEngine {
     this.worldA = kept;
     this.worldB = null;
     this.activeWorld = 'A';
+    this.dismissedDecisions.clear();
     this.version++;
     this.emit();
   }

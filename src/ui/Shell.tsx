@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useUI, type CameraMode, type OverlayMode, type LightingMode } from '../state/store';
 import { engine, type Speed } from '../state/engine';
-import { dateLabel, CIV_IDS, civDef, ageGroups, explainStability, explainReadiness, demographicAnalogue, civHeadline, parseWhatIf, MILESTONES } from '../sim';
+import { dateLabel, civDef, ageGroups, explainStability, explainReadiness, demographicAnalogue, civHeadline, parseWhatIf, MILESTONES } from '../sim';
 import type { WorldState, CivId, CivState, PendingDecision } from '../sim';
 import { CIV_TINT } from './shared';
 
@@ -235,7 +235,7 @@ function CivCard({ worldRef }: { worldRef: WRef }) {
           why={<div className="s-why-foot">2026 analogues: Nordics 0.27, Germany 0.31, US 0.41, Brazil 0.53. Automation and joblessness push it up; an income floor, retraining, education and institutions pull it down. Above 0.40 it costs stability and trust; above 0.45 it lowers births.</div>} />
         <Meter label="Unemployment" value={Math.min(1, c.economy.unemployment * 4)} text={pct(c.economy.unemployment, 1)} tone={toneOf(c.economy.unemployment, 0.06, 0.09, true)}
           why={<div className="s-why-foot">Labor relevance {pct(c.society.laborRelevance)}: how much a job still decides a person's income. With an income floor of {pct(c.society.basicProvision)} joblessness hurts less.</div>} />
-        <Meter label="Income floor" value={c.society.basicProvision} tone={c.society.basicProvision > 0.4 ? 'good' : 'none'} why={<div className="s-why-foot">Universal income and services adopted when automation displaces work and the society can afford it (or when you order it under Shape their future).</div>} />
+        <Meter label="Income floor" value={c.society.basicProvision} tone={c.society.basicProvision > 0.4 ? 'good' : undefined} why={<div className="s-why-foot">Universal income and services adopted when automation displaces work and the society can afford it (or when you order it under Shape their future).</div>} />
         <Meter label="Housing crowding" value={c.housing.crowding} tone={toneOf(c.housing.crowding, 0.05, 0.15, true)} text={`${pct(c.housing.crowding)} · rent ${c.housing.rentIndex.toFixed(2)}×`} />
         <Meter label="Derelict housing" value={c.housing.abandoned} tone={toneOf(c.housing.abandoned, 0.05, 0.18, true)} why={<div className="s-why-foot">Homes nobody lives in and nobody maintains. Rises when people leave; cleared by solvent institutions; rebuilt on before new land is taken.</div>} />
       </>)}
@@ -288,8 +288,7 @@ function Dock({ worldRef }: { worldRef: WRef }) {
   const setSpeed = useUI((s) => s.setSpeed);
   const set = useUI((s) => s.set);
   const vmTick = useUI((s) => s.vmTick);
-  const selectedCiv = useUI((s) => s.selectedCiv);
-  const info = useMemo(() => { const w = worldRef.current; return { year: Math.floor(w.startYear + w.tMonths / 12), budget: Math.round(w.observerBudget) }; }, [vmTick, worldRef]); // eslint-disable-line react-hooks/exhaustive-deps
+  const info = useMemo(() => { const w = worldRef.current; return { year: Math.floor(w.startYear + w.tMonths / 12), budget: Math.round(w.observerBudget), seed: w.seed }; }, [vmTick, worldRef]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="s-dock">
       <div className="s-dock-row">
@@ -309,6 +308,7 @@ function Dock({ worldRef }: { worldRef: WRef }) {
         <span className="s-kicker">Year</span><span className="s-year">{info.year}</span>
         <div className="s-seg text">{SPEEDS.map((s) => <button key={s.s} className={`s-seg-btn ${speed === s.s ? 'active' : ''}`} onClick={() => setSpeed(s.s)}>{s.label}</button>)}</div>
         <span className="s-influence" title="Observer intervention budget; no passive effect. Replenishes 6 points per simulated year.">◈ {info.budget}/100 <small>intervention</small></span>
+        <span className="s-influence" title={`World seed ${info.seed} — click to copy. The same seed plus the same scenario reproduces this run exactly.`} onClick={() => navigator.clipboard?.writeText(String(info.seed)).catch(() => {})}>{info.seed} <small>seed</small></span>
       </div>
     </div>
   );

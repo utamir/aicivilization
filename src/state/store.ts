@@ -32,7 +32,7 @@ interface UIState {
   askMode: 'turning-points' | 'never'; // 'never': decisions resolve in character without stopping the clock
   setAskMode: (m: 'turning-points' | 'never') => void;
   chronicleFilter: ChronicleFilter;
-  // view-model tick (forces React refresh at ~5 Hz)
+  // view-model tick (forces React refresh every 0.5 s, from SimDriver in WorldCanvas)
   vmTick: number;
   engineVersion: number;
   hasBranch: boolean;

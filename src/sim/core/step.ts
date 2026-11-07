@@ -64,6 +64,22 @@ export function addEvent(
   // is the terminal event itself, written at the instant extinction is detected.
   if (w.flags['world-extinct'] && e.title !== 'The last population disappears') return ev;
   w.chronicle.push(ev);
+  // Bound the chronicle: multi-century runs at 100x speed generate several
+  // events per tick and the UI copies/filters this array twice a second.
+  // Minor events (significance 1) are trimmed from the oldest middle block;
+  // major history (significance >= 2) is never dropped, and neither are the
+  // founding events, so the early-run chronicle stays inspectable.
+  const MAX_CHRONICLE = 1500;
+  const KEEP_HEAD = 150;
+  if (w.chronicle.length > MAX_CHRONICLE) {
+    const target = w.chronicle.length - MAX_CHRONICLE;
+    let tailStart = w.chronicle.length - KEEP_HEAD; // never evict the newest block either
+    let dropped = 0;
+    for (let i = KEEP_HEAD; i < tailStart && dropped < target; i++) {
+      const ev2 = w.chronicle[i];
+      if (ev2 && ev2.significance === 1) { w.chronicle.splice(i, 1); dropped++; i--; tailStart--; }
+    }
+  }
   return ev;
 }
 
@@ -117,7 +133,11 @@ function dependencyReadiness(w: WorldState, techId: TechId): number {
     const ready = clamp01((dep.cap / 2) * 0.7 + dep.maturity * 0.3);
     sum += deps[k]! * ready;
   }
-  return clamp01(sum / Math.max(0.001, keys.reduce((a, k) => a + deps[k]!, 0)) * (keys.reduce((a, k) => a + deps[k]!, 0)));
+  // Dependency weights in TECH_DEFS total <= 1 per tech, so this weighted sum
+  // can never exceed 1 and the 0.65 gate below stays meaningful even when only
+  // some deps are ready. (An earlier divide-by-total here cancelled out to
+  // exactly this expression; the normalization was dead arithmetic.)
+  return clamp01(sum);
 }
 
 function globalComputeBoost(w: WorldState): number {

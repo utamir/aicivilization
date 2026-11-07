@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createWorld, stepWorld, DEFAULT_PARAMS, SCENARIO_PRESETS, applyDelta,
-  createBranch, compareWorlds, taskHorizonHrs,
+  createBranch, compareWorlds, taskHorizonHrs, resolveDecision,
 } from '../index';
 import type { WorldState } from '../types';
 

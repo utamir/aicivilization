@@ -3,11 +3,14 @@
 # are outstanding. Delete a line once its test passes again -- CI warns when a
 # listed test starts passing, which means the line is stale.
 #
-# Recorded 2026-09-10 against c51d224. See README-DEV "Release invariants".
+# Originally recorded 2026-09-10 against c51d224 (6 entries). Two entries
+# ("stays finite through wars, pandemics and synthetic births" and "a
+# population collapse is not labelled growth") started passing again once the
+# test file's own type error was fixed: an unimported resolveDecision() made
+# both tests error out instead of exercising their invariant. Removed
+# 2026-11-06. See README-DEV "Release invariants".
 
 housing & waste systems population boom without construction causes crowding, rent spikes and unrest pressure
 island world: land, sea and earned frontier the frontier is gated on readiness: a civilization in energy crisis does not build spaceports
 outcome range Hothouse ends with far fewer people than the baseline
-society stays finite through wars, pandemics and synthetic births
-society a population collapse is not labelled growth
 v9 epistemic and plural-futures hardening Earth-bound flourishing is possible without inhabiting every domain

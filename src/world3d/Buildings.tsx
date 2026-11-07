@@ -216,7 +216,6 @@ function CityFringe({ city, visualRef }: { city: CityLayout; visualRef: React.Mu
     if (mesh) {
       const crowd = vis?.crowding ?? 0;
       const n = Math.round(clampN(crowd - 0.1, 0, 1) * MAX_SHANTY * 1.4);
-      const sprawl = vis?.sprawl ?? 1;
       for (let i = 0; i < MAX_SHANTY; i++) {
         if (i < n) {
           const h = huts[i];
