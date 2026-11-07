@@ -8,6 +8,7 @@ import { useUI } from '../state/store.js';
 import { MILESTONES, ERA_LABELS } from '../sim/index.js';
 import { TECH_IDS, TECH_DEFS, DOMAIN_META, researchVelocity, whyDidThisHappen, CIV_IDS, fmtHorizon, taskHorizonHrs, } from '../sim/index.js';
 import { Bar, pct, signed, CATEGORY_COLOR, CIV_TINT } from './shared.js';
+import { characterPortrait } from './portrait.js';
 import { TOPICS, characterReply } from './dialogue.js';
 // ── Chronicle ────────────────────────────────────────────────────────────────
 function ChronicleTab({ worldRef }) {
@@ -51,6 +52,11 @@ function TechnologyTab({ worldRef }) {
     return (_jsxs("div", { className: "tab-scroll", children: [_jsx("div", { className: "tech-list", children: domains.map(([domain, meta]) => (_jsxs("div", { className: "tech-domain", children: [_jsx("div", { className: "domain-label", style: { color: meta.color }, children: meta.label }), TECH_IDS.filter((id) => TECH_DEFS[id].domain === domain).map((id) => (_jsx("button", { className: `tech-item ${id === selectedTech ? 'active' : ''}`, onClick: () => set({ selectedTech: id }), children: TECH_DEFS[id].name }, id)))] }, domain))) }), _jsx(TechInspector, { worldRef: worldRef, techId: selectedTech })] }));
 }
 // ── Characters ───────────────────────────────────────────────────────────────
+/** mood as a human read, never a decimal */
+function demeanor(m) {
+    return m > 0.4 ? 'seems optimistic' : m > 0.05 ? 'cautiously hopeful' : m > -0.35 ? 'uneasy' : 'deeply worried';
+}
+const CIV_CITY = { veloria: 'Meridian', ardan: 'Ferrum', nemea: 'Solace' };
 function CharacterView({ worldRef, charId }) {
     const set = useUI((s) => s.set);
     const vmTick = useUI((s) => s.vmTick);
@@ -62,11 +68,12 @@ function CharacterView({ worldRef, charId }) {
     useMemo(() => setLog([]), [engineVersion]);
     if (!c)
         return null;
-    return (_jsxs("div", { children: [_jsx("button", { className: "ghost-btn back", onClick: () => set({ selectedCharacter: null }), children: "\u2190 Characters" }), _jsxs("div", { className: "char-head", children: [_jsx("div", { className: "char-name", children: c.name }), _jsxs("div", { className: "char-role", children: [c.role, " \u00B7 ", c.civId, " \u00B7 age ", Math.floor(c.age)] }), _jsxs("div", { className: "char-mood", children: ["mood ", c.mood >= 0 ? '+' : '', c.mood.toFixed(2), " \u00B7 prominence ", pct(c.prominence)] })] }), _jsx("div", { className: "sub-head", children: "Talk" }), _jsx("div", { className: "topic-grid", children: TOPICS.map((t) => (_jsx("button", { className: "topic-btn", onClick: () => {
+    const portrait = characterPortrait(c);
+    return (_jsxs("div", { children: [_jsx("button", { className: "ghost-btn back", onClick: () => set({ selectedCharacter: null }), children: "\u2190 Characters" }), _jsxs("div", { className: "char-portrait-frame", children: [_jsx("img", { className: "char-portrait", src: portrait, alt: `${c.name}, ${c.role.toLowerCase()}` }), _jsxs("div", { className: "char-head", children: [_jsx("div", { className: "char-name", children: c.name }), _jsxs("div", { className: "char-role", children: [c.role, " \u00B7 based in ", CIV_CITY[c.civId] ?? c.civId, c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''] }), _jsxs("div", { className: "char-read", children: [demeanor(c.mood), " \u00B7 age ", Math.floor(c.age)] })] })] }), _jsx("div", { className: "sub-head", children: "Interview" }), _jsx("div", { className: "topic-grid", children: TOPICS.map((t) => (_jsx("button", { className: "topic-btn", onClick: () => {
                         const a = characterReply(worldRef.current, c, t.id);
                         setLog((l) => [...l, { q: t.label, a }]);
                         void vmTick;
-                    }, children: t.label }, t.id))) }), _jsx("div", { className: "chat-log", children: log.map((m, i) => (_jsxs("div", { className: "chat-pair", children: [_jsx("div", { className: "chat-q", children: m.q }), _jsx("div", { className: "chat-a", children: m.a })] }, i))) }), _jsx("div", { className: "sub-head", children: "History" }), c.history.slice(-6).reverse().map((h, i) => (_jsx("div", { className: "char-history-line", children: h.text }, i))), c.beliefs.length > 0 && (_jsxs(_Fragment, { children: [_jsx("div", { className: "sub-head", children: "Beliefs" }), c.beliefs.map((b, i) => _jsxs("div", { className: "char-belief", children: ["\u201C", b, "\u201D"] }, i))] }))] }));
+                    }, children: t.label }, t.id))) }), _jsx("div", { className: "chat-log", children: log.map((m, i) => (_jsxs("div", { className: "chat-pair", children: [_jsx("div", { className: "chat-q", children: m.q }), _jsxs("div", { className: "chat-a", children: ["\u201C", m.a, "\u201D", _jsxs("span", { className: "chat-attr", children: ["\u2014 ", c.name] })] })] }, i))) }), _jsx("div", { className: "sub-head", children: "Record" }), c.history.slice(-6).reverse().map((h, i) => (_jsx("div", { className: "char-history-line", children: h.text }, i))), c.beliefs.length > 0 && (_jsxs(_Fragment, { children: [_jsx("div", { className: "sub-head", children: "What they believe" }), c.beliefs.map((b, i) => _jsxs("div", { className: "char-belief", children: ["\u201C", b, "\u201D"] }, i))] })), _jsx("div", { className: "sub-head", children: "In the world" }), _jsxs("button", { className: "ghost-btn", onClick: () => set({ selectedCiv: c.civId, cameraMode: 'city' }), title: "Move the camera to where this person works", children: ["Show me their city (", CIV_CITY[c.civId] ?? c.civId, ")"] })] }));
 }
 function CharactersTab({ worldRef }) {
     const vmTick = useUI((s) => s.vmTick);
@@ -78,7 +85,7 @@ function CharactersTab({ worldRef }) {
     void vmTick;
     if (selectedCharacter)
         return _jsx("div", { className: "tab-scroll", children: _jsx(CharacterView, { worldRef: worldRef, charId: selectedCharacter }) });
-    return (_jsx("div", { className: "tab-scroll", children: chars.map((c) => (_jsxs("button", { className: "char-item", onClick: () => set({ selectedCharacter: c.id }), children: [_jsx("span", { className: "char-avatar", style: { background: CIV_TINT[c.civId] }, children: c.name.split(' ').map((x) => x[0]).join('') }), _jsxs("span", { className: "char-meta", children: [_jsx("span", { className: "char-item-name", children: c.name }), _jsxs("span", { className: "char-item-role", children: [c.role, " \u00B7 ", c.civId, c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''] })] }), _jsx("span", { className: `char-mood-dot ${c.mood > 0.1 ? 'good' : c.mood > -0.3 ? 'warn' : 'bad'}` })] }, c.id))) }));
+    return (_jsx("div", { className: "tab-scroll", children: chars.map((c) => (_jsxs("button", { className: "char-item", onClick: () => set({ selectedCharacter: c.id }), children: [_jsx("img", { className: "char-avatar-img", src: characterPortrait(c, 44, 52), alt: "" }), _jsxs("span", { className: "char-meta", children: [_jsx("span", { className: "char-item-name", children: c.name }), _jsxs("span", { className: "char-item-role", children: [c.role, " \u00B7 ", CIV_CITY[c.civId] ?? c.civId, c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''] })] }), _jsx("span", { className: `char-mood-dot ${c.mood > 0.1 ? 'good' : c.mood > -0.3 ? 'warn' : 'bad'}` })] }, c.id))) }));
 }
 // ── Panel shell ──────────────────────────────────────────────────────────────
 function FrontierTab({ worldRef }) {
