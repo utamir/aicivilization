@@ -1,5 +1,14 @@
 # Changes in this build
 
+## Revision 11.8.1: build pipeline and housekeeping (2026-11-07)
+
+No simulation or rendering change; everything here is about the pipeline around the build and the honesty of the repo's own verification files.
+
+- **Deploys work again.** The xhostd MCP server renamed `get_deploy_log` to `get_logs`, so every release after the server-side change built, tested, packed and pushed successfully — and then failed at the last step, leaving the prod channel serving nothing. `tools/xhost-deploy.py` now discovers the log tool by name and builds its arguments from the inputSchema the server itself advertises, so a future rename degrades to a precise error, not a mystery exit code. Verified against a local fake MCP server for both the success and failure paths.
+- **Deploy failures are visible without log access.** The script now emits `::error::` GitHub annotations on every failure path (auth, missing tools, no deploy id, failed or timed-out deploy); job logs require admin rights to read, annotations do not.
+- **Lint errors at zero for the whole non-React backlog.** Fourteen `no-explicit-any`, `prefer-const`, `no-unused-vars` and `no-useless-escape` findings across `src/ui`, `src/sim` and `tools/` are fixed with real types (`CSSProperties` for CSS custom properties, a typed capacity-factor table, `CivState`/`unknown` parameter types, a narrowed relation-field write in `branch.ts`). The react-hooks and react-refresh findings remain the known, reported-only backlog.
+- **Release manifests regenerated — they had never been.** `RELEASE_MANIFEST.sha256` and `SOURCE_MANIFEST.txt` dated from the initial commit: 15+ files missing (everything from today's world3d work and CI tooling) and dozens of failing hashes. `tools/make_manifests.py` now regenerates both from `git ls-files` in the original formats (`sha256sum`/`shasum`-compatible), excluding the manifest's own always-failing self-entry. Nothing consumed the manifests automatically; they are the by-hand "is this release what it says it is" check, and now that check actually passes.
+
 ## Revision 11.8: verification pass and implementation corrections (2026-11-07)
 
 This pass verified the render paths rather than adding new ones. It found several integration defects that previous reports had described as finished, and fixed them.
