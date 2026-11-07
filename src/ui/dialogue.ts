@@ -67,7 +67,7 @@ export function characterReply(w: WorldState, c: CharacterState, topic: TopicId)
 
   switch (topic) {
     case 'work': {
-      if (role.includes('energy')) return `It's ${year}, and ${energyLine(w, c)} I'm ${moodWord(c.mood)} about keeping the lights on while demand from AI compute keeps climbing.`;
+      if (role.includes('energy')) return `It's ${year}. ${energyLine(w, c)} I'm ${moodWord(c.mood)} about keeping the lights on while demand from AI compute keeps climbing.`;
       if (role.includes('ai') || role.includes('director')) return `${aiLine(w)} My teams feel the acceleration every quarter — tooling that used to assist research now drives it. I'm ${moodWord(c.mood)}.`;
       if (role.includes('fab') || role.includes('semiconductor')) return `Fabrication capacity is the bottleneck everyone discovers eventually. Our fabs run at the edge of what the equipment pipeline allows — capability research means nothing if you cannot manufacture. I'm ${moodWord(c.mood)}.`;
       if (role.includes('labor') || role.includes('union')) return laborLine(w, c);

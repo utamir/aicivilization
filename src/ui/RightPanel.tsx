@@ -11,6 +11,7 @@ import {
 } from '../sim';
 import type { WorldState, TechId } from '../sim';
 import { Bar, pct, signed, CATEGORY_COLOR, CIV_TINT } from './shared';
+import { characterPortrait } from './portrait';
 import { TOPICS, characterReply, type TopicId } from './dialogue';
 
 // ── Chronicle ────────────────────────────────────────────────────────────────
@@ -194,6 +195,12 @@ function TechnologyTab({ worldRef }: { worldRef: React.MutableRefObject<WorldSta
 }
 
 // ── Characters ───────────────────────────────────────────────────────────────
+/** mood as a human read, never a decimal */
+function demeanor(m: number): string {
+  return m > 0.4 ? 'seems optimistic' : m > 0.05 ? 'cautiously hopeful' : m > -0.35 ? 'uneasy' : 'deeply worried';
+}
+const CIV_CITY: Record<string, string> = { veloria: 'Meridian', ardan: 'Ferrum', nemea: 'Solace' };
+
 function CharacterView({ worldRef, charId }: { worldRef: React.MutableRefObject<WorldState>; charId: string }) {
   const set = useUI((s) => s.set);
   const vmTick = useUI((s) => s.vmTick);
@@ -204,16 +211,20 @@ function CharacterView({ worldRef, charId }: { worldRef: React.MutableRefObject<
   const engineVersion = useUI((s) => s.engineVersion);
   useMemo(() => setLog([]), [engineVersion]);
   if (!c) return null;
+  const portrait = characterPortrait(c);
 
   return (
     <div>
       <button className="ghost-btn back" onClick={() => set({ selectedCharacter: null })}>← Characters</button>
-      <div className="char-head">
-        <div className="char-name">{c.name}</div>
-        <div className="char-role">{c.role} · {c.civId} · age {Math.floor(c.age)}</div>
-        <div className="char-mood">mood {c.mood >= 0 ? '+' : ''}{c.mood.toFixed(2)} · prominence {pct(c.prominence)}</div>
+      <div className="char-portrait-frame">
+        <img className="char-portrait" src={portrait} alt={`${c.name}, ${c.role.toLowerCase()}`} />
+        <div className="char-head">
+          <div className="char-name">{c.name}</div>
+          <div className="char-role">{c.role} · based in {CIV_CITY[c.civId] ?? c.civId}{c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''}</div>
+          <div className="char-read">{demeanor(c.mood)} · age {Math.floor(c.age)}</div>
+        </div>
       </div>
-      <div className="sub-head">Talk</div>
+      <div className="sub-head">Interview</div>
       <div className="topic-grid">
         {TOPICS.map((t) => (
           <button
@@ -233,20 +244,28 @@ function CharacterView({ worldRef, charId }: { worldRef: React.MutableRefObject<
         {log.map((m, i) => (
           <div key={i} className="chat-pair">
             <div className="chat-q">{m.q}</div>
-            <div className="chat-a">{m.a}</div>
+            <div className="chat-a">“{m.a}”<span className="chat-attr">— {c.name}</span></div>
           </div>
         ))}
       </div>
-      <div className="sub-head">History</div>
+      <div className="sub-head">Record</div>
       {c.history.slice(-6).reverse().map((h, i) => (
         <div key={i} className="char-history-line">{h.text}</div>
       ))}
       {c.beliefs.length > 0 && (
         <>
-          <div className="sub-head">Beliefs</div>
+          <div className="sub-head">What they believe</div>
           {c.beliefs.map((b, i) => <div key={i} className="char-belief">“{b}”</div>)}
         </>
       )}
+      <div className="sub-head">In the world</div>
+      <button
+        className="ghost-btn"
+        onClick={() => set({ selectedCiv: c.civId, cameraMode: 'city' })}
+        title="Move the camera to where this person works"
+      >
+        Show me their city ({CIV_CITY[c.civId] ?? c.civId})
+      </button>
     </div>
   );
 }
@@ -264,10 +283,10 @@ function CharactersTab({ worldRef }: { worldRef: React.MutableRefObject<WorldSta
     <div className="tab-scroll">
       {chars.map((c) => (
         <button key={c.id} className="char-item" onClick={() => set({ selectedCharacter: c.id })}>
-          <span className="char-avatar" style={{ background: CIV_TINT[c.civId] }}>{c.name.split(' ').map((x) => x[0]).join('')}</span>
+          <img className="char-avatar-img" src={characterPortrait(c, 44, 52)} alt="" />
           <span className="char-meta">
             <span className="char-item-name">{c.name}</span>
-            <span className="char-item-role">{c.role} · {c.civId}{c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''}</span>
+            <span className="char-item-role">{c.role} · {CIV_CITY[c.civId] ?? c.civId}{c.active === false ? ' · deceased' : c.retiredAt != null ? ' · retired' : ''}</span>
           </span>
           <span className={`char-mood-dot ${c.mood > 0.1 ? 'good' : c.mood > -0.3 ? 'warn' : 'bad'}`} />
         </button>
