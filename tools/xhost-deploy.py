@@ -145,6 +145,13 @@ def status_in(line: str) -> str | None:
     return next((s for s in STATUSES if re.search(rf"\b{s}\b", line, re.I)), None)
 
 
+def gh_error(msg: str) -> None:
+    """Surface the failure as a step annotation: job logs need admin rights to
+    read, but annotations show for everyone in the checks UI."""
+    for line in msg.splitlines() or ["(no detail)"]:
+        print(f"::error::{line}", file=sys.stderr)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--app", required=True, help="xhostd app name, e.g. civ")
@@ -174,8 +181,8 @@ def main() -> int:
         names = {t.get("name") for t in mcp.request("tools/list").get("tools", [])}
         missing = {"deploy", "get_deploy_log"} - names
         if missing:
-            print(f"server does not expose {sorted(missing)}", file=sys.stderr)
-            print(f"it offers: {sorted(n for n in names if n)}", file=sys.stderr)
+            gh_error(f"server does not expose {sorted(missing)}; it offers: "
+                     f"{sorted(n for n in names if n)}")
             return 1
 
         started = data_of(
@@ -183,8 +190,7 @@ def main() -> int:
         )
         deploy_id = started.get("deploy_id")
         if not deploy_id:
-            print(f"deploy returned no deploy_id: {started or '(no structured payload)'}",
-                  file=sys.stderr)
+            gh_error(f"deploy returned no deploy_id: {started or '(no structured payload)'}")
             return 1
         print(f"deploy {deploy_id} queued: {ns.app}/{ns.channel} @ {ns.ref}")
 
@@ -207,20 +213,20 @@ def main() -> int:
                 print("deploy succeeded")
                 return 0
             if status == "failed":
+                gh_error(f"deploy {deploy_id} failed")
                 print("--- deploy log ---", file=sys.stderr)
                 print(log, file=sys.stderr)
                 return 1
             if time.time() >= deadline:
-                print(f"timed out after {ns.timeout}s waiting for deploy {deploy_id}",
-                      file=sys.stderr)
-                print(f"last status line: {first or '(none)'}", file=sys.stderr)
-                print("--- deploy log ---", file=sys.stderr)
+                gh_error(f"timed out after {ns.timeout}s waiting for deploy {deploy_id}; "
+                         f"last status line: {first or '(none)'}")
+                print(f"--- deploy log ---", file=sys.stderr)
                 print(log, file=sys.stderr)
                 return 1
             time.sleep(ns.poll)
 
     except McpError as e:
-        print(f"xhostd deploy failed: {e}", file=sys.stderr)
+        gh_error(f"xhostd deploy failed: {e}")
         return 1
 
 
