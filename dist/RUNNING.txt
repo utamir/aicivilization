@@ -1,0 +1,9 @@
+WHAT IF? Civilization Lab - browser-ready build
+
+Serve this folder over HTTP and open index.html (double-clicking the file does not work: ES modules need http://).
+  python3 -m http.server 4173      (then http://localhost:4173)
+  or: npx serve .   or any static host
+
+This build was produced without npm: the app code is compiled locally; React, three.js and the
+react-three packages load from esm.sh at runtime, so the browser needs internet access the first time.
+This runtime has no Node/npm dependency. It does require internet access for the version-pinned esm.sh packages.
