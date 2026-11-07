@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { INFRA_ZONES, CITIES, civMainCity, type InfraZone } from './layout';
 import { heightAt } from './terrain';
+import { skyState } from './skyState';
 import type { WorldVisual } from './cityVisuals';
 import type { CivId } from '../sim';
 import { CIV_IDS } from '../sim';
@@ -55,24 +56,31 @@ function WindFarm({ zone, visualRef }: { zone: InfraZone; visualRef: React.Mutab
         const y = heightAt(x, z);
         return (
           <group key={i} position={[x, y, z]}>
-            <mesh position={[0, 2.6, 0]} castShadow>
-              <cylinderGeometry args={[0.09, 0.16, 5.2, 6]} />
-              <meshStandardMaterial color="#d8dde2" roughness={0.55} />
+            {/* foundation pad */}
+            <mesh position={[0, 0.06, 0]} receiveShadow>
+              <cylinderGeometry args={[0.55, 0.65, 0.12, 10]} />
+              <meshStandardMaterial color="#b0aaa0" roughness={0.95} />
             </mesh>
-            <group position={[0, 5.2, 0]}>
+            {/* tower: hub 8u ≈ 24 m, rotor 6.4u ≈ 19 m (realistic hub/diameter ratio) */}
+            <mesh position={[0, 4, 0]} castShadow>
+              <cylinderGeometry args={[0.14, 0.3, 8, 8]} />
+              <meshStandardMaterial color="#e4e8ec" roughness={0.4} metalness={0.1} />
+            </mesh>
+            <group position={[0, 8, 0]}>
+              {/* nacelle */}
               <mesh castShadow>
-                <boxGeometry args={[0.34, 0.3, 0.7]} />
-                <meshStandardMaterial color="#cfd5da" roughness={0.5} />
+                <boxGeometry args={[0.5, 0.42, 1.1]} />
+                <meshStandardMaterial color="#dde2e6" roughness={0.45} metalness={0.2} />
               </mesh>
-              <group ref={(g) => { if (g) bladesRef.current[i] = g; }} position={[0, 0, 0.4]}>
+              <group ref={(g) => { if (g) bladesRef.current[i] = g; }} position={[0, 0, 0.62]}>
                 {[0, 1, 2].map((k) => (
                   <mesh key={k} rotation={[0, 0, (k * Math.PI * 2) / 3]} position={[0, 0, 0]}>
-                    <boxGeometry args={[0.1, 2.5, 0.03]} />
-                    <meshStandardMaterial color="#e8ecef" roughness={0.4} />
+                    <boxGeometry args={[0.16, 3.2, 0.05]} />
+                    <meshStandardMaterial color="#eef1f3" roughness={0.35} />
                   </mesh>
                 ))}
                 <mesh>
-                  <sphereGeometry args={[0.14, 8, 8]} />
+                  <sphereGeometry args={[0.2, 8, 8]} />
                   <meshStandardMaterial color="#d8dde2" />
                 </mesh>
               </group>
@@ -119,9 +127,55 @@ function SolarField({ zone, visualRef }: { zone: InfraZone; visualRef: React.Mut
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_SOLAR_ROWS]} frustumCulled={false}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_SOLAR_ROWS]} castShadow frustumCulled={false}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color="#1d2f52" roughness={0.25} metalness={0.65} />
+    </instancedMesh>
+  );
+}
+
+// support posts under each solar row
+const MAX_SOLAR_POSTS = 96;
+
+function SolarPosts({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRefObject<WorldVisual | null> }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const applied = useRef(-1);
+
+  useFrame(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    const level = visualRef.current?.infra.get(zone.id) ?? 0;
+    const rows = Math.min(MAX_SOLAR_ROWS, Math.round(8 + level * 12));
+    if (rows === applied.current) return;
+    applied.current = rows;
+    const cols = 8;
+    let i = 0;
+    for (let r = 0; r < rows; r++) {
+      const gx = (r % cols) / cols - 0.44;
+      const gz = Math.floor(r / cols) / Math.ceil(MAX_SOLAR_ROWS / cols) - 0.45;
+      const x = zone.x + gx * zone.size;
+      const z = zone.z + gz * zone.size;
+      const y = heightAt(x, z);
+      for (const off of [-0.7, 0.7]) {
+        if (i >= MAX_SOLAR_POSTS) break;
+        tmpObj.position.set(x + off * 0.0 + off, y + 0.14, z);
+        tmpObj.rotation.set(0, 0, 0);
+        tmpObj.scale.set(0.06, 0.28, 0.06);
+        tmpObj.updateMatrix();
+        mesh.setMatrixAt(i++, tmpObj.matrix);
+      }
+    }
+    for (let k = i; k < MAX_SOLAR_POSTS; k++) {
+      tmpObj.position.set(0, -60, 0); tmpObj.scale.setScalar(0.001); tmpObj.updateMatrix();
+      mesh.setMatrixAt(k, tmpObj.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_SOLAR_POSTS]} frustumCulled={false}>
+      <cylinderGeometry args={[1, 1, 1, 6]} />
+      <meshStandardMaterial color="#5a616b" roughness={0.7} metalness={0.4} />
     </instancedMesh>
   );
 }
@@ -176,16 +230,42 @@ function NuclearPlant({ zone, visualRef }: { zone: InfraZone; visualRef: React.M
             <cylinderGeometry args={[0.95, 0.95, 0.9, 16]} />
             <meshStandardMaterial color="#cfd4d9" roughness={0.7} />
           </mesh>
-          {/* cooling tower */}
-          <mesh position={[1.7, 1.1, 0.6]} castShadow>
-            <cylinderGeometry args={[0.55, 0.8, 2.2, 12]} />
-            <meshStandardMaterial color="#d5d9de" roughness={0.75} />
+          {/* cooling tower: hyperbolic profile, ~2x scale for real presence */}
+          <mesh position={[1.9, 2.0, 0.6]} castShadow>
+            <cylinderGeometry args={[0.72, 1.05, 4.0, 14, 1, true]} />
+            <meshStandardMaterial color="#d5d9de" roughness={0.75} side={THREE.DoubleSide} />
           </mesh>
-          <SteamPuff x={1.7} y={2.3} z={0.6} phase={i * 0.33} />
-          {/* turbine hall */}
-          <mesh position={[-1.3, 0.4, 1.4]} castShadow>
-            <boxGeometry args={[1.6, 0.8, 1.1]} />
+          <SteamPuff x={1.9} y={4.1} z={0.6} phase={i * 0.33} />
+          {/* turbine hall with clerestory */}
+          <mesh position={[-1.5, 0.5, 1.6]} castShadow>
+            <boxGeometry args={[2.2, 1.0, 1.5]} />
             <meshStandardMaterial color="#b9bfc6" roughness={0.8} />
+          </mesh>
+          <mesh position={[-1.5, 1.02, 1.6]}>
+            <boxGeometry args={[2.24, 0.08, 0.5]} />
+            <meshStandardMaterial color="#39424c" emissive="#8fb4d8" emissiveIntensity={0.25} />
+          </mesh>
+          {/* switchyard: transformer plinths + gantry */}
+          {[0, 1, 2].map((k) => (
+            <group key={k} position={[-2.2 + k * 0.9, 0, -1.6]}>
+              <mesh position={[0, 0.16, 0]} castShadow>
+                <boxGeometry args={[0.5, 0.32, 0.5]} />
+                <meshStandardMaterial color="#8a8478" roughness={0.9} />
+              </mesh>
+              <mesh position={[0, 0.4, 0]}>
+                <cylinderGeometry args={[0.08, 0.08, 0.2, 6]} />
+                <meshStandardMaterial color="#6e7278" roughness={0.5} metalness={0.5} />
+              </mesh>
+            </group>
+          ))}
+          <mesh position={[-1.3, 0.95, -1.6]}>
+            <boxGeometry args={[2.4, 0.06, 0.08]} />
+            <meshStandardMaterial color="#5a616b" roughness={0.6} metalness={0.5} />
+          </mesh>
+          {/* perimeter: service apron */}
+          <mesh position={[0, 0.02, 3.4]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[6.5, 2.2]} />
+            <meshStandardMaterial color="#6e6a62" roughness={1} />
           </mesh>
         </group>
       ))}
@@ -208,7 +288,7 @@ function DataCenter({ zone, visualRef }: { zone: InfraZone; visualRef: React.Mut
     const level = visualRef.current?.infra.get(zone.id) ?? 0;
     const halls = Math.min(MAX_HALLS, Math.floor(level * 2.4));
     if (halls === applied.current) { /* still update glow pulse */ }
-    const night = (window as any).__nightFactor ?? 0;
+    const night = skyState.nightFactor;
     (glow.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.25 + night * 1.6;
     if (halls === applied.current) return;
     applied.current = halls;
@@ -236,6 +316,11 @@ function DataCenter({ zone, visualRef }: { zone: InfraZone; visualRef: React.Mut
 
   return (
     <group>
+      {/* service apron + perimeter: the halls sit on a fenced gravel yard */}
+      <mesh position={[zone.x, heightAt(zone.x, zone.z) + 0.02, zone.z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[zone.size * 1.15, zone.size * 0.72]} />
+        <meshStandardMaterial color="#77746c" roughness={1} />
+      </mesh>
       <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_HALLS]} castShadow frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#3a4149" roughness={0.7} metalness={0.3} />
@@ -244,6 +329,40 @@ function DataCenter({ zone, visualRef }: { zone: InfraZone; visualRef: React.Mut
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.4} />
       </instancedMesh>
+      {/* transformer yard */}
+      {[0, 1].map((k) => {
+        const x = zone.x - zone.size * 0.36 + k * 1.6;
+        const z = zone.z + zone.size * 0.3;
+        return (
+          <group key={k} position={[x, heightAt(x, z), z]}>
+            <mesh position={[0, 0.22, 0]} castShadow>
+              <boxGeometry args={[0.7, 0.44, 0.6]} />
+              <meshStandardMaterial color="#6e7278" roughness={0.6} metalness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.5, 0]}>
+              <cylinderGeometry args={[0.07, 0.07, 0.2, 6]} />
+              <meshStandardMaterial color="#5a616b" metalness={0.6} roughness={0.4} />
+            </mesh>
+          </group>
+        );
+      })}
+      {/* entrance pavilion with doors */}
+      {(() => {
+        const x = zone.x, z = zone.z - zone.size * 0.38;
+        const y = heightAt(x, z);
+        return (
+          <group position={[x, y, z]}>
+            <mesh position={[0, 0.3, 0]} castShadow>
+              <boxGeometry args={[1.3, 0.6, 0.4]} />
+              <meshStandardMaterial color="#8a9096" roughness={0.6} />
+            </mesh>
+            <mesh position={[0, 0.62, 0]}>
+              <boxGeometry args={[1.34, 0.06, 0.44]} />
+              <meshStandardMaterial color="#28323c" roughness={0.4} />
+            </mesh>
+          </group>
+        );
+      })()}
     </group>
   );
 }
@@ -314,7 +433,7 @@ function Farm({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRe
         x: zone.x + gx * zone.size,
         z: zone.z + gz * zone.size,
         w: zone.size * (0.16 + nextFloat(rng) * 0.06),
-        hue: 0.22 + nextFloat(rng) * 0.08, // base healthy green
+        hue: 0.2 + nextFloat(rng) * 0.08, // muted healthy green
         light: 0.3 + nextFloat(rng) * 0.12,
         rot: (nextFloat(rng) - 0.5) * 0.3,
       };
@@ -350,8 +469,8 @@ function Farm({ zone, visualRef }: { zone: InfraZone; visualRef: React.MutableRe
         if (!child.visible) return;
         const m = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
         const p = patches[i];
-        // healthy green → drought/shortage brown
-        m.color.setHSL(p.hue * (1 - stress) + 0.07 * stress, 0.5 - stress * 0.15, p.light * (1 - stress * 0.4));
+        // healthy green → drought/shortage brown (muted: real fields are dusty)
+        m.color.setHSL(p.hue * (1 - stress) + 0.07 * stress, 0.28 - stress * 0.1, 0.3 * (1 - stress * 0.4) + p.light * 0.18);
       });
     }
     const tg = towerRef.current;
@@ -511,7 +630,7 @@ export function Infrastructure({ visualRef }: { visualRef: React.MutableRefObjec
       {INFRA_ZONES.map((z) => {
         switch (z.type) {
           case 'wind': return <WindFarm key={z.id} zone={z} visualRef={visualRef} />;
-          case 'solar': return <SolarField key={z.id} zone={z} visualRef={visualRef} />;
+          case 'solar': return <group key={z.id}><SolarField zone={z} visualRef={visualRef} /><SolarPosts zone={z} visualRef={visualRef} /></group>;
           case 'nuclear': return <NuclearPlant key={z.id} zone={z} visualRef={visualRef} />;
           case 'datacenter': return <DataCenter key={z.id} zone={z} visualRef={visualRef} />;
           case 'port': return <Port key={z.id} zone={z} visualRef={visualRef} />;

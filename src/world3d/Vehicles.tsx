@@ -1,53 +1,69 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// VEHICLES — cars moving along road curves and ships on sea lanes. As EV
-// adoption grows in each civ, the fleet visibly shifts color. Ships carry
-// running lights at night.
+// VEHICLES — recognizable traffic on the inter-city roads and ships on the
+// sea lanes. Cars, vans, buses and trucks are composed parts (body, cabin,
+// wheels with hubs, lights, windscreens) at true scale to the 2.6-unit road
+// (1 unit ≈ 3 m → a car is ≈ 1.5 units long). EV adoption from the sim
+// repaints the fleet; cars keep their identity across the transition.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { buildRoadPaths } from './Roads';
+import { buildRoadPaths } from './RoadsCurves';
 import { heightAt } from './terrain';
 import type { WorldVisual } from './cityVisuals';
 import { cityById } from './layout';
+import { skyState } from './skyState';
 
 const tmpObj = new THREE.Object3D();
 const tmpColor = new THREE.Color();
 
-interface Car {
+type VehKind = 'car' | 'van' | 'bus' | 'truck';
+interface Vehicle {
   path: number;
   t: number;
   speed: number;
   dir: 1 | -1;
+  kind: VehKind;
   ev: boolean;
 }
 
-const CARS_PER_ROAD = 14;
-const ICE_COLORS = ['#8a8f96', '#6b7078', '#7a6f63', '#5d6470', '#8f8578'];
-const EV_COLORS = ['#cfe6ef', '#a8d8e8', '#e8f4f8', '#9fd4c8'];
+const CARS_PER_ROAD = 12;
+const ICE_COLORS = ['#8a8f96', '#6b7078', '#7a6f63', '#5d6470', '#8f8578', '#3e434a', '#7a3a34'];
+const EV_COLORS = ['#cfe6ef', '#a8d8e8', '#e8f4f8', '#9fd4c8', '#d8e4ee'];
+
+// dims per kind: [bodyL, bodyH, bodyW, cabinL, cabinH, wheelR]
+const KIND_DIMS: Record<VehKind, { bl: number; bh: number; bw: number; cl: number; ch: number; wr: number; roof: number }> = {
+  car: { bl: 1.5, bh: 0.34, bw: 0.6, cl: 0.78, ch: 0.26, wr: 0.14, roof: 0.1 },
+  van: { bl: 1.7, bh: 0.5, bw: 0.64, cl: 0.7, ch: 0.3, wr: 0.16, roof: 0.2 },
+  bus: { bl: 3.1, bh: 0.72, bw: 0.68, cl: 2.6, ch: 0.3, wr: 0.17, roof: 0.12 },
+  truck: { bl: 3.4, bh: 0.62, bw: 0.7, cl: 0.95, ch: 0.42, wr: 0.19, roof: 0.1 },
+};
 
 export function Vehicles({ visualRef }: { visualRef: React.MutableRefObject<WorldVisual | null> }) {
   const paths = useMemo(() => buildRoadPaths(), []);
-  const cars = useMemo<Car[]>(() => {
-    const out: Car[] = [];
+  const cars = useMemo<Vehicle[]>(() => {
+    const out: Vehicle[] = [];
     let s = 12345;
     const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
     paths.forEach((_, pi) => {
       for (let i = 0; i < CARS_PER_ROAD; i++) {
-        out.push({ path: pi, t: rnd(), speed: 0.010 + rnd() * 0.009, dir: rnd() < 0.5 ? 1 : -1, ev: false });
+        const kr = rnd();
+        const kind: VehKind = kr < 0.62 ? 'car' : kr < 0.78 ? 'van' : kr < 0.9 ? 'bus' : 'truck';
+        out.push({ path: pi, t: rnd(), speed: 0.009 + rnd() * 0.008, dir: rnd() < 0.5 ? 1 : -1, kind, ev: false });
       }
     });
     return out;
   }, [paths]);
 
   const bodyRef = useRef<THREE.InstancedMesh>(null);
+  const cabinRef = useRef<THREE.InstancedMesh>(null);
+  const wheelRef = useRef<THREE.InstancedMesh>(null);
   const lightRef = useRef<THREE.InstancedMesh>(null);
   const evQuant = useRef(-1);
 
   useFrame((_, dt) => {
-    const body = bodyRef.current;
-    const lights = lightRef.current;
-    if (!body || !lights) return;
+    const body = bodyRef.current, cabin = cabinRef.current, wheel = wheelRef.current, lights = lightRef.current;
+    if (!body || !cabin || !wheel || !lights) return;
     const wv = visualRef.current;
     const avgEv = wv ? (wv.evShare.veloria + wv.evShare.ardan + wv.evShare.nemea) / 3 : 0;
     // repaint fleet when EV share moves (quantized)
@@ -64,11 +80,12 @@ export function Vehicles({ visualRef }: { visualRef: React.MutableRefObject<Worl
       });
       if (body.instanceColor) body.instanceColor.needsUpdate = true;
     }
-    const night = (window as any).__nightFactor ?? 0;
-    (lights.material as THREE.MeshStandardMaterial).emissiveIntensity = night * 2.4;
+    const night = skyState.nightFactor;
+    (lights.material as THREE.MeshStandardMaterial).emissiveIntensity = night * 2.6;
 
     const pt = new THREE.Vector3();
     const tan = new THREE.Vector3();
+    const sideV = new THREE.Vector3();
     cars.forEach((car, i) => {
       const path = paths[car.path];
       const ca = cityById(path.a), cb = cityById(path.b);
@@ -78,8 +95,10 @@ export function Vehicles({ visualRef }: { visualRef: React.MutableRefObject<Worl
       // Deterministically thin traffic as the connected settlements empty.
       const visible = activity > 0 && ((i * 37) % 100) < Math.round(Math.min(1, Math.pow(activity, 0.62)) * 100);
       if (!visible) {
-        tmpObj.position.set(0, -80, 0); tmpObj.scale.set(0.001, 0.001, 0.001); tmpObj.rotation.set(0, 0, 0); tmpObj.updateMatrix();
-        body.setMatrixAt(i, tmpObj.matrix); lights.setMatrixAt(i, tmpObj.matrix);
+        tmpObj.position.set(0, -80, 0); tmpObj.scale.setScalar(0.001); tmpObj.updateMatrix();
+        body.setMatrixAt(i, tmpObj.matrix); cabin.setMatrixAt(i, tmpObj.matrix);
+        lights.setMatrixAt(i, tmpObj.matrix);
+        for (let w = 0; w < 4; w++) wheel.setMatrixAt(i * 4 + w, tmpObj.matrix);
         return;
       }
       car.t += (car.speed * dt * 60 * car.dir) / path.length;
@@ -88,29 +107,67 @@ export function Vehicles({ visualRef }: { visualRef: React.MutableRefObject<Worl
       path.curve.getPointAt(car.t, pt);
       path.curve.getTangentAt(car.t, tan);
       if (car.dir < 0) tan.negate();
-      const side = new THREE.Vector3(-tan.z, 0, tan.x).multiplyScalar(0.3);
-      pt.add(side);
-      pt.y = heightAt(pt.x, pt.z) + 0.32;
+      // right-hand traffic: offset to the side of travel direction
+      sideV.set(-tan.z, 0, tan.x).multiplyScalar(0.62 * car.dir);
+      pt.add(sideV);
+      const dim = KIND_DIMS[car.kind];
+      const yaw = Math.atan2(tan.x, tan.z);
+      pt.y = heightAt(pt.x, pt.z) + dim.wr;
       tmpObj.position.copy(pt);
-      tmpObj.rotation.set(0, Math.atan2(tan.x, tan.z), 0);
-      tmpObj.scale.set(0.42, 0.26, 0.85);
+      tmpObj.rotation.set(0, yaw, 0);
+      tmpObj.scale.set(dim.bw, dim.bh, dim.bl);
       tmpObj.updateMatrix();
       body.setMatrixAt(i, tmpObj.matrix);
-      tmpObj.position.add(tan.clone().multiplyScalar(0.5));
-      tmpObj.position.y += 0.05;
-      tmpObj.scale.set(0.16, 0.08, 0.1);
+      // cabin: glass-house on top, slightly toward the front for buses/trucks cabs
+      const cabForward = car.kind === 'truck' ? 0.9 : car.kind === 'bus' ? 0.7 : -0.05;
+      tmpObj.position.set(
+        pt.x + tan.x * cabForward,
+        pt.y + dim.bh / 2 + dim.ch / 2,
+        pt.z + tan.z * cabForward,
+      );
+      tmpObj.scale.set(dim.bw * 0.92, dim.ch, dim.cl);
+      tmpObj.updateMatrix();
+      cabin.setMatrixAt(i, tmpObj.matrix);
+      // wheels: 4 corners
+      const axW = dim.bl * 0.32, axF = dim.bl * 0.3;
+      for (let w = 0; w < 4; w++) {
+        const sx = (w % 2 === 0 ? -1 : 1) * (dim.bw / 2);
+        const sy = w < 2 ? axF : -axW;
+        tmpObj.position.set(
+          pt.x + tan.x * sy - tan.z * sx,
+          pt.y - dim.wr + dim.wr * 0.05 + 0.0,
+          pt.z + tan.z * sy + tan.x * sx,
+        );
+        tmpObj.rotation.set(0, yaw, Math.PI / 2);
+        tmpObj.scale.set(dim.wr * 0.8, dim.wr * 1.7, dim.wr * 1.7);
+        tmpObj.updateMatrix();
+        wheel.setMatrixAt(i * 4 + w, tmpObj.matrix);
+      }
+      // headlights: small emissive strip at the front
+      tmpObj.position.set(pt.x + tan.x * (dim.bl / 2 + 0.02), pt.y + dim.bh * 0.18, pt.z + tan.z * (dim.bl / 2 + 0.02));
+      tmpObj.scale.set(dim.bw * 0.7, 0.07, 0.06);
       tmpObj.updateMatrix();
       lights.setMatrixAt(i, tmpObj.matrix);
     });
     body.instanceMatrix.needsUpdate = true;
+    cabin.instanceMatrix.needsUpdate = true;
+    wheel.instanceMatrix.needsUpdate = true;
     lights.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <group>
-      <instancedMesh ref={bodyRef} args={[undefined, undefined, cars.length]} frustumCulled={false}>
+      <instancedMesh ref={bodyRef} args={[undefined, undefined, cars.length]} castShadow frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial roughness={0.4} metalness={0.5} />
+        <meshStandardMaterial roughness={0.35} metalness={0.55} />
+      </instancedMesh>
+      <instancedMesh ref={cabinRef} args={[undefined, undefined, cars.length]} castShadow frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#28323c" roughness={0.15} metalness={0.4} />
+      </instancedMesh>
+      <instancedMesh ref={wheelRef} args={[undefined, undefined, cars.length * 4]} frustumCulled={false}>
+        <cylinderGeometry args={[1, 1, 1, 10]} />
+        <meshStandardMaterial color="#191b1e" roughness={0.85} />
       </instancedMesh>
       <instancedMesh ref={lightRef} args={[undefined, undefined, cars.length]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
@@ -146,7 +203,7 @@ export function Ships({ visualRef }: { visualRef: React.MutableRefObject<WorldVi
       const tt = (t * 0.006 + offsets[i]) % 1;
       const pt = curve.getPointAt(tt);
       const tan = curve.getTangentAt(tt);
-      g.position.set(pt.x, 0.42 + Math.sin(t * 1.1 + i) * 0.06, pt.z);
+      g.position.set(pt.x, 0.34 + Math.sin(t * 1.1 + i) * 0.06, pt.z);
       g.rotation.y = Math.atan2(tan.x, tan.z);
       g.rotation.z = Math.sin(t * 0.9 + i * 2) * 0.02;
     });
@@ -156,20 +213,38 @@ export function Ships({ visualRef }: { visualRef: React.MutableRefObject<WorldVi
     <group>
       {curves.map((_, i) => (
         <group key={i} ref={(g) => { if (g) shipRefs.current[i] = g; }}>
+          {/* hull with sheer and bulwark */}
           <mesh castShadow>
-            <boxGeometry args={[1.1, 0.5, 3.4]} />
+            <boxGeometry args={[1.2, 0.55, 4.2]} />
             <meshStandardMaterial color={i === 1 ? '#7a4a3a' : '#3f5a6e'} roughness={0.6} />
           </mesh>
-          <mesh position={[0, 0.45, -0.9]}>
-            <boxGeometry args={[0.7, 0.5, 0.8]} />
+          <mesh position={[0, 0.36, 0]}>
+            <boxGeometry args={[1.06, 0.16, 3.9]} />
+            <meshStandardMaterial color="#8a949c" roughness={0.7} />
+          </mesh>
+          {/* deckhouse aft + bridge */}
+          <mesh position={[0, 0.75, -1.4]}>
+            <boxGeometry args={[0.86, 0.6, 1.1]} />
             <meshStandardMaterial color="#d5d9de" roughness={0.7} />
           </mesh>
-          <mesh position={[0, 0.42, 0.6]}>
-            <boxGeometry args={[0.85, 0.35, 1.4]} />
-            <meshStandardMaterial color={i === 2 ? '#4a7a5c' : '#8a6a4a'} roughness={0.7} />
+          <mesh position={[0, 1.2, -1.6]}>
+            <boxGeometry args={[0.7, 0.34, 0.6]} />
+            <meshStandardMaterial color="#28323c" roughness={0.3} />
           </mesh>
+          {/* funnel */}
+          <mesh position={[0, 1.05, -0.6]}>
+            <cylinderGeometry args={[0.14, 0.18, 0.5, 8]} />
+            <meshStandardMaterial color={i === 2 ? '#4a7a5c' : '#c94f38'} roughness={0.6} />
+          </mesh>
+          {/* container rows fore of deckhouse */}
+          {[-0.2, 0.35, 0.9].map((dz, k) => (
+            <mesh key={k} position={[0, 0.5, dz]} castShadow>
+              <boxGeometry args={[0.9, 0.26, 0.5]} />
+              <meshStandardMaterial color={['#8a5a3a', '#3a6a8a', '#5a7a4a'][(i + k) % 3]} roughness={0.8} />
+            </mesh>
+          ))}
           {/* running light */}
-          <mesh position={[0, 0.85, -0.9]}>
+          <mesh position={[0, 1.45, -1.6]}>
             <sphereGeometry args={[0.09, 6, 6]} />
             <meshStandardMaterial color="#ffe9a8" emissive="#ffd970" emissiveIntensity={1.6} />
           </mesh>

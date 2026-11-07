@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import * as THREE from 'three';
 import { WORLD_SIZE, CITIES } from './layout';
+import { groundDetail } from './textures';
 
 // tiny deterministic 2D value noise
 function hash2(x: number, y: number): number {
@@ -31,7 +32,20 @@ export function fbm(x: number, y: number, octaves = 5): number {
   return sum / norm;
 }
 
+// ── heightAt: quantized memo cache ───────────────────────────────────────────
+// Called from many per-frame animation layers (vehicles, citizens, fringes).
+// A 0.25-unit grid cache keeps their cost flat; visual-only callers tolerate
+// the tiny quantization, and static consumers (terrain bake, districts) call
+// it before the cache could matter. Cleared wholesale when it grows past the
+// cap so long runs never leak.
+const H_GRID = 0.25;
+const H_CAP = 120000;
+const hCache = new Map<number, number>();
+
 export function heightAt(x: number, z: number): number {
+  const key = (Math.round(x / H_GRID) + 4096) * 8192 + (Math.round(z / H_GRID) + 4096);
+  const hit = hCache.get(key);
+  if (hit !== undefined) return hit;
   const nx = x / WORLD_SIZE + 0.5, nz = z / WORLD_SIZE + 0.5;
   // edge falloff → island continent surrounded by sea
   const ex = Math.min(nx, 1 - nx), ez = Math.min(nz, 1 - nz);
@@ -58,6 +72,8 @@ export function heightAt(x: number, z: number): number {
     const target = Math.max(1.2, fbm(nx * 4, nz * 4, 2) * 3);
     h = h * flat + target * (1 - flat);
   }
+  if (hCache.size >= H_CAP) hCache.clear();
+  hCache.set(key, h);
   return h;
 }
 
@@ -96,7 +112,10 @@ export function buildTerrain(): THREE.Mesh {
   }
   geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geo.computeVertexNormals();
-  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0.0 });
+  // micro surface detail: grayscale noise multiplied into the vertex colors
+  const detail = groundDetail();
+  detail.repeat.set(46, 46);
+  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, map: detail, roughness: 0.95, metalness: 0.0 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = 'terrain';

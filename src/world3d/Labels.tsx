@@ -1,6 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LABELS — settlement names anchored in the world, with the people who live
-// there. Sizes follow population; the biggest city of a civilization is bold.
+// LABELS — compact settlement tags. Small pill with the name and (only for the
+// selected or principal city) the population; scales down with camera
+// distance, never covers the world. Detailed data lives in the inspector
+// panels, not on the label.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useRef } from 'react';
 import { Html } from '@react-three/drei';
@@ -24,10 +26,10 @@ function CityLabel({ id, visualRef }: { id: string; visualRef: React.MutableRefO
     el.current.classList.toggle('lbl-selected', useUI.getState().selectedCiv === city.civId);
   });
   return (
-    <Html position={[city.x, heightAt(city.x, city.z) + 3.5 + (main ? 2 : 0), city.z]} center distanceFactor={140} zIndexRange={[2, 1]} occlude style={{ pointerEvents: 'none' }}>
-      <div ref={el} className={`city-label civ-${city.civId} ${main ? 'lbl-main' : ''}`}>
+    <Html position={[city.x, heightAt(city.x, city.z) + 2.2 + (main ? 0.6 : 0), city.z]} center distanceFactor={38} zIndexRange={[2, 1]} occlude style={{ pointerEvents: 'none' }}>
+      <div ref={el} className={`city-label city-label-sm civ-${city.civId} ${main ? 'lbl-main' : ''}`}>
         <div className="lbl-name">{city.name}</div>
-        <div className="lbl-sub">{city.kind}</div>
+        <div className="lbl-sub" />
       </div>
     </Html>
   );

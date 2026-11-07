@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useUI } from '../state/store';
 import { engine } from '../state/engine';
+import { skyState } from './skyState';
 
 const DAY_PERIOD = 240; // seconds per cosmetic day while the sim runs
 
@@ -99,8 +100,11 @@ export function SkyRig() {
     const dusk = (1 - night) * THREE.MathUtils.smoothstep(0.32 - Math.abs(elev), 0.0, 0.32);
     const az = mode === 'cycle' ? phase.current * Math.PI * 2 : 1.9;
     const sunDir = new THREE.Vector3(Math.cos(az) * 0.9, Math.max(elev, -0.35), Math.sin(az) * 0.45).normalize();
-    (window as any).__nightFactor = night;
-    (window as any).__sunDir = sunDir;
+    const fog = new THREE.Color('#b8c8d8').lerp(new THREE.Color('#d9a380'), dusk * 0.5).lerp(new THREE.Color('#070b14'), night);
+    skyState.nightFactor = night;
+    skyState.duskFactor = dusk;
+    skyState.fogColor.copy(fog);
+    skyState.sunDir.copy(sunDir);
 
     if (sun.current) {
       sun.current.position.copy(sunDir).multiplyScalar(300);
@@ -127,7 +131,7 @@ export function SkyRig() {
     }
     if (stars.current) (stars.current.material as THREE.PointsMaterial).opacity = night * 0.9;
     if (scene.fog instanceof THREE.Fog) {
-      scene.fog.color.set(new THREE.Color('#b8c8d8').lerp(new THREE.Color('#d9a380'), dusk * 0.5).lerp(new THREE.Color('#070b14'), night));
+      scene.fog.color.copy(fog);
       scene.fog.near = THREE.MathUtils.lerp(160, 120, night);
     }
   });
