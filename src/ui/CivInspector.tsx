@@ -2,13 +2,14 @@
 // CIV INSPECTOR — left panel. Per-civilization state with metric history
 // sparklines, energy mix, and current strategic priority.
 // ─────────────────────────────────────────────────────────────────────────────
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import { useUI } from '../state/store';
 import { CIV_IDS, civDef } from '../sim';
 import type { WorldState, CivId } from '../sim';
 import { Stat, Bar, Sparkline, pct, CIV_TINT } from './shared';
 
 const MIX_ORDER = ['fossil', 'nuclear', 'hydro', 'wind', 'solar'] as const;
+const MIX_CF: Record<(typeof MIX_ORDER)[number], number> = { fossil: 0.55, nuclear: 0.9, hydro: 0.45, wind: 0.35, solar: 0.22 };
 const MIX_COLORS: Record<string, string> = { fossil: '#6b6157', nuclear: '#e8e3d5', hydro: '#4a90c2', wind: '#9fd4c8', solar: '#e8c552' };
 
 export function CivInspector({ worldRef }: { worldRef: React.MutableRefObject<WorldState> }) {
@@ -22,7 +23,7 @@ export function CivInspector({ worldRef }: { worldRef: React.MutableRefObject<Wo
     const civ = w.civs.find((c) => c.id === selectedCiv)!;
     const hist = w.metrics;
     const series = (fn: (m: (typeof w.metrics)[0]) => number) => hist.map(fn);
-    const totalGen = MIX_ORDER.reduce((a, k) => a + civ.energy.sources[k].cap * ({ fossil: 0.55, nuclear: 0.9, hydro: 0.45, wind: 0.35, solar: 0.22 } as any)[k], 0) || 1;
+    const totalGen = MIX_ORDER.reduce((a, k) => a + civ.energy.sources[k].cap * MIX_CF[k], 0) || 1;
     return {
       civ,
       def: civDef(selectedCiv),
@@ -35,7 +36,7 @@ export function CivInspector({ worldRef }: { worldRef: React.MutableRefObject<Wo
       giniS: series((m) => m.gini[selectedCiv]),
       stabS: series((m) => m.stability[selectedCiv]),
       outGrowth: (() => { const o = series((m) => m.output[selectedCiv]); return o.length > 2 ? (o[o.length - 1] / Math.max(0.01, o[o.length - 2]) - 1) : 0; })(),
-      mix: MIX_ORDER.map((k) => ({ k, share: (civ.energy.sources[k].cap * ({ fossil: 0.55, nuclear: 0.9, hydro: 0.45, wind: 0.35, solar: 0.22 } as any)[k]) / totalGen })),
+      mix: MIX_ORDER.map((k) => ({ k, share: (civ.energy.sources[k].cap * MIX_CF[k]) / totalGen })),
       projects: w.projects.filter((p) => p.civId === selectedCiv && p.status !== 'operational' && p.status !== 'cancelled'),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,7 +59,7 @@ export function CivInspector({ worldRef }: { worldRef: React.MutableRefObject<Wo
       </div>
       <div className="civ-tabs">
         {CIV_IDS.map((id: CivId) => (
-          <button key={id} className={`civ-tab ${id === selectedCiv ? 'active' : ''}`} style={{ ['--tint' as any]: CIV_TINT[id] }} onClick={() => set({ selectedCiv: id })}>
+          <button key={id} className={`civ-tab ${id === selectedCiv ? 'active' : ''}`} style={{ '--tint': CIV_TINT[id] } as CSSProperties} onClick={() => set({ selectedCiv: id })}>
             {civDef(id).name}
           </button>
         ))}

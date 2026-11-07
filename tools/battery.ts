@@ -1,4 +1,4 @@
-import { createWorld, stepWorld, DEFAULT_PARAMS, SCENARIO_PRESETS, applyDelta } from '../src/sim';
+import { createWorld, stepWorld, DEFAULT_PARAMS, SCENARIO_PRESETS, applyDelta, type CivState } from '../src/sim';
 declare const process: { argv: string[] };
 const years = Number(process.argv[2] ?? 200);
 let bad = 0;
@@ -17,7 +17,7 @@ for (const preset of SCENARIO_PRESETS) {
     }
     check('K', w.frontier.kardashev, 0.5, 2.2); check('warming', w.env.warmingC, 0.5, 6); check('mineralCost', w.resources.mineralCostIndex, 0.4, 9);
     const ach = w.frontier.milestones.filter(m => m.status === 'achieved').length;
-    const sum = (fn: (c: any) => number) => w.civs.reduce((a, c) => a + fn(c), 0);
+    const sum = (fn: (c: CivState) => number) => w.civs.reduce((a, c) => a + fn(c), 0);
     console.log(`${preset.id.padEnd(18)} seed=${seed} ${ms}ms pop=${sum(c=>c.population.total).toFixed(0)} off=${w.frontier.offworldPopulationM.toFixed(1)} out=${sum(c=>c.economy.output).toFixed(1)} K=${w.frontier.kardashev.toFixed(2)} LE=${(sum(c=>c.population.lifeExpectancy)/3).toFixed(0)} milestones=${ach} traj=${w.frontier.trajectory} events=${w.chronicle.length} inv=${w.inventions.length} warm=${w.env.warmingC.toFixed(2)} abandoned=${(sum(c=>c.housing.abandoned)/3).toFixed(2)} minCost=${w.resources.mineralCostIndex.toFixed(2)} fossil=${w.resources.fossilReserves.toFixed(0)}`);
   }
 }

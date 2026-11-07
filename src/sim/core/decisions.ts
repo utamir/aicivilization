@@ -169,7 +169,7 @@ export const DECISIONS: DecisionDef[] = [
   },
   {
     id: 'climate_2_5', title: 'Two and a half degrees',
-    question: (w, _c) => `Warming has passed ${w.env.warmingC.toFixed(1)} °C. Harvests are beginning to fail in the exposed regions. Fund climate engineering research, or adapt?`,
+    question: (w) => `Warming has passed ${w.env.warmingC.toFixed(1)} °C. Harvests are beginning to fail in the exposed regions. Fund climate engineering research, or adapt?`,
     trigger: (w, c) => w.env.warmingC > 2.5 && c.frontierReadiness > 0.5 && c.id === 'veloria',
     options: [
       { id: 'engineer', label: 'Fund sunshade and capture research', consequence: 'Decades of work toward an engineered climate; needs planetary energy to run. Collaboration improves.', params: { collaboration: 1.15, cleanLearningMult: 1.15 }, apply: (w) => { for (const c of w.civs) c.researchCapacity *= 1.05; }, affinity: (c) => c.traits.sciencePriority },

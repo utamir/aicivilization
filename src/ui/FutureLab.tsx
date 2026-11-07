@@ -3,7 +3,7 @@
 // parameters), and custom What-If text via the safe parser. Starts a new
 // simulation from September 2026 under the chosen assumptions.
 // ─────────────────────────────────────────────────────────────────────────────
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useUI } from '../state/store';
 import { engine } from '../state/engine';
 import { SCENARIO_PRESETS, BUILDER_AXES, parseWhatIf, mergeDeltas } from '../sim';
@@ -46,7 +46,7 @@ export function FutureLab() {
         {mode === 'presets' && (
           <div className="preset-grid">
             {SCENARIO_PRESETS.map((p) => (
-              <button key={p.id} className="preset-card" style={{ ['--accent' as any]: p.accent }} onClick={() => launch(p.id, p.delta, p.name)}>
+              <button key={p.id} className="preset-card" style={{ '--accent': p.accent } as CSSProperties} onClick={() => launch(p.id, p.delta, p.name)}>
                 <span className="preset-name">{p.name}</span>
                 <span className="preset-tagline">{p.tagline}</span>
                 <span className="preset-desc">{p.description}</span>

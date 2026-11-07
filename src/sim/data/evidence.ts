@@ -653,7 +653,7 @@ export const EVIDENCE: EvidenceEntry[] = [
     id: 'floating-cities', domain: 'Land', metric: 'Cost and status of floating urban districts',
     value: 'OCEANIX Busan ≈ US$10,000/m² platform cost (15.5 acres ≈ US$627M) for 12,000 people; Maldives Floating City targets 20,000 residents; floating construction runs 20–50% above land-based equivalents', unit: 'US$/m²',
     observationPeriod: '2019–2026', geography: 'Busan, Maldives, Rotterdam',
-    sourceTitle: 'NBC News on OCEANIX Busan (2022); Newsweek, \"Why floating cities never get built\" (June 2026); Waterstudio / Dutch Docklands',
+    sourceTitle: 'NBC News on OCEANIX Busan (2022); Newsweek, "Why floating cities never get built" (June 2026); Waterstudio / Dutch Docklands',
     sourceUrl: 'https://www.newsweek.com/freedom-ship-why-floating-cities-never-get-built-12022797', sourceType: 'industry-primary',
     publicationDate: '2026-06-03', retrievalDate: R, confidence: 'provisional',
     modelFamily: 'housing capex × 1.45 with 15% learning per doubling of floating stock; wear 1.8× land housing', fitParameters: 'floatingCapexMult 1.45, floatingWearMult 1.8, unlocked by the modular-floating-platforms invention',

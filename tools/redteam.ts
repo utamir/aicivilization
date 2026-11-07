@@ -5,9 +5,9 @@ const years = Number(process.argv[2] ?? 300);
 const seeds = [7, 11, 23];
 const findings: string[] = [];
 const isBad = (x: unknown) => typeof x === 'number' && !Number.isFinite(x);
-function scan(o: any, path: string, depth: number, out: string[]) {
+function scan(o: unknown, path: string, depth: number, out: string[]) {
   if (depth > 6 || o === null || typeof o !== 'object') return;
-  for (const [k, v] of Object.entries(o)) { if (isBad(v)) out.push(`${path}.${k}`); else if (typeof v === 'object') scan(v, `${path}.${k}`, depth + 1, out); }
+  for (const [k, v] of Object.entries(o as Record<string, unknown>)) { if (isBad(v)) out.push(`${path}.${k}`); else if (typeof v === 'object') scan(v, `${path}.${k}`, depth + 1, out); }
 }
 let worst = 0;
 for (const preset of SCENARIO_PRESETS) {

@@ -2,6 +2,7 @@
 // WELCOME — title, tagline, scenario selection. The world is already
 // rendering behind this screen; entering starts the clock.
 // ─────────────────────────────────────────────────────────────────────────────
+import type { CSSProperties } from 'react';
 import { useUI } from '../state/store';
 import { engine } from '../state/engine';
 import { SCENARIO_PRESETS } from '../sim';
@@ -31,7 +32,7 @@ export function WelcomeScreen() {
         </div>
         <div className="welcome-presets">
           {featured.map((p) => (
-            <button key={p.id} className="preset-card" style={{ ['--accent' as any]: p.accent }} onClick={() => enter(p.id)}>
+            <button key={p.id} className="preset-card" style={{ '--accent': p.accent } as CSSProperties} onClick={() => enter(p.id)}>
               <span className="preset-name">{p.name}</span>
               <span className="preset-tagline">{p.tagline}</span>
             </button>

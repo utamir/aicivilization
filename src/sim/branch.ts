@@ -86,8 +86,8 @@ export function applyIntervention(
         if (ef.field === 'chipExportAllowed') {
           r.chipExportAllowed = Boolean(ef.value);
           if (!ef.value) r.grievances.push('export controls');
-        } else {
-          (r as any)[ef.field] = Number(ef.value);
+        } else if (ef.field === 'sciCollaboration' || ef.field === 'tradeOpenness') {
+          r[ef.field] = Number(ef.value);
         }
       }
     }
