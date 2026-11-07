@@ -160,7 +160,7 @@ function stepTechnology(w) {
     const horizonDoublings = Math.log2(Math.max(0.5, autonomyIndex(w.techs.ai_agents.cap))); // dimensionless beyond the empirical task-suite ceiling
     const aiFeedbackMult = 1 + Math.min(3.5, w.params.aiFeedback * 0.13 * Math.max(0, horizonDoublings));
     // collaboration spillover from relations + scenario
-    let collab = w.params.collaboration * activeGlobalMult(w, 'collaboration');
+    const collab = w.params.collaboration * activeGlobalMult(w, 'collaboration');
     const meanSci = w.relations.reduce((a, r) => a + r.sciCollaboration, 0) / w.relations.length;
     const spillover = 1 + (collab - 1) * 0.6 + meanSci * 0.25;
     for (const id of TECH_IDS) {

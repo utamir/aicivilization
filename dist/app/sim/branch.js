@@ -77,7 +77,7 @@ export function applyIntervention(w, interventionId, civId, otherCiv) {
                     if (!ef.value)
                         r.grievances.push('export controls');
                 }
-                else {
+                else if (ef.field === 'sciCollaboration' || ef.field === 'tradeOpenness') {
                     r[ef.field] = Number(ef.value);
                 }
             }
