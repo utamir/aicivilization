@@ -198,6 +198,8 @@ function stepTechnology(w) {
             domainMult *= w.params.fusionMult;
         if (id === 'longevity_bio')
             domainMult *= w.params.longevityMult;
+        if (id === 'neural_interface')
+            domainMult *= w.params.neuroMult;
         if (id === 'space_systems')
             domainMult *= w.params.spaceMult;
         if ((id === 'ai_models' || id === 'ai_agents') && aiFeedbackMult > 1.15)
@@ -1604,7 +1606,11 @@ function stepEconomy(w) {
         const attract = civPolicy(w, c.id, 'attract_scientists');
         const edu = civPolicy(w, c.id, 'education');
         pop.education = clamp(pop.education * (1 + (0.0035 + edu * 0.009) * DT), 0.3, 1.6);
-        const researchTarget = clamp((0.45 + pop.education * 0.55) * ec.institutionalCapacity * (0.65 + ec.output * 0.25) * (1 + attract * 0.12), 0.08, 8);
+        // Neural interfaces raise throughput per researcher — the one channel that
+        // adds capability rather than compute. Bounded so it cannot replace the
+        // institutions the model treats as load-bearing.
+        const neuroBoost = 1 + Math.min(0.45, c.society.neuralDependency * 0.5) * clamp(c.society.neuralAccess * 1.2, 0, 1);
+        const researchTarget = clamp((0.45 + pop.education * 0.55) * ec.institutionalCapacity * (0.65 + ec.output * 0.25) * (1 + attract * 0.12) * neuroBoost, 0.08, 8);
         c.researchCapacity = lerp(c.researchCapacity, researchTarget, 0.012);
     }
 }
@@ -1691,7 +1697,57 @@ function stepPopulation(w) {
         }
     }
 }
-// ── 6. SOCIETY — trust, stability, backlash (all causal) ────────────────────
+// ── 6b. NEUROTECHNOLOGY — cognition rented from a machine ───────────────────
+// A neural interface raises what one person can do: throughput on analysis,
+// memory, and coordination — the "thinking through an AI" channel that more
+// compute cannot buy. It is not free. Two consequences are modelled:
+//   • ACCESS: regardless of adoption, who can obtain one is a policy choice.
+//     Market-tiered access concentrates a cognitive advantage; universal
+//     provision spreads it. This is the inequality channel.
+//   • DEPENDENCY: once daily cognition runs through a link, an outage is a
+//     personal crisis and a hostile model is a lever. Dependency scales with
+//     adoption and with how much provision people rely on.
+function stepNeuro(w) {
+    for (const c of w.civs) {
+        const s = c.society;
+        const a = w.techs.neural_interface.adoption[c.id];
+        const diffusion = clamp01((a.intensity * 0.6 + a.penetration * 0.4) * (a.arrived ? 1 : 0.25));
+        // Policy sets who can get one; affordability sets how far it actually goes.
+        const affordability = clamp((c.economy.wageIndex - 0.55) * 0.9, 0, 1);
+        const policyAccess = s.neuralProgram === 'public' ? 0.88
+            : s.neuralProgram === 'tiered' ? 0.30
+                : s.neuralProgram === 'ban' ? 0.0
+                    : 0.16;
+        s.neuralAccess = clamp01(lerp(s.neuralAccess, policyAccess * affordability, 0.01 * DT));
+        // Effective augmented share: technology available AND people able to use it.
+        const augmented = clamp01(Math.min(diffusion, s.neuralAccess + diffusion * 0.15));
+        // Dependency: how much of daily cognition is mediated by a machine.
+        s.neuralDependency = clamp01(lerp(s.neuralDependency, augmented * (0.55 + 0.45 * (1 - s.basicProvision)), 0.01 * DT));
+        // Market-tiered augmentation widens the gap between those who have it and
+        // those who do not; universal provision does not.
+        if (s.neuralProgram !== 'public' && augmented > 0.15) {
+            c.economy.gini = clamp(c.economy.gini + augmented * (1 - s.neuralAccess * 0.6) * 0.004 * DT, 0.2, 0.85);
+        }
+        if (s.neuralProgram === 'ban' && a.penetration > 0.02) {
+            a.penetration = clamp01(a.penetration * (1 - 0.02 * DT));
+            a.intensity = clamp01(a.intensity * (1 - 0.02 * DT));
+        }
+        if (s.neuralAccess > 0.6 && s.neuralProgram === 'public' && !w.flags[`neural-${c.id}`]) {
+            w.flags[`neural-${c.id}`] = true;
+            addEvent(w, {
+                title: `${c.name} makes the neural link universal`,
+                body: `A brain–AI interface stops being an elite prosthetic and becomes public infrastructure: ${(s.neuralAccess * 100).toFixed(0)}% of adults can obtain one. Cognitive throughput rises across the workforce instead of concentrating in those who can pay.`,
+                category: 'technology', civId: c.id, significance: 3,
+                causes: [
+                    { factor: 'device cost fell below what the state can carry', weight: 0.4 },
+                    { factor: 'political demand for equal access', weight: 0.35 },
+                    { factor: 'institutional capacity to run the programme', weight: 0.25 },
+                ],
+                counterforces: [{ factor: 'surgical capacity and long-term implant risk', weight: 0.5 }], confidence: 'medium',
+            });
+        }
+    }
+}
 function stepSociety(w) {
     for (const c of w.civs) {
         const s = c.society;
@@ -1742,7 +1798,10 @@ function stepSociety(w) {
         // blackouts still destroy trust rapidly.
         const trustTarget = clamp(-Math.max(0, c.economy.gini - 0.42) * 0.35 +
             0.46 + (0.07 - jobless) * 1.2 + (1.25 - c.energy.priceIndex) * 0.10 + (0.5 - ec.gini) * 0.22 + s.basicProvision * 0.06 + Math.min(0.08, Math.max(0, ec.outputPerCapita - 1) * 0.03)
-            - severeEnergyStress * 0.28 - c.food.shortage * 0.48 - c.waste.accumulation * 0.12 - c.housing.abandoned * 0.15, 0.08, 0.90);
+            - severeEnergyStress * 0.28 - c.food.shortage * 0.48 - c.waste.accumulation * 0.12 - c.housing.abandoned * 0.15
+            // A neurally dependent population pays far more for the same outage, and
+            // weak institutions leave the link open to manipulation.
+            - s.neuralDependency * (severeEnergyStress * 0.22 + clamp(0.45 - s.trust, 0, 0.45) * 0.18 + (w.frontier.agi && c.economy.institutionalCapacity < 0.45 ? 0.10 : 0)), 0.08, 0.90);
         s.trust = clamp01(lerp(s.trust, trustTarget, 0.006 + severeEnergyStress * 0.012) - s.backlash * 0.002 * DT);
         // State collapse is nonlinear. Ordinary recessions/price spikes hurt; they do
         // not automatically turn every country into a failed state.
@@ -2621,6 +2680,7 @@ export function stepWorld(w, months = 1) {
         stepEconomy(w);
         stepPopulation(w);
         stepSociety(w);
+        stepNeuro(w);
         stepDiplomacy(w);
         stepEnvironment(w);
         // Population can hit literal zero in stepPopulation. Do not let the later

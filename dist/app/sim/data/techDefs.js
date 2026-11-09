@@ -228,6 +228,26 @@ export const TECH_DEFS = {
         phase0: 'deployment', maturity0: 0.7, reliability0: 0.75, cost0: 1,
         pen0: { veloria: 0.3, ardan: 0.25, nemea: 0.15 },
     },
+    // ── E2. Neurotechnology ─────────────────────────────────────────────────
+    // A living brain bridged to machine intelligence: not uploading (the body
+    // stays) and not germline editing (nothing is inherited). Clicks and speech
+    // are the 2026 clinical state; the technology's promise — thinking through
+    // an AI — is what the model extrapolates. Diffusion is deliberately gated by
+    // surgery capacity, durability and stated public acceptance, not by demand.
+    neural_interface: {
+        id: 'neural_interface', name: 'Neural Interface (brain–AI link)', short: 'neural links', domain: 'neuro',
+        cap0: 0.06, paradigmCap0: 4.5, paradigmJump: [2.2, 4.2], paradigmBreakRate: 0.09,
+        kGrowth: 0.30, difficultyTheta: 1.25, effortPull: 0.05,
+        aiToolingGain: 0.6, labAutomationGain: 0.3, computeGain: 0.15,
+        deps: { ai_models: 0.45, biotech_med: 0.35, semiconductor_fab: 0.2 },
+        learningRate: 0.11, costFloor: 0.40, mfgGrowth: 0.16, maturityRate: 0.05,
+        diffusionSpeed: 0.09, energyPerAdoption: 0.05, sigma: 0.42,
+        evidence: ['bci-clinical-throughput', 'bci-public-attitudes'],
+        constraintLabels: ['neural decoding reliability', 'long-term implant durability', 'surgical capacity', 'regulatory approval', 'public acceptance'],
+        gameplayScaling: 1.0,
+        phase0: 'science', maturity0: 0.07, reliability0: 0.16, cost0: 3.2,
+        pen0: { veloria: 0.012, ardan: 0.006, nemea: 0.001 },
+    },
     // ── F. Transportation ───────────────────────────────────────────────────
     transport_ev: {
         id: 'transport_ev', name: 'Electric Vehicles', short: 'EVs', domain: 'transport',
@@ -314,5 +334,6 @@ export const DOMAIN_META = {
     energy: { label: 'Energy', color: '#FFC94D' },
     robotics: { label: 'Robotics & Automation', color: '#FF8A5C' },
     biotech: { label: 'Biotech & Medicine', color: '#6BD88F' },
+    neuro: { label: 'Neurotechnology', color: '#C77DFF' },
     transport: { label: 'Transportation', color: '#B49CFF' },
 };

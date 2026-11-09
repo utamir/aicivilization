@@ -8,8 +8,7 @@ import { CALIBRATION } from '../data/calibration.js';
 import { MILESTONES } from '../data/frontier.js';
 export const START_YEAR = 2026;
 export const START_MONTH = 8; // September (0-indexed)
-function initTech(id, _params) {
-    void _params;
+function initTech(id, params) {
     const d = TECH_DEFS[id];
     const adoption = {};
     for (const c of CIV_IDS) {
@@ -19,7 +18,7 @@ function initTech(id, _params) {
     return {
         id,
         cap: d.cap0,
-        paradigmCap: d.paradigmCap0,
+        paradigmCap: (d.id === 'ai_models' || d.id === 'ai_agents') ? d.paradigmCap0 * params.aiCeilingMult : d.paradigmCap0,
         paradigm: 1,
         maturity: d.maturity0,
         reliability: d.reliability0,
@@ -191,7 +190,7 @@ function initCiv(defId, params) {
             basicProvision: d.traits.marketOrientation < 0.5 ? 0.12 : 0.06,
             laborRelevance: 1, syntheticProgram: 'none', syntheticBirthsPerYear: 0, lockdown: 0, fragmented: false, lowStabilityMonths: 0, revivalMonths: 0, enhancement: 'none',
             familyFormation: Math.min(0.9, Math.max(0.08, (d.population.fertility - 0.6) / 3.2)), polityStatus: 'active', autonomousInfrastructure: 0.03,
-            primacy: 0.62,
+            primacy: 0.62, neuralProgram: 'none', neuralAccess: 0.15, neuralDependency: 0,
         },
         researchAlloc: alloc,
         researchCapacity: d.researchCapacity,
