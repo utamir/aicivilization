@@ -1,4 +1,4 @@
-# WHAT IF? Civilization Lab — v11.4 release red-team report
+# WHAT IF? Civilization Lab — red-team report (v11.4 base, addenda through v11.10)
 
 Date: 2026-09-09  
 Scope: source, simulation logic, scenario semantics, UI claims, research assumptions, build path and autonomous reconstruction prompt.
@@ -220,10 +220,54 @@ The correct response to these limitations is **visible uncertainty and stress te
 
 The project should be understood as a **causal counterfactual laboratory**. Its value is not that it knows 2126. Its value is that a user can change an assumption, observe downstream physical/social effects, inspect why they happened, and discover which conclusions survive across very different plausible worlds.
 
-That principle is now encoded both in the current source and in the v11.4 autonomous reconstruction master prompt.
+That principle is encoded both in the current source and in the v11.10 autonomous reconstruction master prompt. The v11.9–11.10 addendum at the end of this file records the defects found after v11.4 and the rules that now prevent each class.
 
 ### v11 release validation correction — maintenance is not a countdown
 
 The first v11 wear implementation fixed immortal habitats but overshot in the other direction: a maintained marine habitat could still drift toward near-zero condition merely because enough centuries elapsed. That is another hidden destiny. The release model now treats condition as serviceability converging toward a maintenance-supported equilibrium. Continuous inspection, replacement, corrosion control, pumping, seals and mooring work can keep a habitat viable; abandonment drives it toward failure. Physical stock remains separately represented in both cases.
 
 The release validator also caught that the reconstructed `Ocean Century` executable still inherited an old “wait until land pressure is extreme” planning gate. That contradicted the scenario premise. The corrected planner allows strategic marine urbanization before absolute land exhaustion while retaining technology, finance, institutional and maintenance constraints. Shallow subsea habitats may be surface-served; closed-loop autonomy becomes progressively important with remoteness/depth.
+
+
+---
+
+## Findings from the v11.9–11.10 passes — seven things the model was lying about
+
+This section is deliberately not a feature list. It records defects that survived earlier reviews, how each was found, and what rule now prevents the class of failure. Several were found only by probing the running model rather than reading code, which is the point.
+
+### 1. Ruins were rendered where no building had ever stood
+The ruin layer positioned shells and rubble from a legacy random scatter, while buildings stood on street-facing plots. A ruined structure therefore appeared in a field with the original still standing elsewhere. **Rule now:** only one layer owns a structure's lifecycle, and it must be the layer that owns its position. Removed the parallel ruin renderer; decay is emitted per plot.
+
+### 2. A duplicate future-architecture renderer contradicted the primary one
+Two systems drew hexagonal towers: one on plots with lifecycle state, one at district-radius positions with condition colouring. Both were visible. **Rule:** a distinctive asset family has exactly one owner. If two systems can draw the same object, one of them is wrong.
+
+### 3. Arcology parts were silently truncated
+Instanced capacity was sized from a smaller adoption estimate than the selection pass used, so tall towers lost their upper floors as vertical pressure rose — a structure that quietly degraded because a buffer was short. **Rule:** capacity must be computed for the worst case, not the expected case, and truncation must be impossible rather than invisible.
+
+### 4. Hexagonal geometry had the wrong origin
+Parts were positioned by centre while the hex prism was base-anchored, displacing every hexagonal component by half its height. It looked like a stack of trays on a pole. **Rule:** one positioning convention per part system, asserted once.
+
+### 5. Settlement primacy had the wrong sign
+A new baseline of 0.40 sat below the settlement layout's implied largest-city share (~0.62), so at t=0 the largest city shrank and the others grew. The feature was inverting its own premise from the first tick. **Rule:** a neutral parameter must equal the state it claims to be neutral about. Verify by measuring the first months, not by reading the formula.
+
+### 6. The classifier said "growth" for a civilization that lost a third of its people
+Over a century of steady depletion, the thirty-year window was calm, so nothing tripped the collapse or crisis branches and the label fell through to growth. **Rule:** trajectory labels are part of the visual contract. A sustained decline below the starting level is a decline whatever per-capita output does. If the label can contradict the world, the label is a bug.
+
+### 7. Two invariants were passing on luck, and one was failing honestly
+- `baseline stays fed` passed on a favourable stochastic draw. Baseline warming produces multi-year droughts; a drought on a tight year causes a real, recorded, recoverable crisis. The test now asserts the structural claim (ends fed, crises transient and attributable) instead of "no bad year ever".
+- `long stagnation does not become superintelligence` was violated: the scenario reached ~44× capability and ASI by 2195 because the initial ceiling was multiplied away by subsequent paradigm jumps. The ceiling now scales each jump, and the world plateaus around 14×/21×.
+- **Rule:** a scenario claim must hold by mechanism. A test that passes because of a seed is not evidence, and a ledger entry is a debt, not a defence.
+
+### What this implies for the model's honesty
+Every item above is a case where a number, a label or a render contradicted the state beneath it. None required new features to find; all required looking at the running world and asking whether it matched its own description. The same standard applied to the new mechanics:
+
+- **health** must change how deadly a shock is, or it is decoration;
+- **access** must be separable from **adoption**, or "who holds it" is unanswerable;
+- **the cognition market** must be able to lower measured unemployment while degrading health, or the trap is not modelled;
+- **settlement convergence** must be reversible by policy, or it is a script.
+
+### Still unverified in this pass
+- Arcology scale relative to surrounding infrastructure reads small from the gameplay camera; not yet corrected.
+- Aged-vs-occupied arcology differentiation is visible but subtle.
+- The cognition market prices no wage: it is a share, not a rate. Modelling the collapse toward subsistence needs a wage distribution the model does not have.
+- No automated visual-regression coverage exists; every rendering conclusion here rests on inspected captures, not a pixel diff.

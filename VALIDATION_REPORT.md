@@ -1,6 +1,9 @@
-# Validation Report — WHAT IF? Civilization Lab v11.4
+# Validation Report — WHAT IF? Civilization Lab v11.10
 
-Validated: 9 September 2026
+Original release validation: 9 September 2026.
+Revalidated after the v11.5–11.10 passes: 9 November 2026.
+
+The September figures below describe the v11.4 gates and are kept as history. The November section records what the current tree actually passes, including three invariants that still fail and are carried in `tools/known-test-failures.txt`.
 
 This report records checks run against the **v11.4 executable tree** prepared for the public release at `https://aicivilization.fyi`. Scenario values below are test snapshots, not forecasts.
 
@@ -16,6 +19,34 @@ This report records checks run against the **v11.4 executable tree** prepared fo
 - Clean archive candidate: all **249** listed release files passed `sha256sum -c`; exactly two root READMEs and no embedded historical ZIPs/obsolete README entry points — **PASS**.
 
 The browser-ready runtime still loads version-pinned React/Three packages from `esm.sh`, so browser internet access is required. Node/npm are not required to run the included build.
+
+## November 2026 revalidation (v11.10)
+
+**PASS** for the checked gates; three named invariants remain open by design.
+
+- `tsc -b` (strict app configuration) and `tsc -p tsconfig.sim.json` — **PASS**.
+- **48 simulation tests**: 45 pass, **3 fail**, and exactly those 3 are listed in `tools/known-test-failures.txt`; `tools/check-tests.py` treats the suite as green only on that exact set.
+- Browser/CDN build: **64 modules**, 0 syntax failures; whole module graph evaluated and React root render reached — **PASS**.
+- `.pyz` archive rebuilt, booted, served `index.html` plus `app/main.js`, `app/App.js`, `app/sim/index.js`, `index.css`, `check.html`; path traversal blocked — **PASS** (verified locally and in CI run 14).
+- Working tree clean at the deployed commit; CI build + deploy **PASS**.
+
+Open invariants (carried, not hidden):
+
+1. population boom without construction does not produce the expected crowding/rent/unrest response;
+2. the frontier is not reliably gated on readiness in an energy crisis;
+3. Earth-bound flourishing is not reachable in the tested seed.
+
+New mechanics added since v11.4 are covered by targeted tests rather than only by the scenario sweep:
+
+- health stays bounded, responds to living conditions, and makes a pandemic measurably deadlier in a frail population;
+- the cognition market is absent with a strong floor and present without one (controlled comparison), absorbs displacement while costing health and equality, and is capped by policy after the decision;
+- the settlement decision moves primacy and the robot rollout;
+- sustained aversion concentrates settlement; primacy stays bounded across scenarios;
+- the neural-interface tech starts in a clinical state, raises research through dependency, widens inequality under tiered access, and the provision decision changes access and adoption;
+- long stagnation plateaus below the ASI threshold by capability ceiling, not by seed;
+- an open prompt ("sell their brain power for computing") maps to a validated delta.
+
+Deliberately **not** claimed: pixel-level visual regression, legs of the model that were only inspected rather than asserted (arcology scale relative to infrastructure; aged-vs-occupied differentiation), and any wage-rate model for the cognition market.
 
 ## Terminal civilization gate
 

@@ -74,6 +74,10 @@ The scenarios are questions, not predictions.
 
 **Terminal Cascade** asks whether the model can actually lose everyone, and what the physical world does afterward.
 
+**Neural Divide** asks what happens if a brain–AI interface arrives early and only some people can get one.
+
+**Cognitive Proletariat** asks what happens when automation displaces people faster than institutions absorb them, and the last saleable asset is attention.
+
 A scenario changes the pressures without dictating the ending.
 
 ## What you should notice on the screen
@@ -88,6 +92,12 @@ Decay is physical too. Buildings lose occupants and light first. Maintenance sto
 
 Use Below ground to inspect subsurface settlements from beneath the terrain instead of projecting them through the surface. Use Beyond Earth when population and industry move off-world. The frontier geometry stays intentionally schematic instead of pretending the island, orbit and Mars share one literal scale.
 
+Cities don't only spread — they densify. As a settlement outgrows its footprint, low-rise fabric is redeveloped into higher-density blocks, suburbs fill the ground beyond the old edge, and in the advanced era tower families with their own architecture take specific plots. Heritage plots keep their original buildings, so a mature district shows several generations at once.
+
+Settlement can also converge. When general-purpose robots pervade daily life and people are displaced — or simply refuse to live among the machines — the population concentrates into one metropolis while the countryside is worked by autonomous machines. The older towns empty through derelict to ruined. It is a decision, not a script: concentrate, disperse into transit-linked towns, or restrict robots to industry.
+
+Two things about people became state rather than decoration. **Population health** is a stock: fed by healthcare and institutions, eaten by pollution, crowding, hunger and extraction work. It scales how many people a shock kills — a pandemic is far deadlier in an unhealthy society — and it takes years to recover. **The cognition market** appears when automation displaces people and no income floor exists: attention and judgement sold to machine systems by the task. It lowers measured unemployment, and it raises inequality and wears down health. A floor is the alternative, and that is a decision too.
+
 I kept four questions close to the world on the interface: what's happening, why it's happening, what's preventing something else from happening, and what changed when I changed one assumption. If a number looks strange, inspect its cause before you accept it because it came from a simulation.
 
 ## Try breaking it
@@ -101,6 +111,12 @@ Run Vertical World and look below the surface as it grows. Run Ocean Century and
 Run Collapse & Return long enough for vegetation to reclaim abandoned districts. If settlers return, they come from a surviving population; the model can't respawn them.
 
 Run Terminal Cascade. If everybody dies, keep the clock moving. History stops. Nature doesn't.
+
+Run Automation Divide long enough for robots to pervade daily life and watch settlement concentrate. Then run the same world with a strong income floor: the metropolis should not form, because the aversion that drives it depends on desperation.
+
+Run Neural Divide and compare universal provision with a market in neural links. Same technology, different societies — check inequality, health and how fast research moves.
+
+Run Cognitive Proletariat and watch measured unemployment fall while the population's health and legitimacy wear down. That is the trap: a statistic improving while the people behind it do not.
 
 Change one assumption and run it again. Each run shows the future as a collision between systems running on different clocks, more than as a list of inventions.
 

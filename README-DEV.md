@@ -46,6 +46,12 @@ python3 tools/build-cdn.py
 python3 tools/build-no-node-pyz.py
 ```
 
+## Testing
+
+`npm test` runs the simulation suite. Three invariants currently fail and are listed, with reasons, in `tools/known-test-failures.txt`. CI tolerates exactly that set and fails on any new failure; it also warns when a listed test starts passing, because a stale entry hides the fact that the world changed.
+
+A claim that passes on one seed is not evidence. Tests for scenario-level claims (ceilings, floors, labels) are written to hold by mechanism, and controlled comparisons hold the driver constant while stepping the model.
+
 ## Release invariants
 
 The renderer is part of the causal contract. In particular:
@@ -58,7 +64,13 @@ The renderer is part of the causal contract. In particular:
 - Earth + orbit/cislunar + Mars + deep space must equal total population; digital minds are an overlapping substrate category;
 - literal global extinction is absorbing: no research, diplomacy, decisions, new civilization milestones or respawn after zero;
 - after extinction, climate/ocean inertia, infrastructure decay and ecological succession may continue;
-- deep-future uncertainty must be labelled as modelling assumption rather than presented as measured precision.
+- deep-future uncertainty must be labelled as modelling assumption rather than presented as measured precision;
+- one layer owns each structure's lifecycle; a ruin appears only where its building stood, and carries that building's materials;
+- a district's trajectory label must match its population history — a civilization below its starting population is not "growing";
+- population health is a stock with consequences (shock lethality, births, trust), not a displayed number;
+- capability-changing technology separates existence from access; unequal access must show up in distribution;
+- cities densify and redevelop as population grows, and settlement can converge into one metropolis or stay polycentric;
+- a scenario's stated ceiling must survive repeated breakthroughs (paradigm lifts are scaled, not only the initial asymptote).
 
 See `knowledge/physics-and-ecology-visual-contract.md` for the detailed visual/physics contract.
 

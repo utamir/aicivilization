@@ -1,4 +1,4 @@
-# WHAT IF? Civilization Lab v11.4 — Release candidate
+# WHAT IF? Civilization Lab v11.10 — Release candidate
 
 Complete source, autonomous reconstruction prompt, evidence/red-team material, prebuilt browser runtime, and no-Node launchers.
 

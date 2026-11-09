@@ -1,5 +1,5 @@
 # WHAT IF? CIVILIZATION LAB
-## Autonomous Reconstruction Master Prompt — v11.4
+## Autonomous Reconstruction Master Prompt — v11.10
 
 > **Start with the world we have. Watch what comes next.**
 >
@@ -198,6 +198,14 @@ Each path must create its own constraints. Building upward trades land for struc
 
 Do not make “more land” the only positive solution. Compact cities are a legitimate future. Nor should the model assume that population must eventually stabilize: indefinite growth is allowed until some real carrying-capacity, habitat, energy, material, ecological or social constraint actually binds.
 
+## 5.3.1 City growth must be visible, and settlement can converge
+
+If population rises and the built world does not change, the render is lying about the simulation. Growth needs visible channels: infill, redevelopment of low-rise fabric into higher density, suburbs beyond the original footprint, and — where a civilization earns it — new architectural families. Immutable plots are a modelling convenience, not a law.
+
+Distribute population across a territory, not within one pot. A civilization can concentrate into a single dominant metropolis and leave its older towns to empty, or keep a polycentric network. Make that concentration emergent rather than scripted: it should follow from conditions like automation-mediated aversion, displacement, housing and transport viability — and it should be reversible by policy.
+
+Whatever the mechanism, the two directions must be representable: **dispersion** and **convergence**. A model that can only spread evenly cannot describe either a suburb or a metropolis.
+
 ## 5.4 Climate and sea level
 
 Temperature, climate damage and sea level must not be the same variable.
@@ -231,9 +239,41 @@ Model enough social state to create meaningful divergence. Useful dimensions inc
 - cooperation, trade and conflict;
 - public finance;
 - biosecurity and public health capacity;
+- **population health as its own stock** (see 6.1);
+- **who can obtain cognitively significant technology** (see 6.2);
+- settlement geography: how population is distributed across a territory (see 5.3.1);
 - climate adaptation capacity.
 
 The exact variables may differ. The invariant is that institutions and distribution must be able to change whether technological abundance becomes broadly beneficial, destabilizing, exclusionary or wasted.
+
+## 6.1 Population health is a stock, not an event log
+
+A model that only subtracts deaths during a shock cannot answer "who could withstand the next shock". Track a population health state that is:
+
+- **built** by healthcare capacity, income and institutional delivery;
+- **eroded** by pollution, crowding, hunger and exhausting forms of work;
+- **slow to recover** — a damaged population takes years to heal;
+- **consequential**: it should change mortality, births, trust, and how many people a given pandemic kills.
+
+Reuse it. The same state should make an epidemic, a heat wave and a famine interact, instead of each being an isolated subtraction. If a shock kills the same share of the population in a healthy society and a broken one, health is decoration.
+
+## 6.2 Distinguish capability from access
+
+A technology can exist, be cheap, and still be unequally held. For any technology that changes what a person can *do* rather than what a firm can *buy*, model access separately from adoption:
+
+- adoption = how widely it is deployed;
+- access = who can actually obtain it, as a policy outcome;
+- consequence = whether the benefit spreads or concentrates.
+
+The interesting scenarios are not "does the technology work" but "who holds it". Make that a decision with real trade-offs, not an automatic good.
+
+## 6.3 Labour can be sold back to the machines
+
+When automation displaces people faster than institutions absorb them and no floor exists, the last saleable asset is human attention: judgement, verification and accountability sold into machine systems by the task. Model it if you model displacement.
+
+It matters because it is a **stabiliser that hides a bad equilibrium**: measured unemployment falls while health, equality and legitimacy degrade. A functioning income floor should remove most of the supply — that contrast is the point, and it should be testable.
+
+Be honest about the physics. Literal biological brains as bulk compute are not credible: interface bandwidth is many orders of magnitude below what a machine interconnect provides. What is credible is human-shaped work inside machine loops.
 
 ---
 
@@ -365,6 +405,7 @@ The simulation may explore extremely ambitious futures, including:
 - large habitats;
 - climate intervention;
 - digital minds;
+- **brain–AI interfaces** that augment a living person rather than replacing the body (distinct from uploading and from germline enhancement);
 - Type-I-scale energy capture;
 - early solar-system industry.
 
@@ -574,7 +615,9 @@ At the time of this v11 prompt, useful authoritative anchors include:
 - UN World Population Prospects 2024 — fertility, aging and long-run demographic momentum;
 - IPCC AR6 — climate response and long-lived sea-level commitment;
 - UNEP Emissions Gap Report 2025 — current-policy warming context;
-- robust decision-making / exploratory modeling literature — stress-test strategies across many plausible futures rather than optimizing one forecast.
+- robust decision-making / exploratory modeling literature — stress-test strategies across many plausible futures rather than optimizing one forecast;
+- clinical brain–computer interface trials (Willett et al. 2023; Metzger et al. 2023; Card et al. 2024) — anchor decoding throughput, and anchor how small the implanted population still is;
+- public-attitude survey work on enhancement implants (e.g. Pew 2021) — anchor the gap between therapeutic acceptance and enhancement acceptance.
 
 These are starting points, not immutable citations. Update them when fresher authoritative evidence exists.
 
@@ -624,7 +667,19 @@ Examples:
 - abandoned land should undergo ecological succession and visible rewilding over time;
 - growth should be spatially legible: denser skylines, arcologies, underground portals/infrastructure, reclaimed/floating/subsea districts and off-world habitats should appear because the corresponding state exists;
 - war, flooding, grid failure and maintenance collapse should damage the visible systems that the model says were damaged;
-- off-world civilization must not justify ghost activity on an empty Earth. Render orbit/Mars/deep-space continuity where it actually occurs.
+- off-world civilization must not justify ghost activity on an empty Earth. Render orbit/Mars/deep-space continuity where it actually occurs;
+- a district's label must match what is on screen: a civilization that lost a third of its people is not "growing";
+- a scenario's stated ceiling must survive repeated breakthroughs, or the ceiling is decoration.
+
+## 17.2.1 Detail does not rescue a wrong primary form
+
+Adding windows, balconies, roofs or textures to a primitive will not make a primitive credible. If a structure reads as a stack of boxes or a cylinder with a pattern, the **primary design** is wrong: massing, proportion, structure, opening rhythm and relationship to the ground. Change the design, not the decoration. Establish one representative place at the target quality before propagating the approach, and evaluate it from actual gameplay cameras with the interface hidden.
+
+## 17.2.2 Lifecycle must preserve identity
+
+One building should be recognisable across its states. Occupied, aged and ruined versions of the same structure must keep its footprint, orientation, structure and material identity, and must be inspectable from a matched camera. Damage must reveal construction: a severed slab shows its thickness, a broken parapet shows its profile, debris carries the building's own materials at believable scale. Arbitrary rubble scattered near an unchanged building is a failure, not a ruin.
+
+Age the ground too: construction disturbance, service yards, then weeds, sediment and succession.
 
 A user should be able to infer a broad state of the civilization from the world before opening a chart. Numbers explain and verify the scene; they should not be required to notice that the city is dying.
 
@@ -737,7 +792,13 @@ Test at least these classes of failure:
 - frontier expansion is not required for flourishing;
 - frontier expansion is not sufficient for flourishing;
 - the same seed with no changed assumption reproduces the same future;
-- a changed assumption produces attributable divergence.
+- a changed assumption produces attributable divergence;
+- a population health stock actually changes how deadly a shock is, rather than being a displayed number;
+- access to a capability-changing technology is separable from its existence, and unequal access shows up in distribution;
+- a labour market that absorbs displacement cannot simultaneously reduce measured unemployment and improve health and equality;
+- settlement can both disperse and converge, and convergence is reversible by policy;
+- a claim like "baseline stays fed" or "stagnation never reaches superintelligence" must hold by mechanism, not by a lucky seed;
+- visual labels and classifications must not contradict the underlying state they describe.
 
 ## 19.2 Extreme stress tests
 
@@ -766,6 +827,18 @@ If almost every scenario converges to the same label, same stability, same techn
 Investigate rather than merely widening parameters.
 
 ---
+
+## 19.4 Keep a defect ledger, and never whitelist a claim
+
+Every failing invariant carried into a release must be listed with its reason, and the build must fail on any *new* failure. That is a debt register, not a defence: an entry stays only while the failure is understood.
+
+The harder rule: never resolve a violated claim by relaxing the claim, unless the original claim was itself wrong. Distinguish three cases explicitly:
+
+- the model is wrong → fix the mechanism;
+- the test was asserting the wrong thing → rewrite the claim and say why in the changelog;
+- the claim only held by luck → strengthen the mechanism until it holds for reasons.
+
+A pass produced by a favourable seed is not evidence. Where a scenario states a ceiling, a floor or a label, add the mechanism that makes it true and a test that holds the driver constant.
 
 # 20. Autonomous swarm operating model
 
@@ -828,6 +901,8 @@ The following are **not fixed** and may be replaced entirely:
 
 A new build may be radically different and still be correct.
 
+The mechanisms described in 6.1–6.3, 5.3.1 and 17.2 are **examples of principles already earned**, not required implementations. If you can satisfy the principle with a better model, do so. Do not copy a variable name because it exists here; derive the mechanism you can defend, and say what it assumes.
+
 The following **are fixed in spirit**:
 
 - recognizable present → open causal futures;
@@ -840,7 +915,9 @@ The following **are fixed in spirit**:
 - no date-scripted prophecy;
 - no hidden equivalence between technological expansion and flourishing;
 - positive as well as negative futures;
-- reproducible, testable simulation behavior.
+- reproducible, testable simulation behavior;
+- health, access and attention treated as real state, not decoration;
+- growth and decline visible in the world, with labels that match it.
 
 ---
 
@@ -896,6 +973,12 @@ It is done when all of these are true:
 21. UI overlays never obscure each other or lie about depth: world labels occlude behind geometry and remain below application panels; very large numbers use bounded formatting rather than shifting layout.
 22. Subsurface growth is spatially legible: additional underwater/underground stock adds physically deeper/farther structures, inspectable with a real camera path or explicit opt-in cutaway.
 23. The product still feels like **WHAT IF? Civilization Lab**, even if almost every implementation choice changed.
+24. Population health is a stock that changes the lethality of shocks and takes years to recover.
+25. Capability-changing technologies separate existence from access, and unequal access has distributional consequences.
+26. When automation outruns institutions, a market in human attention can appear, and a functioning income floor is the visible alternative to it.
+27. Cities visibly densify and redevelop as population grows; settlement can both spread and converge, and the label matches what is rendered.
+28. A mature district shows multiple generations of architecture, and one structure remains recognisable across occupied, aged and ruined states with damage that reveals its construction.
+29. Every scenario-level claim (a ceiling, a floor, a trajectory label) is enforced by mechanism and covered by a test that does not depend on a lucky draw.
 
 ---
 
