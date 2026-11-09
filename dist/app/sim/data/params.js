@@ -235,6 +235,14 @@ export const SCENARIO_PRESETS = [
         delta: { neuroMult: 2.3, aiProgressMult: 1.2, aiTooling: 1.25, diffusionMult: 1.45, socialContract: 0.6, governanceCapacity: 0.82, regulation: 0.82, aiSafety: 0.85 },
         accent: '#C77DFF',
     },
+    {
+        id: 'cognitive_proletariat',
+        name: 'Cognitive Proletariat',
+        tagline: 'What if the poor sell their attention to the machines, by the hour?',
+        description: 'Automation displaces labour faster than institutions absorb it, no income floor is built, and machine systems still need human judgement inside them. Attention becomes the last saleable asset: paid by the task, priced at desperation, concentrated among people with no alternative. Output keeps rising and measured unemployment falls, because the people who lost their jobs are now working in the machine loop. The test is whether a society can see that as prosperity.',
+        delta: { aiProgressMult: 1.3, aiTooling: 1.35, roboticsMult: 1.4, diffusionMult: 1.3, socialContract: 0.42, governanceCapacity: 0.75, regulation: 0.7, biosecurity: 0.9 },
+        accent: '#D98C5F',
+    },
 ];
 export const BUILDER_AXES = [
     {
@@ -400,6 +408,8 @@ const PATTERNS = [
     { re: /(ai safety|ai assurance|evaluation|oversight)/i, label: 'Stronger AI assurance', delta: { aiSafety: 1.5, regulation: 0.9 }, explanation: 'AI incident prevention and response strengthened; diffusion becomes somewhat more cautious.' },
     { re: /(biosecurity|pandemic preparedness|disease surveillance)/i, label: 'Stronger biosecurity', delta: { biosecurity: 1.5 }, explanation: 'Pandemic hazard and severity reduced through surveillance and response capacity.' },
     { re: /(climate adaptation|resilien.{0,20}climate|flood defence|heat adaptation)/i, label: 'Climate adaptation', delta: { climateAdaptation: 1.5 }, explanation: 'Infrastructure and agricultural adaptation reduce climate damage and drought exposure.' },
+    { re: /(sell|sold|sell(ing)?|donat\w*|rent|renting|lease).{0,40}(brain|cogniti\w*|attention|mind|thinking)/i, label: 'A market in human cognition', delta: { socialContract: 0.45, aiTooling: 1.2 }, explanation: 'Displaced people sell attention and judgement to machine systems: income continues, the social contract weakens, and the price is paid in health and inequality rather than in output.' },
+    { re: /(brain|neuro|neural|bci|brain.?computer|mind).{0,40}(interface|implant|link|connect)/i, label: 'Neural interfaces arrive early', delta: { neuroMult: 2.2, diffusionMult: 1.3 }, explanation: 'Brain-AI interfaces mature ahead of their institutions. Access, not capability, becomes the binding question.' },
     { re: /(semiconductor|chip).{0,30}(shock|shortage|restrict)/i, label: 'Semiconductor shock', delta: { tradeOpenness: 0.6, collaboration: 0.7 }, explanation: 'Chip trade restricted; compute expansion slows outside producers.' },
 ];
 export function parseWhatIf(text) {

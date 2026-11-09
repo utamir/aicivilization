@@ -585,6 +585,13 @@ function classifyTrajectory(w) {
         fr.trajectory = 'managed_decline';
         fr.trajectoryNote = `Population fell ${(-popTrend * 100).toFixed(0)}% in 20 years while living standards held; cities are consolidating, not collapsing.`;
     }
+    else if (livingNow < startPop * 0.85 && popTrend < 0.12) {
+        // A civilization does not "grow" while losing its people, whatever output
+        // per person does. Slow, century-long depletion has a calm thirty-year
+        // window and used to fall through to the growth label.
+        fr.trajectory = 'managed_decline';
+        fr.trajectoryNote = `Population is ${((1 - livingNow / startPop) * 100).toFixed(0)}% below its 2026 level and not recovering. Output per person may still rise; the civilization is shrinking.`;
+    }
     else if (perCapGrowth < 0.003 && achieved < 2) {
         fr.trajectory = 'stagnation';
         fr.trajectoryNote = `Output per person grew ${(perCapGrowth * 100).toFixed(1)}%/yr over 20 years; no frontier program has paid off.`;

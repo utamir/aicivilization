@@ -279,7 +279,9 @@ function pandemic(w) {
         P.months += 1;
         for (const c of w.civs) {
             const exposure = c.population.urbanization * (0.6 + w.relations.reduce((a, r) => a + r.tradeOpenness, 0) / w.relations.length) * (1 - c.society.lockdown * 0.7);
-            const kill = P.severity * exposure * 0.004 * DT * 12; // share of population per year at peak
+            // The same pathogen kills more where the population is already unhealthy.
+            const frailty = 1 + (1 - c.society.health) * 1.6;
+            const kill = P.severity * exposure * 0.004 * DT * 12 * frailty; // share of population per year at peak
             // the old die first: weight the top bands
             const co = c.population.cohorts;
             let dead = 0;

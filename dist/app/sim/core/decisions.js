@@ -236,6 +236,47 @@ export const DECISIONS = [
             },
         ],
     },
+    {
+        id: 'mind_market', title: 'The market in human cognition',
+        question: (_w, c) => `${c.name}: ${(c.economy.displacedShare * 100).toFixed(0)}% of workers have been displaced and machine systems still need human judgement inside them. Firms are hiring people by the hour to supply it - attention, verification, decisions - paid per task. ${(c.economy.mindMarket * 100).toFixed(0)}% of the labour force is already doing it. What is it to ${c.name}?`,
+        trigger: (w, c) => w.techs.ai_agents.adoption[c.id].intensity > 0.3 && c.economy.displacedShare > 0.1 && c.economy.mindMarket > 0.1 && c.society.mindMarketPolicy === 'none',
+        months: 24,
+        options: [
+            {
+                id: 'regulated',
+                label: 'Regulate it: minimum rate, hours, health cover',
+                consequence: 'The work continues with a floor under it. Incomes are steadier, the worst extraction slows, and firms pay more for human judgement.',
+                apply: (_w, c) => {
+                    c.society.mindMarketPolicy = 'regulated';
+                    c.economy.mindMarket = Math.min(c.economy.mindMarket, 0.35);
+                    c.society.health = Math.min(0.98, c.society.health + 0.02);
+                },
+                affinity: (c) => 0.45 + (1 - c.traits.marketOrientation) * 0.35,
+            },
+            {
+                id: 'market',
+                label: 'Let it run: it is work, and work is scarce',
+                consequence: 'Cheap cognition floods the market. More people earn something; the rate collapses; health and legitimacy wear down.',
+                apply: (_w, c) => {
+                    c.society.mindMarketPolicy = 'market';
+                    c.economy.gini = Math.min(0.85, c.economy.gini + 0.02);
+                },
+                affinity: (c) => c.traits.marketOrientation * 0.85,
+            },
+            {
+                id: 'banned',
+                label: 'Ban the sale of cognition; provide in its place',
+                consequence: 'Piece-rate human computation is prohibited. Firms slow their machine rollouts; displaced people need a floor instead, and the budget is charged for it.',
+                apply: (_w, c) => {
+                    c.society.mindMarketPolicy = 'banned';
+                    c.economy.mindMarket = 0;
+                    c.society.basicProvision = Math.max(c.society.basicProvision, 0.35);
+                    c.economy.publicDebt += 0.04;
+                },
+                affinity: (c) => c.traits.regulatoryCaution * 0.6 + (1 - c.traits.marketOrientation) * 0.3,
+            },
+        ],
+    },
 ];
 export function stepDecisions(w) {
     if (w.tMonths % 3 !== 0)
