@@ -1,4 +1,4 @@
-# Validation Report — WHAT IF? Civilization Lab v11.10
+# Validation Report — WHAT IF? Civilization Lab v11.10.1
 
 Original release validation: 9 September 2026.
 Revalidated after the v11.5–11.10 passes: 9 November 2026.
