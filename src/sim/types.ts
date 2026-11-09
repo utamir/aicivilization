@@ -123,6 +123,7 @@ export interface EconomyState {
   laborForce: number;      // millions
   unemployment: number;    // 0..1
   automationExposure: number; // 0..1 share of tasks technically automatable now
+  mindMarket: number;      // 0..1 share of the labour force selling cognition as machine work
   displacedShare: number;  // cumulative displacement pressure 0..1
   wageIndex: number;       // 1 = 2026 median wage
   gini: number;            // inequality proxy 0..1
@@ -175,6 +176,8 @@ export interface SocietyState {
                            // rises when robots take the countryside and people will not or cannot live among them
   enhancement: 'none' | 'public' | 'private' | 'ban'; // germline enhancement policy
   neuralProgram: 'none' | 'public' | 'tiered' | 'ban'; // who gets a neural interface once it exists
+  health: number;            // 0..1 population health: exposure, healthcare capacity, extraction load
+  mindMarketPolicy: 'none' | 'regulated' | 'market' | 'banned'; // how cognition may be sold as machine work
   neuralAccess: number;     // 0..1 share of the population that could obtain one
   neuralDependency: number; // 0..1 how much daily cognition runs through an AI link
   familyFormation: number; // 0..1 structural/cultural support for having and raising children; evolves, not destiny

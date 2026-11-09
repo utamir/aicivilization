@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createWorld, stepWorld, DEFAULT_PARAMS, SCENARIO_PRESETS, applyDelta,
-  createBranch, compareWorlds, taskHorizonHrs, resolveDecision, DECISIONS, TECH_DEFS,
+  createBranch, compareWorlds, taskHorizonHrs, resolveDecision, DECISIONS, TECH_DEFS, parseWhatIf,
 } from '../index';
 import type { WorldState } from '../types';
 
@@ -479,6 +479,101 @@ describe('neural interface: brain–AI coupling', () => {
     expect(w.techs.neural_interface.adoption[c.id].penetration).toBeLessThanOrEqual(0.06);
   });
 });
+
+describe('population health and the cognition market', () => {
+  it('health stays bounded and responds to living conditions', () => {
+    const w = run(240, 'baseline_2026', 21);
+    for (const c of w.civs) {
+      expect(c.society.health).toBeGreaterThan(0);
+      expect(c.society.health).toBeLessThan(1);
+    }
+    // a degraded world (waste, crowding, hunger) must end less healthy than a good one
+    const good = w.civs[0].society.health;
+    const bad = run(240, 'polycrisis', 21).civs[0].society.health;
+    expect(bad).toBeLessThan(good);
+  });
+
+  it('the cognition market appears only when the floor fails (controlled)', () => {
+    // Same world, same seed, same automation: only the provision floor differs.
+    const build = (floor: number) => {
+      const w = run(240, 'baseline_2026', 5);
+      for (const c of w.civs) {
+        c.economy.displacedShare = 0.3;
+        w.techs.ai_agents.adoption[c.id].intensity = 0.8;
+        w.techs.ai_models.adoption[c.id].intensity = 0.8;
+      }
+      for (let i = 0; i < 180; i++) {
+        for (const c of w.civs) {
+          c.society.basicProvision = floor;
+          c.economy.displacedShare = 0.3;
+          w.techs.ai_agents.adoption[c.id].intensity = 0.8;
+          w.techs.ai_models.adoption[c.id].intensity = 0.8;
+        }
+        stepWorld(w, 1);
+      }
+      return w.civs[0].economy.mindMarket;
+    };
+    const withoutFloor = build(0);
+    const withFloor = build(0.8);
+    expect(withoutFloor).toBeGreaterThan(0.12);
+    expect(withoutFloor).toBeGreaterThan(withFloor * 1.5);
+  });
+
+  it('selling cognition slows measured displacement but costs health and equality', () => {
+    const w = run(240, 'cognitive_proletariat', 11);
+    const c = w.civs[0];
+    const displaced0 = c.economy.displacedShare;
+    const gini0 = c.economy.gini;
+    const health0 = c.society.health;
+    for (let i = 0; i < 120; i++) {
+      c.economy.mindMarket = 0.6;            // hold the market open
+      c.society.basicProvision = 0;          // no floor
+      stepWorld(w, 1);
+    }
+    expect(c.economy.displacedShare).toBeLessThan(displaced0 + 0.25); // absorbed, not eliminated
+    expect(c.economy.gini).toBeGreaterThanOrEqual(gini0);
+    expect(c.society.health).toBeLessThan(health0 + 0.01);            // extraction is not free
+  });
+
+  it('the cognition-market decision sets policy and caps the market', () => {
+    const w = run(240, 'cognitive_proletariat', 13);
+    const c = w.civs[1];
+    const def = DECISIONS.find((d) => d.id === 'mind_market')!;
+    c.economy.mindMarket = 0.5;
+    c.society.basicProvision = 0;
+    w.pendingDecisions.push({
+      key: 'decision-mind_market-1', defId: 'mind_market', civId: c.id, title: def.title,
+      question: def.question(w, c), raisedAt: 0, deadline: 480,
+      options: def.options.map((o) => ({ id: o.id, label: o.label, consequence: o.consequence })),
+    });
+    resolveDecision(w, 'decision-mind_market-1', 'banned');
+    expect(c.society.mindMarketPolicy).toBe('banned');
+    expect(c.economy.mindMarket).toBe(0);
+    expect(c.society.basicProvision).toBeGreaterThanOrEqual(0.35);
+  });
+
+  it('a pandemic kills more in an unhealthy population', () => {
+    const mk = (health: number) => {
+      const w = run(24, 'baseline_2026', 31);
+      const c = w.civs[0];
+      c.society.health = health;
+      w.pandemic = { months: 0, severity: 1.2, startedAt: 0 };
+      const before = c.population.total;
+      for (let i = 0; i < 12; i++) { c.society.health = health; stepWorld(w, 1); }
+      return before - c.population.total;
+    };
+    const healthy = mk(0.9);
+    const frail = mk(0.25);
+    expect(frail).toBeGreaterThan(healthy);
+  });
+
+  it('an open prompt maps to a cognition-market assumption', () => {
+    const parsed = parseWhatIf('what if poor people sell their brain power for computing');
+    expect(parsed.ok).toBe(true);
+    expect(parsed.label.toLowerCase()).toContain('cognition');
+  });
+});
+
 
 describe('settlement geography: robot segregation and city growth', () => {
   it('primacy stays within bounds and drifts under long runs', () => {

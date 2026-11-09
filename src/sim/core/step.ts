@@ -948,7 +948,13 @@ function stepResearchPrograms(w: WorldState) {
           t.reliability = Math.min(0.99, t.reliability + 0.03);
         } else {
           t.cap *= 1 + candidate.capabilityGain;
-          t.paradigmCap *= candidate.paradigmLift;
+          // In a world with a lower AI ceiling each new paradigm buys less: the
+          // lift above 1.0 is scaled, so repeated breakthroughs cannot quietly
+          // erode the scenario's stated ceiling back to unbounded growth.
+          const lift = (p.techId === 'ai_models' || p.techId === 'ai_agents')
+            ? 1 + (candidate.paradigmLift - 1) * w.params.aiCeilingMult
+            : candidate.paradigmLift;
+          t.paradigmCap *= lift;
           t.paradigm += 1;
           t.maturity *= 0.82; t.reliability *= 1 - candidate.reliabilityPenalty; t.cost *= candidate.costPenalty;
         }
@@ -1428,7 +1434,10 @@ function stepEconomy(w: WorldState) {
     const retrain = civPolicy(w, c.id, 'retraining');
     const displacementRate = ec.automationExposure * 0.018 * (1 - retrain * 0.35);
     const absorptionRate = 0.028 * (0.6 + Math.min(2.5, ec.tfp) * 0.25) * (1 + retrain * 0.4) * ec.institutionalCapacity;
-    ec.displacedShare = clamp01(ec.displacedShare + (displacementRate - absorptionRate * ec.displacedShare) * DT);
+    // Selling cognition to machine systems absorbs some displacement. It is a
+    // real income channel and a real trap: it lowers measured displacement while
+    // converting unemployed people into piece-rate cognitive labour.
+    ec.displacedShare = clamp01(ec.displacedShare + (displacementRate - absorptionRate * ec.displacedShare - ec.mindMarket * 0.35 * DT) * DT);
 
     // Productivity growth comes from *new* technological improvement and its
     // absorption, not from re-counting the entire accumulated capability level
@@ -1600,9 +1609,11 @@ function stepPopulation(w: WorldState) {
     const famine = Math.pow(Math.max(0, c.food.shortage - 0.18) / 0.32, 2) * 0.09;
     const stateFailure = Math.pow(Math.max(0, 0.2 - c.society.stability) / 0.2, 2) * 0.05;
     const heat = (Math.max(0, w.env.warmingC - 3) * 0.006 + Math.pow(Math.max(0, w.env.warmingC - 4), 2) * 0.01) * (1 - c.society.basicProvision * 0.3);
-    const extraDeath = Math.min(0.65, (hardship * 0.012 + c.food.shortage * 0.014 + c.housing.crowding * 0.002 + c.waste.accumulation * 0.004 + Math.max(0, 0.35 - c.society.stability) * 0.01 + famine + stateFailure + heat) * w.params.collapseSeverityMult);
+    // An unhealthy population dies sooner from the same conditions.
+    const healthPenalty = Math.max(0, 0.72 - c.society.health) * 0.055;
+    const extraDeath = Math.min(0.65, (hardship * 0.012 + c.food.shortage * 0.014 + c.housing.crowding * 0.002 + c.waste.accumulation * 0.004 + Math.max(0, 0.35 - c.society.stability) * 0.01 + famine + stateFailure + heat + healthPenalty) * w.params.collapseSeverityMult);
     // Hardship, hunger and crowded, expensive cities suppress births.
-    const birthSuppression = clamp(hardship * 0.8 + c.food.shortage * 0.9 + c.housing.crowding * 0.3, 0, 0.95);
+    const birthSuppression = clamp(hardship * 0.8 + c.food.shortage * 0.9 + c.housing.crowding * 0.3 + Math.max(0, 0.7 - c.society.health) * 0.18, 0, 0.95);
     reconcile(p); // migration, off-world moves and off-world births changed total since last month
     const rates = stepCohorts(p, extraDeath, birthSuppression, DT);
     p.birthRate = rates.birthRate; p.deathRate = rates.deathRate;
@@ -1687,11 +1698,11 @@ function stepNeuro(w: WorldState) {
       : s.neuralProgram === 'tiered' ? 0.30
       : s.neuralProgram === 'ban' ? 0.0
       : 0.16;
-    s.neuralAccess = clamp01(lerp(s.neuralAccess, policyAccess * affordability, 0.01 * DT));
+    s.neuralAccess = clamp01(lerp(s.neuralAccess, policyAccess * affordability, 0.06 * DT));
     // Effective augmented share: technology available AND people able to use it.
     const augmented = clamp01(Math.min(diffusion, s.neuralAccess + diffusion * 0.15));
     // Dependency: how much of daily cognition is mediated by a machine.
-    s.neuralDependency = clamp01(lerp(s.neuralDependency, augmented * (0.55 + 0.45 * (1 - s.basicProvision)), 0.01 * DT));
+    s.neuralDependency = clamp01(lerp(s.neuralDependency, augmented * (0.55 + 0.45 * (1 - s.basicProvision)), 0.04 * DT));
     // Market-tiered augmentation widens the gap between those who have it and
     // those who do not; universal provision does not.
     if (s.neuralProgram !== 'public' && augmented > 0.15) {
@@ -1719,6 +1730,73 @@ function stepNeuro(w: WorldState) {
 }
 
 
+// ── 6c. HEALTH — the body under the economy ────────────────────────────────
+// A population health stock, not a per-event death roll. It is fed by
+// healthcare capacity and institutions, and eaten by waste, crowding and
+// extraction work. It then scales mortality, births and pandemic severity, so
+// the same shock kills more people in an unhealthy society than in a healthy
+// one. This is the channel a "sell your cognition" labour market needs: the
+// price is paid in bodies, not just in Gini points.
+function stepHealth(w: WorldState, c: CivState) {
+  const s = c.society;
+  const ec = c.economy;
+  const care = clamp(
+    w.techs.biotech_med.adoption[c.id].intensity * 0.55
+    + clamp((ec.outputPerCapita - 0.6) * 0.35, 0, 0.3)
+    + ec.institutionalCapacity * 0.15,
+    0, 1);
+  const pollution = clamp(c.waste.accumulation * 0.7 + (1 - c.waste.managedShare) * 0.3, 0, 1);
+  const pandemicLoad = w.pandemic ? Math.min(0.45, w.pandemic.severity * 0.12) : 0;
+  const extraction = ec.mindMarket * (0.5 + 0.5 * (1 - s.basicProvision));
+  const target = clamp(
+    0.42 + care * 0.42 + s.trust * 0.08
+    - pollution * 0.14 - c.housing.crowding * 0.12
+    - extraction * 0.20 - pandemicLoad
+    - clamp(c.food.shortage * 0.5, 0, 0.2),
+    0.05, 0.98);
+  // Health moves slowly: a healthcare system takes years to build and a damaged
+  // population takes years to recover.
+  s.health = clamp(lerp(s.health, target, 0.05 * DT), 0.03, 0.99);
+}
+
+// ── 6d. MIND MARKET — cognition sold as machine work ───────────────────────
+// When automation displaces people faster than institutions absorb them, and
+// no floor exists, the last saleable asset is attention. This is not "brains
+// as GPUs" — interface bandwidth makes that uneconomic — it is brokered human
+// judgement inside machine systems. It is a labour market, and it appears
+// precisely where the safety net fails.
+function stepMindMarket(w: WorldState, c: CivState) {
+  const s = c.society;
+  const ec = c.economy;
+  const t = w.techs;
+  const machineDemand = clamp(t.ai_agents.adoption[c.id].intensity * 0.7 + t.ai_models.adoption[c.id].intensity * 0.3, 0, 1);
+  const desperation = clamp(ec.displacedShare * 1.1 + Math.max(0, 1 - ec.wageIndex) * 0.3, 0, 1);
+  const floor = s.basicProvision;
+  const cap = s.mindMarketPolicy === 'banned' ? 0
+    : s.mindMarketPolicy === 'regulated' ? 0.35
+    : s.mindMarketPolicy === 'market' ? 0.95
+    : 0.55;
+  const pressure = clamp(machineDemand * desperation * (1 - floor * 0.85), 0, 1);
+  const target = Math.min(cap, pressure * 0.85);
+  ec.mindMarket = clamp(lerp(ec.mindMarket, target, 0.10 * DT), 0, 0.95);
+  if (ec.mindMarket > 0.25 && !w.flags[`mind-market-${c.id}`]) {
+    w.flags[`mind-market-${c.id}`] = true;
+    addEvent(w, {
+      title: `${c.name}: a market in human cognition`,
+      body: `With ${(ec.displacedShare * 100).toFixed(0)}% of workers displaced and no income floor worth the name, ${(ec.mindMarket * 100).toFixed(0)}% of the labour force now sells attention and judgement to machine systems. It pays. It is also the only asset they have left.`,
+      category: 'society', civId: c.id, significance: 3,
+      causes: [
+        { factor: 'automation displacing labour faster than absorption', weight: 0.45 },
+        { factor: 'absence of an income floor', weight: 0.35 },
+        { factor: 'demand for human verification inside machine systems', weight: 0.2 },
+      ],
+      counterforces: [{ factor: 'regulation, minimum standards and a basic provision floor', weight: 0.5 }],
+      confidence: 'medium',
+    });
+  }
+}
+
+
 function stepSociety(w: WorldState) {
   for (const c of w.civs) {
     const s = c.society;
@@ -1733,7 +1811,7 @@ function stepSociety(w: WorldState) {
       c.waste.accumulation * 0.25;
     const ubs = civPolicy(w, c.id, 'ubs');
     const retrain = civPolicy(w, c.id, 'retraining');
-    s.backlash = clamp01(s.backlash + (displacePressure * 0.045 - (0.022 + ubs * 0.04 + retrain * 0.03)) * DT);
+    s.backlash = clamp01(s.backlash + (displacePressure * 0.045 + ec.mindMarket * 0.035 - (0.022 + ubs * 0.04 + retrain * 0.03)) * DT);
     // ── settlement geography: do people cluster away from the machines? ───────
     // When robots take the fields, factories and roads, people who cannot or
     // will not live alongside them converge on one metro. Aversion comes from
@@ -1772,7 +1850,9 @@ function stepSociety(w: WorldState) {
       - severeEnergyStress * 0.28 - c.food.shortage * 0.48 - c.waste.accumulation * 0.12 - c.housing.abandoned * 0.15
       // A neurally dependent population pays far more for the same outage, and
       // weak institutions leave the link open to manipulation.
-      - s.neuralDependency * (severeEnergyStress * 0.22 + clamp(0.45 - s.trust, 0, 0.45) * 0.18 + (w.frontier.agi && c.economy.institutionalCapacity < 0.45 ? 0.10 : 0)),
+      - s.neuralDependency * (severeEnergyStress * 0.22 + clamp(0.45 - s.trust, 0, 0.45) * 0.18 + (w.frontier.agi && c.economy.institutionalCapacity < 0.45 ? 0.10 : 0))
+      // Sick populations and markets in human attention both corrode legitimacy.
+      - Math.max(0, 0.6 - s.health) * 0.16 - ec.mindMarket * 0.06,
       0.08, 0.90,
     );
     s.trust = clamp01(lerp(s.trust, trustTarget, 0.006 + severeEnergyStress * 0.012) - s.backlash * 0.002 * DT);
@@ -2672,6 +2752,7 @@ export function stepWorld(w: WorldState, months = 1) {
     stepPopulation(w);
     stepSociety(w);
     stepNeuro(w);
+    for (const c of w.civs) { stepMindMarket(w, c); stepHealth(w, c); }
     stepDiplomacy(w);
     stepEnvironment(w);
     // Population can hit literal zero in stepPopulation. Do not let the later

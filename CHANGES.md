@@ -1,5 +1,19 @@
 # Changes in this build
 
+## Revision 11.10: population health, and a market in human cognition (2026-11-09)
+
+Two things the model was missing: a population health stock, and the labour market that appears when people sell attention to machine systems.
+
+**Health is now a state, not a death roll.** `society.health` (0–1) is fed by healthcare capacity (biotech adoption, income, institutions) and eaten by pollution, crowding, hunger and extraction work. It scales mortality, birth suppression, trust, and — reusing the existing pandemic machinery — how many people a given pathogen kills: the same severity is up to 2.6× deadlier in an unhealthy population. Health moves over years, so a damaged population takes years to recover. Surfaced in the civilization inspector as "Population health".
+
+**The mind market.** `economy.mindMarket` is the share of the labour force paid by the task to supply attention and judgement inside machine systems — the plausible form of "selling brain power", because interface bandwidth makes literal neural compute uneconomic. It is driven by machine demand × desperation × (1 − income floor), so it appears exactly where the safety net fails. Effects: it absorbs displacement (lowering measured unemployment — the seductive part), while raising Gini, feeding backlash and degrading health (the price).
+
+- **Decision: "The market in human cognition"** — regulate (minimum rate, hours, health cover), let it run, or ban the sale and provide a floor instead.
+- **Scenario: Cognitive Proletariat** — automation outruns institutions, no floor is built, and attention becomes the last saleable asset.
+- **Prompts**: "what if poor people sell their brain power for computing" and "what if brain–computer interfaces arrive early" now map to validated deltas in the What-If box.
+- **Classifer correction found while testing**: a civilization that lost 34% of its population over a century was labelled "growth", because its calm 30-year window hid the depletion. The trajectory classifier now treats sustained sub-2026 population without recovery as managed decline, whatever output per person does.
+- **Paradigm ceilings hold**: `aiCeilingMult` now scales each AI paradigm *lift* rather than only the initial asymptote, so repeated breakthroughs cannot erode a scenario's stated ceiling. Long Stagnation plateaus at ~14× model / ~21× agent capability and never reaches ASI (it previously crossed 40× at 2245).
+
 ## Revision 11.9: neural interface — the brain–AI link (2026-11-09)
 
 A new technology, and a new kind of inequality. It was not previously modelled: the tree had whole-brain emulation (people *leaving* the body) and germline enhancement (editing offspring), but nothing for a living person whose cognition runs through a machine.
