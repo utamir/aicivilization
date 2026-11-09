@@ -33,6 +33,16 @@ Growth may occur through:
 
 Each path consumes its own stock, capex, time, energy, maintenance and institutional capacity.
 
+**Growth must be visible.** If population rises and the built world does not change, the render is contradicting the state. Three channels are required, and they must be distinguishable in a single frame:
+
+1. **redevelopment** — low-rise fabric replaced by higher-density blocks on the same plot (identity kept: same site, same street, new building);
+2. **extension** — plots beyond the original footprint filling with new streets and houses;
+3. **new typologies** — architectural families that only an advanced civilization can build, on explicit sites.
+
+Heritage protection is local, not a fixed global percentage: a mature district should show several generations at once, not one style everywhere.
+
+**Settlement can converge as well as spread.** The same territory must be able to hold a polycentric network or one dominant metropolis with emptied secondary towns. Concentration is a state, reversible by policy, and the emptied towns follow the full abandonment sequence in §8.
+
 ## 3. Tall construction
 
 Very tall construction is not ordinary housing with a height multiplier. Increasing height/development intensity should raise marginal cost and/or lead time through at least some of:
@@ -111,6 +121,20 @@ Minimum sequence:
 
 The exact material persistence over millennia is uncertain and environment-specific. Do not claim that a modern skyscraper remains intact for 10,000 years; also do not erase concrete, steel, foundations and altered ground as if they never existed.
 
+## 8.1 Lifecycle identity and ruin truth
+
+A structure keeps its identity across states. Occupied, aged and ruined versions share footprint, orientation, structure and material language, and must be comparable from a matched camera at matched lighting.
+
+Damage reveals construction:
+- a severed floor plate shows its slab thickness and the reinforcement it contained;
+- a broken parapet shows its profile and the planting it held;
+- debris carries the building's own materials, at believable sizes and thicknesses, resting with contact and shadow;
+- absence is explained: if a section is missing, its fragments are somewhere plausible.
+
+Aged does not mean merely tinted. Ageing is visible as replaced panels, patch repairs, weathered materials, overgrowth and suppressed maintenance — and it differs by structure type.
+
+Arbitrary rubble scattered beside an unchanged building is a failure, not a ruin. Generic shells placed where no building ever stood are a failure, not a ruin.
+
 ## 9. Ocean-first planning
 
 An ocean-oriented civilization does not need to wait until the last square metre of land is occupied. Ports, energy, industry and housing can move offshore strategically before absolute scarcity, provided technology, finance, institutions and maintenance support it.
@@ -132,6 +156,12 @@ If the majority of civilization leaves Earth:
 ## 11. Observer budget is not world physics
 
 The intervention budget belongs to the player/observer, outside civilization. `100/100` means fully replenished intervention capacity. It has **zero passive effect** on any scenario. Only an explicit intervention spends it and changes causal state.
+
+## 11.1 Labels and classifications are part of the contract
+
+Any word the interface puts on the world must match the state beneath it. A civilization below its starting population is not "growing". A district labelled industrial must not be residential. A "flourishing" label must be reachable only through the outcome conditions it names.
+
+Trajectory classification therefore needs a depletion case: sustained population loss relative to the start, without recovery, is decline whatever output per person does. A calm thirty-year window must not hide a century of emptying.
 
 ## 12. Terminal-state and interface truth
 
