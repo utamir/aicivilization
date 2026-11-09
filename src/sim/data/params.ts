@@ -8,6 +8,7 @@ export const DEFAULT_PARAMS: SimParams = {
   aiTooling: 1.0,
   aiFeedback: 1.0,
   aiProgressMult: 1.0,
+  aiCeilingMult: 1.0,
   algorithmicHalvingMonths: 10,   // evidence: ~8–12mo provisional
   computeDoublingMonths: 5.5,     // evidence: ~5mo compute doubling baseline
   buildSpeedMult: 1.0,
@@ -33,6 +34,7 @@ export const DEFAULT_PARAMS: SimParams = {
   marineMult: 1.0,
   medianAgeShift: 0,
   longevityMult: 1.0,
+  neuroMult: 1.0,
   fusionMult: 1.0,
   geothermalMult: 1.0,
   bioenergyMult: 1.0,
@@ -144,7 +146,7 @@ export const SCENARIO_PRESETS: ScenarioPreset[] = [
     name: 'Long Stagnation',
     tagline: 'What if AI plateaus and the big bets never pay off?',
     description: 'AI progress slows to a crawl, frontier programs stall, aging societies shrink, and infrastructure built for a larger population must be paid for by fewer people.',
-    delta: { aiProgressMult: 0.45, aiFeedback: 0.4, aiTooling: 0.6, roboticsMult: 0.6, spaceMult: 0.4, longevityMult: 0.4, fusionMult: 0.4, agingMult: 1.3, fertilityMult: 0.88, demographicVolatility: 0.7, capitalAvailability: 0.85 },
+    delta: { aiProgressMult: 0.45, aiCeilingMult: 0.55, aiFeedback: 0.4, aiTooling: 0.6, roboticsMult: 0.6, spaceMult: 0.4, longevityMult: 0.4, fusionMult: 0.4, agingMult: 1.3, fertilityMult: 0.88, demographicVolatility: 0.7, capitalAvailability: 0.85 },
     accent: '#7d8597',
   },
   {
@@ -242,6 +244,14 @@ export const SCENARIO_PRESETS: ScenarioPreset[] = [
     description: 'Closed-loop habitats, autonomous industry and space systems receive sustained investment. Population can spread from Earth to orbit, Mars and deep-space settlements. Earth can later decline without implying that civilization itself is extinct.',
     delta: { spaceMult: 1.8, fusionMult: 1.45, nuclearBuildMult: 1.35, aiTooling: 1.25, roboticsMult: 1.45, capitalAvailability: 1.35, collaboration: 1.25, fertilityMult: 1.16, reproductionTechMult: 1.25 },
     accent: '#87A7FF',
+  },
+  {
+    id: 'neural_divide',
+    name: 'Neural Divide',
+    tagline: 'What if a brain-AI interface lands early, and only some people get it?',
+    description: 'Neural interfaces mature far ahead of the institutions that would spread them: clinical pipelines accelerate, devices get cheap, and access is allocated by the market. Cognitive advantage becomes inheritable advantage in practice - better jobs, faster study, more influence - while the un-augmented fall behind. The scenario tests whether a civilization can absorb a technology that changes what a citizen is capable of, without splitting into two populations.',
+    delta: { neuroMult: 2.3, aiProgressMult: 1.2, aiTooling: 1.25, diffusionMult: 1.45, socialContract: 0.6, governanceCapacity: 0.82, regulation: 0.82, aiSafety: 0.85 },
+    accent: '#C77DFF',
   },
 ];
 

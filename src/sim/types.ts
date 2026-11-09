@@ -9,11 +9,11 @@ export type TechId =
   | 'compute_accel' | 'semiconductor_fab'
   | 'solar_pv' | 'wind_power' | 'nuclear_power' | 'geothermal_power' | 'bioenergy_systems' | 'ocean_energy' | 'hydrogen_systems' | 'storage_batt' | 'grid_transmission'
   | 'robotics_ind' | 'robotics_gp'
-  | 'biotech_med' | 'longevity_bio'
+  | 'biotech_med' | 'longevity_bio' | 'neural_interface'
   | 'transport_ev' | 'transport_av'
   | 'fusion_power' | 'space_systems';
 
-export type TechDomain = 'ai' | 'compute' | 'energy' | 'robotics' | 'biotech' | 'transport' | 'frontier';
+export type TechDomain = 'ai' | 'compute' | 'energy' | 'robotics' | 'biotech' | 'neuro' | 'transport' | 'frontier';
 
 export type TechPhase =
   | 'science' | 'prototype' | 'engineering' | 'deployment' | 'diffusion' | 'mature';
@@ -174,6 +174,9 @@ export interface SocietyState {
   primacy: number;         // share of the urban population living in the primary metro (0..1) —
                            // rises when robots take the countryside and people will not or cannot live among them
   enhancement: 'none' | 'public' | 'private' | 'ban'; // germline enhancement policy
+  neuralProgram: 'none' | 'public' | 'tiered' | 'ban'; // who gets a neural interface once it exists
+  neuralAccess: number;     // 0..1 share of the population that could obtain one
+  neuralDependency: number; // 0..1 how much daily cognition runs through an AI link
   familyFormation: number; // 0..1 structural/cultural support for having and raising children; evolves, not destiny
   polityStatus: 'active' | 'failed' | 'abandoned' | 'resettling';
   autonomousInfrastructure: number; // 0..1 share of essential systems able to operate without local embodied labor
@@ -465,6 +468,7 @@ export interface SimParams {
   aiTooling: number;            // multiplier on AI→research tooling strength
   aiFeedback: number;           // strength of AI→AI-research recursive loop
   aiProgressMult: number;       // broad AI progress speed
+  aiCeilingMult: number;        // ceiling on AI capability asymptotes (1 = no extra ceiling)
   algorithmicHalvingMonths: number; // efficiency doubling pace (lower = faster)
   computeDoublingMonths: number;    // baseline compute supply trend
   // energy & physical build
@@ -494,7 +498,8 @@ export interface SimParams {
   resourceAbundance: number;    // multiplier on fossil & mineral reserves (1 = central estimate)
   spaceMult: number;            // space-systems research & launch build speed
   marineMult: number;           // priority for the sea: floating platforms, offshore energy, seabed minerals, reclamation (1 = neutral)
-  longevityMult: number;        // longevity research speed
+  longevityMult: number;
+  neuroMult: number;        // neural-interface research speed (clinical + decoding)
   fusionMult: number;           // fusion research speed
   geothermalMult: number;       // geothermal research/deployment priority
   bioenergyMult: number;        // sustainable bioenergy / fuels priority

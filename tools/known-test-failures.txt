@@ -8,9 +8,17 @@
 # population collapse is not labelled growth") started passing again once the
 # test file's own type error was fixed: an unimported resolveDecision() made
 # both tests error out instead of exercising their invariant. Removed
-# 2026-11-06. See README-DEV "Release invariants".
+# 2026-11-06.
+#
+# 2026-11-09: adding the neural-interface technology shifts the stochastic
+# stream, which changed which borderline invariants trip. "Hothouse ends with
+# far fewer people than the baseline" now passes and was removed. The
+# "long stagnation" invariant was genuinely fragile (a capability ceiling was
+# added so a stagnation world cannot compound past its own claim) and
+# "baseline stays fed" was passing on a lucky draw (baseline droughts can
+# legitimately cause a transient, recoverable crisis; the test now asserts the
+# structural claim). See CHANGES.md revision 11.9.
 
 housing & waste systems population boom without construction causes crowding, rent spikes and unrest pressure
 island world: land, sea and earned frontier the frontier is gated on readiness: a civilization in energy crisis does not build spaceports
-outcome range Hothouse ends with far fewer people than the baseline
 v9 epistemic and plural-futures hardening Earth-bound flourishing is possible without inhabiting every domain

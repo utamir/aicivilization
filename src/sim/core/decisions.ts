@@ -218,6 +218,41 @@ export const DECISIONS: DecisionDef[] = [
       },
     ],
   },
+  {
+    id: 'neural_provision', title: 'Who gets a neural link?',
+    question: (_w, c) => `${c.name}: a brain-AI interface has cleared clinical use. It raises throughput, memory and coordination for the person wearing it - thinking with a machine inside the loop rather than beside it. Cost is ${c.society.neuralAccess < 0.3 ? 'still far beyond ordinary households' : 'falling towards what a household can carry'}. Who gets one?`,
+    trigger: (w, c) => w.techs.neural_interface.cap > 1.6 && w.techs.neural_interface.adoption[c.id].intensity > 0.12 && c.society.neuralProgram === 'none',
+    months: 30,
+    options: [
+      {
+        id: 'public',
+        label: 'Universal provision: a public right',
+        consequence: 'Every adult can obtain one as public infrastructure. Cognitive gain spreads; the budget carries it permanently; dependency becomes society-wide.',
+        apply: (_w, c) => { c.society.neuralProgram = 'public'; c.society.neuralAccess = 0.55; c.economy.publicDebt += 0.05; },
+        affinity: (c) => 0.5 + (1 - c.traits.marketOrientation) * 0.4,
+      },
+      {
+        id: 'tiered',
+        label: 'Market: whoever can pay',
+        consequence: 'Prices allocate it. The augmented pull ahead in work and study; inequality climbs inside a generation; the un-augmented become a distinct class.',
+        apply: (_w, c) => { c.society.neuralProgram = 'tiered'; c.society.neuralAccess = 0.22; c.economy.gini = Math.min(0.85, c.economy.gini + 0.03); },
+        affinity: (c) => c.traits.marketOrientation * 0.9,
+      },
+      {
+        id: 'ban',
+        label: 'Restrict it to medicine, not enhancement',
+        consequence: 'Therapy only. The research and productivity gains are mostly forgone, and those who want augmentation move elsewhere.',
+        apply: (w2, c) => {
+          c.society.neuralProgram = 'ban';
+          c.society.neuralAccess = 0.05;
+          c.researchCapacity *= 0.98;
+          const a = w2.techs.neural_interface.adoption[c.id];
+          a.penetration = Math.min(a.penetration, 0.06);
+        },
+        affinity: (c) => c.traits.regulatoryCaution,
+      },
+    ],
+  },
 ];
 
 export function stepDecisions(w: WorldState) {

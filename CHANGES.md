@@ -1,5 +1,19 @@
 # Changes in this build
 
+## Revision 11.9: neural interface — the brain–AI link (2026-11-09)
+
+A new technology, and a new kind of inequality. It was not previously modelled: the tree had whole-brain emulation (people *leaving* the body) and germline enhancement (editing offspring), but nothing for a living person whose cognition runs through a machine.
+
+- **`neural_interface`**, a new `neuro` tech domain. Starts at the real 2026 state — a few dozen clinical implants decoding speech and cursor movement — with `cap0 0.06`, low maturity and high cost. Depends on frontier AI, biotech and leading-edge fabrication. Two curated pathways (high-bandwidth decoding, closed-loop cognitive co-processing) and numbered follow-on generations. Calibrated against two new evidence entries: clinical decoding throughput (Willett/Metzger 2023, Card 2024) and stated public acceptance of enhancement implants (Pew 2021) — the latter sets a deliberately low diffusion ceiling.
+- **Benefit channel.** Neural dependency adds a bounded research-throughput multiplier (≤1.45×) — capability added per researcher, which more compute cannot buy. This is the only channel of its kind in the model.
+- **Access channel.** `society.neuralAccess` and `society.neuralProgram` decide who can obtain one, independent of how good the technology is. Market-tiered access widens `gini`; universal provision does not. A public programme crossing 60% access records a milestone.
+- **Risk channel.** `society.neuralDependency` feeds the trust equation: a dependent population pays far more for the same blackout, and weak institutions leave the link open to manipulation when frontier AI is loose. This is what makes the technology a real trade-off rather than a free upgrade.
+- **Decision fork: "Who gets a neural link?"** — universal provision, market allocation, or therapy-only restriction (which also suppresses adoption).
+- **Scenario preset: "Neural Divide"** — `neuroMult 2.3`, fast diffusion, weak social contract and institutions, so the interface lands early and only some people get it.
+- **`aiCeilingMult`**, a new parameter and an honest correction: probing revealed that "Long Stagnation" reached superintelligence by 2195 (~44× capability), contradicting the scenario's own claim. The scenario now carries a capability ceiling (0.55), and the trajectory plateaus near 35×, below the ASI threshold. The invariant "long stagnation does not become superintelligence merely because centuries pass" now holds by mechanism, not by luck.
+- **Corrected claim in the food test.** "Baseline stays fed" had been passing on a lucky draw. Baseline warming produces multi-year droughts, and a drought landing on a tight year causes a real, recorded, recoverable food crisis (observed 2056: demand 1.36 vs production 1.17). The test now asserts the structural claim — the civilization ends the period fed, any crisis is transient, and every crisis names its causes — and a new test verifies recovery.
+- **Known-failure ledger** updated to the three invariants that currently fail; "Hothouse ends with far fewer people than the baseline" now passes and was removed.
+
 ## Revision 11.8.1: build pipeline and housekeeping (2026-11-07)
 
 No simulation or rendering change; everything here is about the pipeline around the build and the honesty of the repo's own verification files.
