@@ -141,7 +141,8 @@ if (!isMainThread) {
   expectations.oceanCenturyRobustAcrossSeeds=seedChecks.filter(x=>x.id==='ocean_century').every(x=>x.habitats.floating>0.07&&x.habitats.subsea>0.01);
   expectations.verticalWorldRobustAcrossSeeds=seedChecks.filter(x=>x.id==='vertical_world').every(x=>x.habitats.vertical>0.05&&x.habitats.underground>0.02);
 
-  const result={generatedAt:new Date().toISOString(),release:'v11.4',simulationYears:years,scenarioCount:sim.SCENARIO_PRESETS.length,seed:defaultSeed,expectations,invariantErrors,zeroTest,observerTest,scenarios,seedChecks};
+  const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
+  const result={generatedAt:new Date().toISOString(),release:`v${pkg.version}`,simulationYears:years,scenarioCount:sim.SCENARIO_PRESETS.length,seed:defaultSeed,expectations,invariantErrors,zeroTest,observerTest,scenarios,seedChecks};
   fs.writeFileSync(path.join(root,'VALIDATION_RESULTS.json'),JSON.stringify(result,null,2));
   const pass=Object.values(expectations).every(Boolean);
   console.log(JSON.stringify({scenarioCount:result.scenarioCount,workerConcurrency:concurrency,pass,expectations},null,2));

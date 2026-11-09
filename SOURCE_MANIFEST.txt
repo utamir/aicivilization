@@ -1,5 +1,6 @@
 .github/workflows/build-release.yml
 .gitignore
+AGENTS.md
 CHANGES.md
 MASTER_PROMPT.md
 README-DEV.md
@@ -50,6 +51,7 @@ dist/app/ui/RightPanel.js
 dist/app/ui/Shell.js
 dist/app/ui/WelcomeScreen.js
 dist/app/ui/dialogue.js
+dist/app/ui/portrait.js
 dist/app/ui/shared.js
 dist/app/world3d/ArcPreview.js
 dist/app/world3d/Buildings.js
@@ -90,13 +92,17 @@ images/world-view.png
 index.html
 info.md
 knowledge/README.md
+knowledge/analogues/attention-piecework.md
 knowledge/analogues/fertility-contagion.md
 knowledge/analogues/income-floor-and-fertility.md
+knowledge/analogues/metropolitan-primacy.md
 knowledge/analogues/nemea-slide.md
 knowledge/analogues/singapore-reclamation.md
 knowledge/open-questions.md
 knowledge/physics-and-ecology-visual-contract.md
 knowledge/science/agi-timeline.md
+knowledge/science/bci-acceptance.md
+knowledge/science/bci-throughput.md
 knowledge/science/engineered-pandemic-hazard.md
 knowledge/science/fusion-learning.md
 knowledge/science/ivg-ectogenesis-timeline.md
@@ -104,6 +110,7 @@ knowledge/science/longevity-fertility.md
 knowledge/science/offworld-share.md
 knowledge/science/output-in-a-post-embodied-economy.md
 knowledge/science/pandemic-hazard.md
+knowledge/science/population-health-stock.md
 knowledge/science/seabed-plume-ecology.md
 knowledge/science/seabed-supply.md
 knowledge/templates/mechanism-spec.md
@@ -156,6 +163,7 @@ src/ui/Shell.tsx
 src/ui/TopBar.tsx
 src/ui/WelcomeScreen.tsx
 src/ui/dialogue.ts
+src/ui/portrait.ts
 src/ui/shared.tsx
 src/world3d/ArcPreview.tsx
 src/world3d/Buildings.tsx

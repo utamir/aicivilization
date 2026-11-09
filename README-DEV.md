@@ -4,6 +4,8 @@ Public visitors should start with `README.md`. This file is only for running, ch
 
 The current implementation is React + TypeScript + Three.js. The project itself is technology-agnostic: `MASTER_PROMPT.md` is the reconstruction constitution for another model or autonomous agent swarm.
 
+**Agents: read `AGENTS.md` before changing anything.** It carries the per-change checklist (code, tests, evidence, knowledge note, changelog, docs, manifests, deploy verification). The checklist is not bureaucracy: this repository has repeatedly shipped code whose documentation, knowledge notes and manifests were left behind, and the checklist exists to stop that recurrence.
+
 ## Run the included release without Node/npm
 
 The archive includes a prebuilt browser runtime in `dist/`. Node.js, npm, Vite, TypeScript and `node_modules` are **not required to run it**.

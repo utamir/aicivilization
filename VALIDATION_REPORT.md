@@ -29,6 +29,8 @@ The browser-ready runtime still loads version-pinned React/Three packages from `
 - Browser/CDN build: **64 modules**, 0 syntax failures; whole module graph evaluated and React root render reached — **PASS**.
 - `.pyz` archive rebuilt, booted, served `index.html` plus `app/main.js`, `app/App.js`, `app/sim/index.js`, `index.css`, `check.html`; path traversal blocked — **PASS** (verified locally and in CI run 14).
 - Working tree clean at the deployed commit; CI build + deploy **PASS**.
+- `tools/validate-release.mjs` regenerated for this build: **25/25 scenarios** at seed 7 over 300 years, zero invariant errors, **17/17 release expectations** true (`VALIDATION_RESULTS.json`).
+- `SOURCE_MANIFEST.txt` / `RELEASE_MANIFEST.sha256` regenerated and verified with `shasum -a 256 -c` — **PASS**.
 
 Open invariants (carried, not hidden):
 
@@ -47,6 +49,8 @@ New mechanics added since v11.4 are covered by targeted tests rather than only b
 - an open prompt ("sell their brain power for computing") maps to a validated delta.
 
 Deliberately **not** claimed: pixel-level visual regression, legs of the model that were only inspected rather than asserted (arcology scale relative to infrastructure; aged-vs-occupied differentiation), and any wage-rate model for the cognition market.
+
+Also **not** verified in this pass: the README screenshots were captured from an earlier build and could not be regenerated here, because automated capture requires a visible desktop window that this environment did not provide. The four images still illustrate the product but predate the new scenarios, the Neurotechnology panel and the current world rendering. They are labelled as such in `README.md` rather than silently left to misrepresent the build.
 
 ## Terminal civilization gate
 

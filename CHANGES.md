@@ -1,5 +1,15 @@
 # Changes in this build
 
+## Revision 11.10.1: coverage audit and the change checklist (2026-11-09)
+
+Documentation and tooling only; no simulation or rendering behaviour changed. This pass exists because the previous revisions shipped code, evidence and changelog while leaving other records behind — the third time in this project that a change was "done" in one file and unfinished in another.
+
+- **`AGENTS.md` added at the repository root.** A per-change contract for coding, architecture, research and review agents: inspect the real code path first, one owner per behaviour, worst-case buffers, defaults measured rather than assumed, tests with the driver held constant, evidence plus a knowledge note for any number, and the full documentation table. Ends with a copyable checklist and a reporting standard that requires stating what is **not** verified.
+- **Wired into the entry points** so an agent cannot miss it: `README-DEV.md` opens by requiring it, `knowledge/README.md` states that every code change owes that folder a note, and `MASTER_PROMPT.md` §20.0 makes the record part of the definition of a completed change.
+- **Manifests regenerated and verified** (`tools/make_manifests.py`; 236 tracked files, `shasum -a 256 -c` passes).
+- **`VALIDATION_RESULTS.json` regenerated** from the current build: 25 scenarios, 300 years, seed 7, zero invariant errors, 17/17 release expectations. The generator now reads the version from `package.json` instead of hardcoding `v11.4`.
+- **`VALIDATION_REPORT.md`** records the 25/25 sweep and names a documentation gap rather than hiding it: the README screenshots predate this build and could not be recaptured, because automated capture needs a visible desktop window the environment did not provide.
+
 ## Revision 11.10: population health, and a market in human cognition (2026-11-09)
 
 Two things the model was missing: a population health stock, and the labour market that appears when people sell attention to machine systems.

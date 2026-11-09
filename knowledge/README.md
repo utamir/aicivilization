@@ -17,5 +17,8 @@ Layout
 
 Note format: see `templates/note.md`. Ids: `kind-slug`, e.g. `analogue-singapore-reclamation`, `science-ivg-timeline`.
 
+## Every code change owes this folder something
+If a change introduces or alters a number, rate, threshold, capability or claimed mechanism, it needs a note here **and** an `evidence.ts` entry, in the same commit. If it is a modelling judgment rather than evidence, it belongs in `open-questions.md` with its evidence class. The per-change checklist and the rest of the obligations live in `AGENTS.md` at the repository root.
+
 ## The autonomy rule
 Agents do not ask the operator questions. When information is missing, an agent searches (the web, the literature, the code, the batch runners) and decides; it records the decision and its reasoning in a note or in CHANGES.md and marks the confidence. A question to the operator is allowed only when the answer cannot be found or reasoned to at all and the wrong choice would destroy work that cannot be redone (for example: deleting a deliverable, changing the product's purpose, spending money). Even then the agent proposes its own default and proceeds with it if no answer arrives. "Should I do X or Y" is never a question; it is a decision with a note. The same rule governs the game: the world asks the observer only at real turning points, offers "Let them decide" and "Stop asking", and never blocks on an answer past the deadline.

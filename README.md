@@ -16,6 +16,8 @@ Nobody, including me, knows in advance where it ends.
 
 ![Baseline world view of the WHAT IF? Civilization Lab: the island with its settlements, the Civilization Observatory and the Living World chronicle](images/world-view.png)
 
+*Screenshots in this README were captured from an earlier build. The world rendering, the scenario list and the technology panel have changed since — see "What you should notice on the screen" below for what is there now.*
+
 ## Why I built it
 
 We hand consequential decisions to systems that contain models of people inside them.

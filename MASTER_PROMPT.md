@@ -874,6 +874,20 @@ Repeat until the definition of done is met:
 
 Do not ask the operator questions that can be resolved by research, code inspection, a reasonable reversible choice, or explicit assumption. Record the assumption instead.
 
+## 20.0 A change is not done until its record is updated
+
+Require every agent to treat documentation, evidence and reporting as part of the change, not as a follow-up task. The minimum set, in the same commit as the code:
+
+- a test for the new behaviour and for its failure mode, with the driver held constant;
+- an evidence entry when a number, rate, threshold or capability changes;
+- a knowledge note (claim, what it constrains, how we would know it is wrong) when a mechanism is added;
+- a changelog entry stating **what** changed and **why**, including the alternative that was rejected when the choice was close;
+- updates to the public narrative, the reconstruction prompt (if a principle was learned), the red-team report (if a defect was found) and the validation report (counts, known failures, what was *not* verified);
+- regenerated manifests and validation results;
+- a verified deploy, not just a green local build.
+
+A change that satisfies the code and not this list is incomplete, regardless of how small it looked.
+
 ---
 
 # 21. Creative latitude
